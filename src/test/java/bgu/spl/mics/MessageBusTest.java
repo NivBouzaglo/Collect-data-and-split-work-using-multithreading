@@ -5,16 +5,16 @@ import bgu.spl.mics.example.messages.ExampleBroadcast;
 import bgu.spl.mics.example.messages.ExampleEvent;
 import bgu.spl.mics.example.services.ExampleBroadcastListenerService;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
-import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.Assert.*;
 
 public class MessageBusTest {
     MessageBusImpl b;
 
-    @BeforeEach
+    @Before
     public void setUp() {
         b = b.getInstance();
     }

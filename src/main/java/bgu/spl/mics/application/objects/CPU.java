@@ -38,9 +38,6 @@ public class CPU {
      * @post data.size()=0.
      */
     public void sendData(){
-        while(data.size()>0){
-
-        }
     }
 
     /**
