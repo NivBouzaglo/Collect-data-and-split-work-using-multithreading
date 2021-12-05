@@ -1,0 +1,97 @@
+package bgu.spl.mics.application.objects;
+//added by bar
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import bgu.spl.mics.Event;
+
+/**
+ * Passive object representing a single GPU.
+ * Add all the fields described in the assignment as private fields.
+ * Add fields and methods to this class as you see fit (including public methods and constructors).
+ */
+public class GPU {
+    /**
+     * Enum representing the type of the GPU.
+     */
+
+    enum Type {RTX3090, RTX2080, GTX1080}
+
+    private Type type;
+    private Model model;
+    private Cluster cluster;
+    private Queue<DataBatch> batches;
+    private Event event;
+
+
+
+    public  GPU(String t , Model m, Cluster c, Event e) {
+        this.setType(t);
+        model = m;
+        cluster = c;
+        event = e;
+        batches = new LinkedList<DataBatch>();
+    }
+    public String getType(){
+        if (type == Type.RTX3090) return "RTX3090";
+        else
+        if(type == Type.RTX2080) return "RTX2080";
+        else
+        if(type == Type.GTX1080) return "GTX1080";
+        return null;
+    }
+    public Model getModel(){return model;}
+    public Cluster getCluster(){return cluster;}
+    public Event getEvent(){return event;}
+    public Queue<DataBatch> getDataBatchList(){ return batches;}
+    //added by bar - this feild is not recognized in the test class.
+
+    public void setType(String t){
+        if (t.compareTo("RTX3090") == 0) type = Type.RTX3090 ;
+        else
+        if (t.compareTo("RTX2080") == 0) type = Type.RTX2080;
+        else
+        if(t.compareTo("GTX1080") == 0) type = Type.GTX1080;
+    }
+
+
+    /**
+     * @pre batch!=null
+     * @inv batches!=null.
+     * @post batches.size()--.
+     */
+    public void sendToCluster(DataBatch batch){}
+
+    /**
+     * @pre model.data!=null
+     * @inv
+     * @post All the data is stores in one of the data batch.
+     */
+    public void divide(){
+        for (int i=1; i<=model.getData().getSize();i++){
+            batches.add(new DataBatch(model.getData(),i*1000));
+        }
+    }
+
+    /**
+     * @pre batches!=null
+     * @inv model.status="Training".
+     * * @post model.status = "Trained".
+     */
+    public void train(){
+
+    }
+
+    /**
+     * @pre
+     * @inv
+     * @post batches!=null
+     */
+
+    public void receiveFromCluster(DataBatch unit){}
+    public long getTicks(){return 0;}
+
+
+}

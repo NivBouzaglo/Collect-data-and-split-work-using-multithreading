@@ -1,0 +1,33 @@
+package bgu.spl.mics.example.messages;
+
+import bgu.spl.mics.Event;
+import bgu.spl.mics.Message;
+import bgu.spl.mics.application.objects.Model;
+
+public class ExampleEvent implements Event<String>{
+
+    private String senderName;
+
+    public ExampleEvent(String senderName) {
+        this.senderName = senderName;
+    }
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    @Override
+    public Model action() {
+        return null;
+    }
+
+    @Override
+    public String result() {
+        return null;
+    }
+
+    @Override
+    public boolean process() {
+        return false;
+    }
+}
