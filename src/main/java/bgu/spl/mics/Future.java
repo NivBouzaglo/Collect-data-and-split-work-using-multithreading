@@ -39,7 +39,7 @@ public class Future<T> {
     public T get() {
         //TODO: implement this.
         synchronized (this) {
-            if (!isDone)
+            while(!isDone)
                 try {
                     wait();
                 } catch (InterruptedException ex) {
