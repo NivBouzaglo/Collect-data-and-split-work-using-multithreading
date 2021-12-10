@@ -13,6 +13,11 @@ public class Model {
     enum status{
         PreTrained,Training
     }
+    public Model(Student student , Data data , String name){
+        this.name = name;
+        this.data = data;
+        this.student = student;
+    }
     public Data getData(){return data;}
     public String getName(){return name;}
     public Student getStudent(){return student;}
