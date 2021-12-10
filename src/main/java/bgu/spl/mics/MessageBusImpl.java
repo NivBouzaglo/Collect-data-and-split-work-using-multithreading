@@ -15,7 +15,7 @@ public class MessageBusImpl implements MessageBus {
 	private HashMap<MicroService, Queue<Message>> microservices;
 	private HashMap<Class<? extends Event<?>>, Queue<MicroService>> events;
 	private HashMap<Class<? extends Broadcast>, Queue<MicroService>> broadcasts;
-	private static MessageBusImpl INSTANCE;
+	private static MessageBusImpl INSTANCE = null;
 
 	public MessageBusImpl(){
 		microservices = new HashMap<>();
@@ -23,8 +23,10 @@ public class MessageBusImpl implements MessageBus {
 		broadcasts=new HashMap<>();
 	}
 
-	public MessageBusImpl getInstance(){
-		INSTANCE =new MessageBusImpl();
+	public static MessageBusImpl getInstance(){
+		if(INSTANCE == null) {
+			INSTANCE = new MessageBusImpl();
+		}
 		return INSTANCE;
 	}
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
