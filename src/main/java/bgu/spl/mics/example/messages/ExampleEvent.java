@@ -15,19 +15,4 @@ public class ExampleEvent implements Event<String>{
     public String getSenderName() {
         return senderName;
     }
-
-    @Override
-    public Model action() {
-        return null;
-    }
-
-    @Override
-    public String result() {
-        return null;
-    }
-
-    @Override
-    public boolean process() {
-        return false;
-    }
 }

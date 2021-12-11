@@ -11,11 +11,4 @@ import bgu.spl.mics.application.objects.Model;
  */
 
 public interface Event<T> extends Message {
-
-    Model action();//return the action that event define
-
-    T result(); // return the result of the event
-
-    boolean process();//if its steal process
-
 }

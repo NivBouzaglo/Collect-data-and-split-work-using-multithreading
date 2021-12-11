@@ -18,9 +18,19 @@ public class Data {
 
     public Data(String  t ,int dataSize ){
         this.setType(t);
-        processed=0;
-        size= (int)Math.ceil((double)dataSize/1000);
+        this.processed=0;
+        this.size= (int)Math.ceil((double)dataSize/1000);
     }
     public int getSize(){return size;}
-    public void setType(String t){}
+    public void proccesed(int dataBatchSize){
+        this.processed = dataBatchSize + this.processed;
+    }
+    public void setType(String t){
+        if (t.compareTo("Images") == 0)
+            this.type = Type.Images;
+        else if (t.compareTo("Text") == 0)
+            this.type=Type.Text;
+        else if(t.compareTo("Tabular") == 0)
+            this.type = Type.Tabular;
+    }
 }

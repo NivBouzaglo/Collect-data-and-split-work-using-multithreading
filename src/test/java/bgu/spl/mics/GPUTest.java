@@ -23,7 +23,7 @@ public class GPUTest {
     @Before
     public void setUp() {
         e = new ExampleEvent("Test");
-        m = new Model();
+        m = new Model(new Student("niv","computer science","PhD"), new Data("image", 2000),"YOLO10");
         c = new Cluster();
         test = new GPU("RTX080", m, c, e);
     }

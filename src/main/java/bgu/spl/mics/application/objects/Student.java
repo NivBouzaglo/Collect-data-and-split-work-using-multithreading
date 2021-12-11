@@ -1,7 +1,8 @@
 package bgu.spl.mics.application.objects;
 
-import bgu.spl.mics.Event;
-import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.services.StudentService;
+
+import java.util.LinkedList;
 
 /**
  * Passive object representing single student.
@@ -13,18 +14,60 @@ public class Student {
      */
     enum Degree {MSc, PhD}
 
-    private int name;
+    private String name;
     private String department;
     private Degree status;
-    private int publications;
-    private int papersRead;
+    private int publications = 0;
+    private int papersRead = 0;
+    //added by bar
+    private LinkedList<Model> models;
+    private StudentService service;
 
-    public Student(int name , String department){
+    public Student(String name, String department, String degree) {
         this.name = name;
         this.department = department;
+        this.models = new LinkedList<Model>();
+        this.service = new StudentService(this);
+        status = degree(degree);
     }
 
-    public TrainModelEvent CreateEvent(Data data){
-        Model train = new Model(this);
+    private Degree degree(String degree) {
+        if (degree.compareTo("MSc") == 0)
+            return Degree.MSc;
+        else
+            return Degree.PhD;
+    }
+
+    public StudentService getService() {
+        return service;
+    }
+
+    public Degree getStatus() {
+        return status;
+    }
+
+    public int getPublications() {
+        return publications;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LinkedList<Model> getModels() {
+        return this.models;
+    }
+
+    public void createModel(Data data, String m_name) {
+        Model train = new Model(this, data, m_name);
+        models.add(train);
+    }
+
+    public void addPublication(){
+        publications++;
+    }
+
+    public void addPapersRead(){
+        papersRead++;
     }
 }
