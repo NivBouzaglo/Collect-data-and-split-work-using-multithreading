@@ -25,7 +25,7 @@ public class GPUTest {
         e = new ExampleEvent("Test");
         m = new Model(new Student("niv","computer science","PhD"), new Data("image", 2000),"YOLO10");
         c = new Cluster();
-        test = new GPU("RTX080", m, c, e);
+        test = new GPU("RTX080", m, e);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class GPUTest {
     public void testSendToCluster(){
         DataBatch d = new DataBatch(m.getData(),0);
         int before= test.getDataBatchList().size();
-        test.sendToCluster(d);
+        test.sendToCluster();
         testSendToCluster();
         assertEquals(before-1,test.getDataBatchList().size() );
     }
@@ -64,17 +64,17 @@ public class GPUTest {
     }
     @Test
     public void testTrain(){
-        GPU t3090 = new GPU("RTX2080", m, c, e);
+        GPU t3090 = new GPU("RTX2080", m, e);
         long  before = test.getTicks();
         t3090.train();
         long after = test.getTicks();
         assertEquals(1,after-before);
-        GPU t2080 = new GPU("RTX2080", m, c, e);
+        GPU t2080 = new GPU("RTX2080", m,  e);
         before = test.getTicks();
         t2080.train();
         after = test.getTicks();
         assertEquals(2,after-before);
-        GPU t1080= new GPU("RTX2080", m, c, e);
+        GPU t1080= new GPU("RTX2080", m, e);
         before = test.getTicks();
         t1080.train();
         after = test.getTicks();

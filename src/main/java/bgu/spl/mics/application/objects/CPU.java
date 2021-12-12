@@ -12,6 +12,7 @@ public class CPU {
     private int cores;
     private Collection<DataBatch> data;
     private Cluster cluster;
+    private boolean processing;
 
     public CPU(int i_cores,Cluster i_cluster){
         cores=i_cores;
@@ -55,5 +56,7 @@ public class CPU {
      */
     public long getTicks(){return 0;}
 
-
+    public boolean isProcessing() {
+        return processing;
+    }
 }

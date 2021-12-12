@@ -18,8 +18,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class Cluster {
 	private List<CPU> cpu;
 	private List<GPU> gpu;
-	private Queue<DataBatch> endProccessing;
-	private Queue<DataBatch> unprocces;
+	private Queue<DataBatch> endProcessing;
+	private Queue<DataBatch> unProcess;
 	private static Cluster INSTANCE= Cluster.getInstance();
 
 
@@ -32,12 +32,20 @@ public class Cluster {
 		return new Cluster();
 	}
 	public Cluster(){
-		endProccessing = new LinkedBlockingDeque<>();
-		unprocces = new LinkedBlockingDeque<>();
+		endProcessing = new LinkedBlockingDeque<>();
+		unProcess = new LinkedBlockingDeque<>();
 		cpu = new LinkedList<>();
 		gpu = new LinkedList<>();
 	}
 
-    public void startTraining() {
-    }
+	public void add(DataBatch batch) {
+		unProcess.add(batch);
+	}
+	public boolean full(){
+		for (CPU c : cpu){
+			if (!c.isProcessing())
+				return false;
+		}
+		return true;
+	}
 }

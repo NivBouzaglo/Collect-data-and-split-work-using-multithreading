@@ -12,7 +12,7 @@ public class Root{
     @JsonProperty("GPUS")
     public List<String> gPUS;
     @JsonProperty("CPUS")
-    public List<Double> cPUS;
+    public List<Integer> cPUS;
     @JsonProperty("Conferences")
     public List<ConfrenceInformation> conferences;
     @JsonProperty("TickTime")

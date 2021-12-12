@@ -1,11 +1,12 @@
 package bgu.spl.mics.application.objects;
 //added by bar
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.lang.reflect.Array;
+import java.security.Provider;
+import java.util.*;
 
 import bgu.spl.mics.Event;
+import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.services.GPUService;
 
 /**
  * Passive object representing a single GPU.
@@ -23,17 +24,32 @@ public class GPU {
     private Model model;
     private Cluster cluster;
     private Queue<DataBatch> batches;
+    private Array[] processed;
     private Event event;
+    private GPUService GPU;
 
 
 
-    public  GPU(String t , Model m, Cluster c, Event e) {
+    public  GPU(String t , Model m, Event e) {
         this.setType(t);
         model = m;
-        cluster = c;
+        cluster = Cluster.getInstance();
         event = e;
         batches = new LinkedList<DataBatch>();
+        setProcessed();
     }
+
+    private void setProcessed() {
+        switch (type){
+            case GTX1080:
+                processed=new Array[8];
+            case RTX2080:
+                processed=new Array[16];
+            case RTX3090:
+                processed=new Array[32];
+        }
+    }
+
     public String getType(){
         if (type == Type.RTX3090) return "RTX3090";
         else
@@ -55,17 +71,21 @@ public class GPU {
         else
         if(t.compareTo("GTX1080") == 0) type = Type.GTX1080;
     }
-
-
     /**
      * @pre batch!=null
      * @inv batches!=null.
      * @post batches.size()--.
      */
-    public void sendToCluster(DataBatch batch){
-
+    public void sendToCluster(){
+        while (!batches.isEmpty()) {
+            while (cluster.full())
+                try {
+                    GPU.wait();
+                } catch (InterruptedException e) {
+                }
+            cluster.add(batches.poll());
+        }
     }
-
     /**
      * @pre model.data!=null
      * @inv
@@ -84,8 +104,6 @@ public class GPU {
      */
     public void train(){
         model.getTraining();
-        divide();
-        cluster.startTraining();
     }
 
     /**
@@ -94,7 +112,9 @@ public class GPU {
      * @post batches!=null
      */
 
-    public void receiveFromCluster(DataBatch unit){}
+    public void receiveFromCluster(DataBatch unit){
+
+    }
     public long getTicks(){return 0;}
 
 
