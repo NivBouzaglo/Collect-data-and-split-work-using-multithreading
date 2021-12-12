@@ -33,6 +33,7 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
+        subscribeBroadcast();
         for (Model m : student.getModels()) {
             TrainModelEvent train = new TrainModelEvent(m);
             Future future = sendEvent(train);
