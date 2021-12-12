@@ -3,6 +3,7 @@ package bgu.spl.mics.application.objects;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Passive object representing the cluster.
@@ -14,6 +15,9 @@ import java.util.LinkedList;
 public class Cluster {
 	private CPU[] cpu;
 	private GPU[] gpu;
+	private Queue<DataBatch> endProccessing;
+	private Queue<DataBatch> unprocces;
+	private static Cluster INSTANCE= Cluster.getInstance();
 
 
 
@@ -22,7 +26,9 @@ public class Cluster {
 	 */
 	public static Cluster getInstance() {
 		//TODO: Implement this
-		return null;
+		return new Cluster();
 	}
 
+    public void startTraining() {
+    }
 }

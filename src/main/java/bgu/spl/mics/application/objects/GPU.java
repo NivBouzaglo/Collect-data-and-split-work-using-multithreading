@@ -62,7 +62,9 @@ public class GPU {
      * @inv batches!=null.
      * @post batches.size()--.
      */
-    public void sendToCluster(DataBatch batch){}
+    public void sendToCluster(DataBatch batch){
+
+    }
 
     /**
      * @pre model.data!=null
@@ -81,7 +83,9 @@ public class GPU {
      * * @post model.status = "Trained".
      */
     public void train(){
-
+        model.getTraining();
+        divide();
+        cluster.startTraining();
     }
 
     /**

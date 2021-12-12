@@ -17,5 +17,7 @@ public class DataBatch {
     }
     public Data getData() { return data; }
     public boolean isProccesed() { return proccesed; }
-    public void procces{data.proccesed(s);}
+    public void size(){
+
+    }
 }

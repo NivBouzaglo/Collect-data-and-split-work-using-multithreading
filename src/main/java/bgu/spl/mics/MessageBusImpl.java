@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.BlockingDeque;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -13,8 +14,8 @@ import java.util.Queue;
 public class MessageBusImpl implements MessageBus {
 
 	private HashMap<MicroService, Queue<Message>> microservices;
-	private HashMap<Class<? extends Event<?>>, Queue<MicroService>> events;
-	private HashMap<Class<? extends Broadcast>, Queue<MicroService>> broadcasts;
+	private HashMap<Class<? extends Event<?>>, BlockingDeque<MicroService>> events;
+	private HashMap<Class<? extends Broadcast>, BlockingDeque<MicroService>> broadcasts;
 	private static MessageBusImpl INSTANCE = null;
 
 	public MessageBusImpl(){
