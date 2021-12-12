@@ -136,6 +136,7 @@
     "CPUS": [32,32,32,16,16,16,16],
     "Conferences":
     [
+
         {"name": "ICML", "date": 2000},
         {"name": "NeurIPS", "date": 2500},
         {"name": "CVPR", "date": 3000},

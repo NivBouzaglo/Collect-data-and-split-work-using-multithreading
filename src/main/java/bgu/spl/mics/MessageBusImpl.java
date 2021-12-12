@@ -1,10 +1,13 @@
 package bgu.spl.mics;
 
+import java.sql.Array;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -31,13 +34,20 @@ public class MessageBusImpl implements MessageBus {
 		return INSTANCE;
 	}
 	public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		// TODO Auto-generated method stub
-
+		if (!events.containsKey(type)){
+			events.put(type, (BlockingDeque<MicroService>) new LinkedBlockingQueue<MicroService>());
+		}
+		else
+			events.get(type).add(m);
 	}
 
 	@Override
 	public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		// TODO Auto-generated method stub
+		if (!broadcasts.containsKey(type)){
+			broadcasts.put(type, (BlockingDeque<MicroService>) new LinkedBlockingQueue<MicroService>());
+		}
+		else
+			broadcasts.get(type).add(m);
 
 	}
 
@@ -49,21 +59,23 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public void sendBroadcast(Broadcast b) {
-		// TODO Auto-generated method stub
-
+		if (broadcasts.containsKey(b.getClass())){
+			for(MicroService m : broadcasts.get(b.getClass())){
+				microservices.get(m).add(b);
+			}
+		}
 	}
 
-	
 	@Override
 	public <T> Future<T> sendEvent(Event<T> e) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void register(MicroService m) {
-		// TODO Auto-generated method stub
-
+		if (!microservices.containsKey(m)){
+			microservices.put(m  , new LinkedBlockingDeque<>());
+		}
 	}
 
 	@Override
@@ -78,36 +90,46 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	public <T> boolean IsSubscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-		return false;
-	}
-
-	@Override
-	public boolean IsSubscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		return false;
-	}
-
-	@Override
 	public boolean BroadcastSended(Broadcast b) {
+		if (broadcasts.containsKey(b.getClass())){
+			for (MicroService m : broadcasts.get(b.getClass())){
+				if (!microservices.get(m).contains(b))
+					return false;
+			}
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public boolean EventSended(Event b) {
+		if (events.containsKey(b.getClass())){
+			for (MicroService m : events.get(b.getClass())){
+				if (!microservices.get(m).contains(b))
+					return false;
+			}
+			return true;
+		}
 		return false;
 	}
 
 	@Override
 	public boolean registered(MicroService m) {
-		return false;
+		return microservices.containsKey(m);
 	}
 
 	public <T> boolean updateEvent(Class<? extends Event<T>> type, MicroService m) {
-		return false;
+		if (events.containsKey(type.getClass()))
+			return events.get(type.getClass()).contains(m);
+		else
+			return false;
 	}
 
 	public <T> boolean updateBroadcast(Class<? extends Broadcast> type, MicroService m) {
-		return false;
+		if (broadcasts.containsKey(type.getClass()))
+			return broadcasts.get(type.getClass()).contains(m);
+		else
+			return false;
 	}
 
 

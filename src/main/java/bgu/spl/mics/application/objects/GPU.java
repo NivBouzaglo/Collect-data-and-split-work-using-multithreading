@@ -24,7 +24,8 @@ public class GPU {
     private Model model;
     private Cluster cluster;
     private Queue<DataBatch> batches;
-    private Array[] processed;
+    private DataBatch[] processed;
+    private int index=0;
     private Event event;
     private GPUService GPU;
 
@@ -42,11 +43,11 @@ public class GPU {
     private void setProcessed() {
         switch (type){
             case GTX1080:
-                processed=new Array[8];
+                processed=new DataBatch[8];
             case RTX2080:
-                processed=new Array[16];
+                processed=new DataBatch[16];
             case RTX3090:
-                processed=new Array[32];
+                processed=new DataBatch[32];
         }
     }
 
@@ -113,7 +114,10 @@ public class GPU {
      */
 
     public void receiveFromCluster(DataBatch unit){
-
+        if (processed[processed.length-1] == null) {
+            processed[index] = unit;
+            index++;
+        }
     }
     public long getTicks(){return 0;}
 

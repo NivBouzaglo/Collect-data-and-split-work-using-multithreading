@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Callback;
 import bgu.spl.mics.Future;
 import bgu.spl.mics.Message;
 import bgu.spl.mics.MicroService;
@@ -33,7 +34,7 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(TrainModelEvent.class ,);
+     //   subscribeEvent(TrainModelEvent.class , this.getCallbacks().get(TrainModelEvent.class).get(1));
         for (Model m : student.getModels()) {
             TrainModelEvent train = new TrainModelEvent(m);
             Future future = sendEvent(train);
