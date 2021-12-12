@@ -84,7 +84,7 @@ public class GPU {
                     GPU.wait();
                 } catch (InterruptedException e) {
                 }
-            cluster.add(batches.poll());
+            cluster.addUnProcessed(batches.poll());
         }
     }
     /**
@@ -104,7 +104,32 @@ public class GPU {
      * * @post model.status = "Trained".
      */
     public void train(){
-        model.getTraining();
+        model.setStatus(Model.status.Training);
+        switch (type){
+            case GTX1080:
+                while (4>getTicks()){
+                    try {
+                        GPU.wait();
+
+                    } catch (InterruptedException e) {}
+                }
+            case RTX2080:
+                while (2>getTicks()){
+                    try {
+                        GPU.wait();
+
+                    } catch (InterruptedException e) {}
+                }
+            case RTX3090:
+                while (1>getTicks()){
+                    try {
+                        GPU.wait();
+
+                    } catch (InterruptedException e) {}
+                }
+        }
+        model.setStatus(Model.status.Trained);
+
     }
 
     /**
@@ -118,8 +143,15 @@ public class GPU {
             processed[index] = unit;
             index++;
         }
+        if(index< processed.length){
+           processed[index]=unit;
+           index++;
+        }
+
     }
-    public long getTicks(){return 0;}
+    public long getTicks(){
+
+    }
 
 
 }

@@ -18,6 +18,7 @@ public class CPU {
         cores=i_cores;
         cluster=i_cluster;
         data= new LinkedList<DataBatch>();
+        processing=false;
     }
 
     public int getCores(){return cores;}
@@ -39,6 +40,10 @@ public class CPU {
      * @post data.size()=0.
      */
     public void sendData(){
+       for(DataBatch d:data){
+           cluster.addProcessedData(d);
+           data.remove(d);
+       }
     }
 
     /**
@@ -46,7 +51,9 @@ public class CPU {
      * @inv
      * @post data is processed.
      */
-    public void process(){}
+    public void process(){
+        processing=true;
+    }
 
     /**
      * @pre

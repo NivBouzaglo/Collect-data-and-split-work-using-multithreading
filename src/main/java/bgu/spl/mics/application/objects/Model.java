@@ -9,7 +9,6 @@ public class Model {
     private String name;
     private Data data;
     private Student student;
-    //added by bar
     private status s;
     private boolean publish;
     private result r;
@@ -56,8 +55,8 @@ public class Model {
         return student;
     }
 
-    public void getTraining() {
-        s = status.Training;
+    public void setStatus(status status) {
+        s = status;
     }
 
     public void endTraining() {

@@ -26,7 +26,7 @@ public abstract class MicroService implements Runnable {
     private boolean terminated = false;
     private final String name;
     private MessageBusImpl mb = MessageBusImpl.getInstance();
-    private HashMap<Class<? extends Message>, ArrayList<Callback>> callbacks;
+    private HashMap<Class<? extends Message> , ArrayList<Callback>> callbacks;
 
     /**
      * @param name the micro-service name (used mainly for debugging purposes -

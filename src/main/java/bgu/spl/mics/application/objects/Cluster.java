@@ -38,7 +38,7 @@ public class Cluster {
 		gpu = new LinkedList<>();
 	}
 
-	public void add(DataBatch batch) {
+	public void addUnProcessed(DataBatch batch) {
 		unProcess.add(batch);
 	}
 	public boolean full(){
@@ -47,5 +47,8 @@ public class Cluster {
 				return false;
 		}
 		return true;
+	}
+
+	public void addProcessedData(DataBatch d) {
 	}
 }

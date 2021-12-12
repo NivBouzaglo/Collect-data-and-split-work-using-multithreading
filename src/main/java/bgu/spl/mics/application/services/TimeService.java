@@ -3,6 +3,7 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,7 +21,7 @@ public class TimeService extends MicroService{
 	private int speed;
 	private int duration;
 	private Timer timer;
-	private TimerTask t;
+	private TimerTask task;
 	private int currentTime;
 	private TickBroadcast tick;
 
@@ -35,17 +36,23 @@ public class TimeService extends MicroService{
 		this.speed=s;
 		this.timer=new Timer();
 		this.currentTime=1;
+		this.task= new TimerTask() {
+			@Override
+			public void run() {
+				sendBroadcast(tick);
+			}
+		};
 	}
 
 	@Override
 	protected void initialize() {
 		// TODO Implement this
 		while(currentTime<duration){
-			timer.scheduleAtFixedRate(t,0,(long) speed);
+			timer.scheduleAtFixedRate(task,0,speed);
 			currentTime++;
 		}
-
-
+		timer.cancel();
 	}
+
 
 }
