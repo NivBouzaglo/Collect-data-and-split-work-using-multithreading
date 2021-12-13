@@ -90,9 +90,8 @@ public class MessageBusImpl implements MessageBus {
                 }
             }
         }
+        return null;
     }
-
-
     private MicroService roundRobin(BlockingDeque<MicroService> microServices) {
         MicroService m = microServices.poll();
         microServices.add(m);
