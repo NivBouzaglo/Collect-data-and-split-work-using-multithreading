@@ -1,9 +1,6 @@
 package bgu.spl.mics;
 
-import java.sql.Array;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -60,8 +57,10 @@ public class MessageBusImpl implements MessageBus {
 	@Override
 	synchronized public void sendBroadcast(Broadcast b) {
 		if (broadcasts.containsKey(b.getClass()))
-			for(MicroService m : broadcasts.get(b.getClass()))
+			for(MicroService m : broadcasts.get(b.getClass())) {
 				microservices.get(m).add(b);
+			}
+
 		notifyAll();
 	}
 

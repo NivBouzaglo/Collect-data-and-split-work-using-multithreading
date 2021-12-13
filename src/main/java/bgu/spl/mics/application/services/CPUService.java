@@ -23,4 +23,5 @@ public class CPUService extends MicroService {
     protected void initialize() {
         subscribeBroadcast(TickBroadcast.class , m ->{cpu.addTime();});
     }
+    public void setTicks(){}
 }

@@ -15,9 +15,10 @@ public class CPU {
     private boolean processing;
     private int time = 0;
 
-    public CPU(int i_cores,Cluster i_cluster){
+
+    public CPU(int i_cores){
         cores=i_cores;
-        cluster=i_cluster;
+        cluster=Cluster.getInstance();
         data= new LinkedList<DataBatch>();
         processing=false;
     }
