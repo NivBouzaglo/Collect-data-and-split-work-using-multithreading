@@ -1,6 +1,7 @@
 package bgu.spl.mics.application;
 
 import bgu.spl.mics.application.objects.*;
+import bgu.spl.mics.application.services.TimeService;
 import com.google.gson.*;
 
 import java.io.IOException;
@@ -58,7 +59,17 @@ public class CRMSRunner {
             cpus1.add(new CPU(object.getAsInt()));
         }
         cluster.setCpu(cpus1);
-//Continue from Conferences
+        JsonArray conf = obj.get("Conferences").getAsJsonArray();
+        LinkedList<ConfrenceInformation> confrenceInformations= new LinkedList<ConfrenceInformation>();
+        for (JsonElement e: conf){
+            JsonObject object = e.getAsJsonObject();
+            confrenceInformations.add(new ConfrenceInformation(object.get("name").getAsString(),object.get("date").getAsInt()));
+        }
+        int ticks = obj.get("TickTime").getAsInt();
+        int duration = obj.get("Duration").getAsInt();
+        TimeService time = new TimeService(ticks, duration);
+
+
 
 
     }
