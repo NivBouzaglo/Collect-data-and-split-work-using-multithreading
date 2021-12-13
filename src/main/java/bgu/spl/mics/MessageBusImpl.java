@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -107,7 +108,21 @@ public class MessageBusImpl implements MessageBus {
     @Override
     public void unregister(MicroService m) {
         // TODO Auto-generated method stub
-
+        if (!registered(m)) {
+            throw new IllegalArgumentException("this microservice not registered");
+        }
+        else {
+            synchronized (this) {
+                BlockingQueue<Message> remove = microservices.remove(m);
+                for (Message d : remove) {
+                    if (d instanceof Event)
+                        events.get(d.getClass()).remove(m);
+                    if (d instanceof Broadcast)
+                        broadcasts.get(d.getClass()).remove(m);
+                }
+                notifyAll();
+            }
+        }
     }
 
     @Override
