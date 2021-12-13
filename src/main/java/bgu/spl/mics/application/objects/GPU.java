@@ -6,6 +6,7 @@ import java.util.*;
 
 import bgu.spl.mics.Event;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.services.GPUService;
 
 /**
@@ -28,14 +29,15 @@ public class GPU {
     private int index=0;
     private Event event;
     private GPUService GPU;
+    private long time = 0;
 
 
 
-    public  GPU(String t , Model m, Event e) {
-        this.setType(t);
-        model = m;
+    public  GPU(String type , Model model, Event event) {
+        this.setType(type);
+        this.model = model;
         cluster = Cluster.getInstance();
-        event = e;
+        this.event = event;
         batches = new LinkedList<DataBatch>();
         setProcessed();
     }
@@ -124,7 +126,6 @@ public class GPU {
                 while (1>getTicks()){
                     try {
                         GPU.wait();
-
                     } catch (InterruptedException e) {}
                 }
         }
@@ -150,7 +151,7 @@ public class GPU {
 
     }
     public long getTicks(){
-
+        return time;
     }
 
 

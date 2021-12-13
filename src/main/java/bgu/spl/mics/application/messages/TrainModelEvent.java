@@ -4,7 +4,7 @@ import bgu.spl.mics.Event;
 import bgu.spl.mics.Future;
 import bgu.spl.mics.application.objects.Model;
 //i added <T>
-public class TrainModelEvent<T extends Model> implements Event<Model> {
+public class TrainModelEvent implements Event<Model> {
     private Model model ;
     private Future<Model> future;
 

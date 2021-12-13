@@ -117,19 +117,6 @@ public interface MessageBus {
     Message awaitMessage(MicroService m) throws InterruptedException;
 
     //query for the tests
-
-    /**
-     * @inv: m registered
-     * @pre: !event.isEmpty()
-     * @post:m found in the class key in event
-     */
-    public <T> boolean IsSubscribeEvent(Class<? extends Event<T>> type, MicroService m);
-    /**
-     * @inv: m registered
-     * @pre: !broadcast.isEmpty()
-     * @post:m found in the class key in broadcast
-     */
-    public boolean IsSubscribeBroadcast(Class<? extends Broadcast> type, MicroService m);
     /**
      * @inv: m registered
      * @pre: m subscribe the b type

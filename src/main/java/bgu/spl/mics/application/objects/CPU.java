@@ -13,6 +13,7 @@ public class CPU {
     private Collection<DataBatch> data;
     private Cluster cluster;
     private boolean processing;
+    private int time = 0;
 
     public CPU(int i_cores,Cluster i_cluster){
         cores=i_cores;
@@ -61,9 +62,13 @@ public class CPU {
      * @post
      * @return
      */
-    public long getTicks(){return 0;}
+    public void addTime(){time++;}
 
     public boolean isProcessing() {
         return processing;
+    }
+
+    public long getTicks() {
+        return time;
     }
 }

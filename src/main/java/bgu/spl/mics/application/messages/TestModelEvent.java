@@ -4,7 +4,7 @@ import bgu.spl.mics.Event;
 import bgu.spl.mics.Future;
 import bgu.spl.mics.application.objects.Model;
 //the t was added by bar
-public class TestModelEvent<T> implements Event<Model> {
+public class TestModelEvent implements Event<Model> {
     private Model model ;
     private Future<Model> future;
 

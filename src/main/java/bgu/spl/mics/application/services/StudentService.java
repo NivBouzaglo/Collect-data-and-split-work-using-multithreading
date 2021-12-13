@@ -1,8 +1,8 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.Callback;
 import bgu.spl.mics.Future;
 import bgu.spl.mics.Message;
+import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.PublishResultsEvent;
 import bgu.spl.mics.application.messages.TestModelEvent;
@@ -34,7 +34,8 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-     //   subscribeEvent(TrainModelEvent.class , this.getCallbacks().get(TrainModelEvent.class).get(1));
+        MessageBusImpl.getInstance().subscribeEvent(TestModelEvent.class,this);
+        MessageBusImpl.getInstance().subscribeEvent(TrainModelEvent.class,this);
         for (Model m : student.getModels()) {
             TrainModelEvent train = new TrainModelEvent(m);
             Future future = sendEvent(train);
@@ -55,6 +56,7 @@ public class StudentService extends MicroService {
                     }
                 }
                 m.Tested();
+                MessageBusImpl.getInstance().subscribeEvent(PublishResultsEvent.class,this);
                 PublishResultsEvent p = new PublishResultsEvent(m);
                 this.sendEvent(p);
             }

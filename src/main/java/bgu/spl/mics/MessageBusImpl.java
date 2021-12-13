@@ -58,16 +58,15 @@ public class MessageBusImpl implements MessageBus {
 	}
 
 	@Override
-	public void sendBroadcast(Broadcast b) {
-		if (broadcasts.containsKey(b.getClass())){
-			for(MicroService m : broadcasts.get(b.getClass())){
+	synchronized public void sendBroadcast(Broadcast b) {
+		if (broadcasts.containsKey(b.getClass()))
+			for(MicroService m : broadcasts.get(b.getClass()))
 				microservices.get(m).add(b);
-			}
-		}
+		notifyAll();
 	}
 
 	@Override
-	public <T> Future<T> sendEvent(Event<T> e) {
+	synchronized public <T> Future<T> sendEvent(Event<T> e) {
 		return null;
 	}
 
@@ -86,7 +85,14 @@ public class MessageBusImpl implements MessageBus {
 
 	@Override
 	public Message awaitMessage(MicroService m) throws InterruptedException {
-		return null;
+		if (!registered(m))
+			throw new InterruptedException("not registered");
+		else
+			while (microservices.get(m).isEmpty()){
+				wait();
+			}
+			Message message =microservices.get(m).poll();
+			return message;
 	}
 
 	@Override

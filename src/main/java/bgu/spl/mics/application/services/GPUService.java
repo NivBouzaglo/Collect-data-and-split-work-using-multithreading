@@ -4,6 +4,9 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.DataPreProcessEvent;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.objects.GPU;
+
+import java.util.Queue;
 
 /**
  * GPU service is responsible for handling the
@@ -15,9 +18,13 @@ import bgu.spl.mics.application.messages.TrainModelEvent;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class GPUService extends MicroService {
+    private GPU gpu;
+    private Queue event;
 
-    public GPUService(String name) {
-        super("Change_This_Name");
+    public GPUService(String name ,GPU gpu) {
+        super(name);
+        this.gpu = gpu;
+
         // TODO Implement this
     }
 

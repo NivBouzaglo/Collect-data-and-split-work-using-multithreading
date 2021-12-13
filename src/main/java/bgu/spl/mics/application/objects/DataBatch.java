@@ -12,12 +12,11 @@ public class DataBatch {
 
     public DataBatch(Data d, int start){
         data=d;
-        start_index=start;
+        start_index = start;
         this.proccesed = false;
     }
     public Data getData() { return data; }
     public boolean isProccesed() { return proccesed; }
-    public void size(){
 
-    }
+    public int getStart_index() { return start_index; }
 }

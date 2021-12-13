@@ -19,7 +19,7 @@ public class Data {
     public Data(String  t ,int dataSize ){
         this.setType(t);
         this.processed=0;
-        this.size= (int)Math.ceil((double)dataSize/1000);
+        this.size= dataSize;
     }
     public int getSize(){return size;}
     public void proccesed(int dataBatchSize){
