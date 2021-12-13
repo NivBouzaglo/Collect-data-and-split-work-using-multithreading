@@ -187,7 +187,7 @@ public abstract class MicroService implements Runnable {
         }
     }
 
-    public HashMap<Class<? extends Message>, ArrayList<Callback>> getCallbacks() {
-        return callbacks;
+    protected void register(){
+        mb.register(this);
     }
 }
