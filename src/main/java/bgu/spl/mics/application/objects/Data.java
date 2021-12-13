@@ -33,4 +33,15 @@ public class Data {
         else if(t.compareTo("Tabular") == 0)
             this.type = Type.Tabular;
     }
+    public String getType(){
+        switch (type){
+            case Text:
+                return "Text";
+            case Images:
+                return "Images";
+            case Tabular:
+                return "Tabular";
+        }
+        return null;
+    }
 }

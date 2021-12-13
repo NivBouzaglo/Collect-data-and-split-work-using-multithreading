@@ -51,6 +51,9 @@ public class Cluster {
 
 	public void addProcessedData(DataBatch d) {
 	}
+	public statistics getStatistics(){
+		return statistics;
+	}
 
 	public void setGpu(List<GPU> gpu) {
 		this.gpu = gpu;

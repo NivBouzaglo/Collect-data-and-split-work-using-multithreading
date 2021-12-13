@@ -53,6 +53,9 @@ public class Student {
     public int getPublications() {
         return publications;
     }
+    public int getPapersRead() {
+        return papersRead;
+    }
 
     public String getName() {
         return name;
