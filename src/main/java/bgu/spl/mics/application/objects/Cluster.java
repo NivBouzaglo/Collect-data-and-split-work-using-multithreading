@@ -1,11 +1,9 @@
 package bgu.spl.mics.application.objects;
 
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -50,5 +48,13 @@ public class Cluster {
 	}
 
 	public void addProcessedData(DataBatch d) {
+	}
+
+	public void setGpu(List<GPU> gpu) {
+		this.gpu = gpu;
+	}
+
+	public void setCpu(LinkedList<CPU> cpu) {
+		this.cpu = cpu;
 	}
 }

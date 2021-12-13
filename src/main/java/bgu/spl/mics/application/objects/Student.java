@@ -23,12 +23,16 @@ public class Student {
     private LinkedList<Model> models;
     private StudentService service;
 
-    public Student(String name, String department, String degree) {
+    public Student(String name, String department, String degree ) {
         this.name = name;
         this.department = department;
         this.models = new LinkedList<Model>();
+        this.models=new LinkedList<Model>();
         this.service = new StudentService(this);
         status = degree(degree);
+    }
+    public  void setModels(LinkedList<Model> s_models){
+        this.models=s_models;
     }
 
     private Degree degree(String degree) {

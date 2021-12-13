@@ -1,13 +1,11 @@
 package bgu.spl.mics.application.objects;
 //added by bar
-import java.lang.reflect.Array;
-import java.security.Provider;
-import java.util.*;
 
 import bgu.spl.mics.Event;
-import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.services.GPUService;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Passive object representing a single GPU.
@@ -31,8 +29,11 @@ public class GPU {
     private GPUService GPU;
     private long time = 0;
 
+    public GPU(String t){
+        this.setType(t);
+    }
 
-
+    //Swe need to fix it.
     public  GPU(String type , Model model, Event event) {
         this.setType(type);
         this.model = model;
