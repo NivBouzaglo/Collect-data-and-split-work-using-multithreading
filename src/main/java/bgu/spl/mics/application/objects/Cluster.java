@@ -19,6 +19,7 @@ public class Cluster {
 	private Queue<DataBatch> endProcessing;
 	private Queue<DataBatch> unProcess;
 	private static Cluster INSTANCE= Cluster.getInstance();
+	private statistics statistics;
 
 
 
@@ -34,6 +35,7 @@ public class Cluster {
 		unProcess = new LinkedBlockingDeque<>();
 		cpu = new LinkedList<>();
 		gpu = new LinkedList<>();
+		statistics = new statistics();
 	}
 
 	public void addUnProcessed(DataBatch batch) {
