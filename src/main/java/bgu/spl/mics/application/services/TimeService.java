@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
 import java.util.Date;
@@ -52,7 +53,7 @@ public class TimeService extends MicroService{
 			currentTime++;
 		}
 		timer.cancel();
-		subscribeBroadcast();
+		subscribeBroadcast(TerminateBroadcast.class, m->{terminate();});
 	}
 
 
