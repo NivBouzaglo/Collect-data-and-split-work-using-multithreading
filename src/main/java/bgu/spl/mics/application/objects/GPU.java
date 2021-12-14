@@ -3,7 +3,7 @@ package bgu.spl.mics.application.objects;
 
 import bgu.spl.mics.Event;
 import bgu.spl.mics.application.services.GPUService;
-
+import bgu.spl.mics.application.objects.Model.result;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -161,7 +161,19 @@ public class GPU {
     public long getTicks(){
         return time;
     }
-    public void test(Model model){}
+    public Model.result test(Model model){
+        double rand = Math.random();
+        switch (model.getStudent().getStatus()){
+            case MSc:
+                if(rand>=0.6)
+                    return result.Good;
+            case PhD:
+                if(rand>=0.8)
+                    return result.Good;
+        }
+        return result.Bad;
+
+    }
 
 
 }
