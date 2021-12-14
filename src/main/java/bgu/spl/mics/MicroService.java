@@ -26,7 +26,7 @@ public abstract class MicroService implements Runnable {
     private boolean terminated = false;
     private final String name;
     private MessageBusImpl mb = MessageBusImpl.getInstance();
-    private HashMap<Class<? extends Message> , ArrayList<Callback>> callbacks;
+    private HashMap<Class<? extends Message> , Callback> callbacks;
     private int ticks=0;
 
     /**
@@ -62,9 +62,8 @@ public abstract class MicroService implements Runnable {
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
         //TODO: implement this.
         if (!callbacks.containsKey(type)) {
-            callbacks.put(type, new ArrayList<>());
+            callbacks.put(type,callback);
         }
-        callbacks.get(type).add(callback);
         mb.subscribeEvent(type, this);
     }
 
@@ -92,9 +91,8 @@ public abstract class MicroService implements Runnable {
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
         //TODO: implement this.
         if (!callbacks.containsKey(type)) {
-            callbacks.put(type, new ArrayList<>());
+            callbacks.put(type, callback);
         }
-        callbacks.get(type).add(callback);
         mb.subscribeBroadcast(type, this);
     }
 
@@ -180,11 +178,10 @@ public abstract class MicroService implements Runnable {
             try {
                 Message m = mb.awaitMessage(this);
                 if (m != null && callbacks.containsKey(m.getClass())) {
-                    Callback c = (Callback) callbacks.get(m.getClass());
+                    Callback c = callbacks.get(m.getClass());
                     c.call(m);
                 }
             } catch (InterruptedException e) {}
-            mb.unregister(this);
         }
     }
 

@@ -19,6 +19,7 @@ public class MessageBusImpl implements MessageBus {
     private ConcurrentHashMap<Class<? extends Broadcast>, BlockingDeque<MicroService>> broadcasts;
     private ConcurrentHashMap<Message, Future> eventFuture;
     private static MessageBusImpl INSTANCE = null;
+    private Object mlock = new Object();
 
     public MessageBusImpl() {
         microservices = new ConcurrentHashMap<>();
@@ -38,7 +39,7 @@ public class MessageBusImpl implements MessageBus {
         if (!events.containsKey(type)) {
             events.put(type, (BlockingDeque<MicroService>) new LinkedBlockingQueue<MicroService>());
         } else
-            events.get(type).addFirst(m);
+            events.get(type).add(m);
     }
 
     @Override
@@ -60,14 +61,14 @@ public class MessageBusImpl implements MessageBus {
         if (!broadcasts.containsKey(b.getClass()))
             throw new IllegalArgumentException("don't have microservice that subscribe this broadcast");
         else
-            synchronized (this) {
+            synchronized (mlock) {
                 for (MicroService m : broadcasts.get(b.getClass())) {
                     if (!registered(m)) {
                         throw new IllegalArgumentException("didn't register yet");
                     } else
                         microservices.get(m).add(b);
                 }
-                notifyAll();
+                mlock.notifyAll();
             }
     }
 
@@ -76,13 +77,13 @@ public class MessageBusImpl implements MessageBus {
         if (!events.containsKey(e.getClass()) || events.get(e.getClass()).isEmpty())
             return null;
         else {
-            synchronized (this) {
+            synchronized (mlock) {
                 MicroService getTheEvent = roundRobin(events.get(e.getClass()));
                 if (getTheEvent != null) {
                     microservices.get(getTheEvent).add(e);
                     Future<T> future =new Future<>();
                     eventFuture.put(e , future);
-                    notifyAll();
+                    mlock.notifyAll();
                     return future;
                 }
             }
@@ -109,7 +110,7 @@ public class MessageBusImpl implements MessageBus {
             throw new IllegalArgumentException("this microservice not registered");
         }
         else {
-            synchronized (this) {
+            synchronized (mlock) {
                 BlockingQueue<Message> remove = microservices.remove(m);
                 for (Message d : remove) {
                     if (d instanceof Event)
@@ -117,7 +118,7 @@ public class MessageBusImpl implements MessageBus {
                     if (d instanceof Broadcast)
                         broadcasts.get(d.getClass()).remove(m);
                 }
-                notifyAll();
+                mlock.notifyAll();
                 m.terminate();
             }
         }
