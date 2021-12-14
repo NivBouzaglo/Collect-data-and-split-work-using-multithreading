@@ -39,7 +39,7 @@ public class MessageBusImpl implements MessageBus {
         if (!events.containsKey(type)) {
             events.put(type, (BlockingDeque<MicroService>) new LinkedBlockingQueue<MicroService>());
         } else
-            events.get(type).add(m);
+            events.get(type).addFirst(m);
     }
 
     @Override
@@ -81,8 +81,8 @@ public class MessageBusImpl implements MessageBus {
                 MicroService getTheEvent = roundRobin(events.get(e.getClass()));
                 if (getTheEvent != null) {
                     microservices.get(getTheEvent).add(e);
-                    Future<T> future =new Future<>();
-                    eventFuture.put(e , future);
+                    Future<T> future = new Future<>();
+                    eventFuture.put(e, future);
                     mlock.notifyAll();
                     return future;
                 }
@@ -90,6 +90,7 @@ public class MessageBusImpl implements MessageBus {
         }
         return null;
     }
+
     private MicroService roundRobin(BlockingDeque<MicroService> microServices) {
         MicroService m = microServices.poll();
         microServices.add(m);
@@ -108,8 +109,7 @@ public class MessageBusImpl implements MessageBus {
         // TODO Auto-generated method stub
         if (!registered(m)) {
             throw new IllegalArgumentException("this microservice not registered");
-        }
-        else {
+        } else {
             synchronized (mlock) {
                 BlockingQueue<Message> remove = microservices.remove(m);
                 for (Message d : remove) {
@@ -129,13 +129,11 @@ public class MessageBusImpl implements MessageBus {
         if (!registered(m))
             throw new InterruptedException("not registered");
         else {
-            synchronized (this) {
-                while (microservices.get(m).isEmpty()) {
-                    wait();
-                }
-                Message message = microservices.get(m).poll();
-                return message;
+            while (microservices.get(m).isEmpty()) {
+                wait();
             }
+            Message message = microservices.get(m).poll();
+            return message;
         }
     }
 

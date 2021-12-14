@@ -10,13 +10,9 @@ public class PublishConferenceBroadcast implements Broadcast {
 
     private List<Model> modelsName;
 
-    public PublishConferenceBroadcast(){
-        this.modelsName = new LinkedList<>();
+    public PublishConferenceBroadcast(List<Model>models) {
+        this.modelsName = models;
     }
-    public void add(Model model){
-        modelsName.add(model);
-    }
-
     public List<Model> getModelsName() {
         return this.modelsName;
     }

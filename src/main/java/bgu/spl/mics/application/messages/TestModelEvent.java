@@ -27,8 +27,4 @@ public class TestModelEvent implements Event<Model> {
     public void result() {
         future.get();
     }
-
-    public boolean process() {
-        return false;
-    }
 }
