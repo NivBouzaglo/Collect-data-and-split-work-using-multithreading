@@ -1,9 +1,6 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.Future;
-import bgu.spl.mics.Message;
-import bgu.spl.mics.MessageBusImpl;
-import bgu.spl.mics.MicroService;
+import bgu.spl.mics.*;
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
 import bgu.spl.mics.application.messages.PublishResultsEvent;
 import bgu.spl.mics.application.messages.TestModelEvent;
@@ -36,9 +33,9 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(PublishConferenceBroadcast.class , m-> {
-            for(Model name ){
-                if (name.getStudent().equals(student))
+        subscribeBroadcast(PublishConferenceBroadcast.class , t -> {
+            for(Model name : t.getModelsName()){
+                if (student.getModels().contains(name))
                     student.addPublication();
                 else
                     student.addPapersRead();
