@@ -185,7 +185,22 @@ public class GPU {
         }
     }
 
-    public void test(Model model) {
+    public Model.result test(Model model) {
+        double rand = Math.random();
+        switch (model.getStudent().getStatus()){
+            case PhD:
+                if (rand>=0.8){
+                    model.setResult("Good");
+                    return Model.result.Good;
+                }
+            case MSc:
+                if (rand>=0.6){
+                    model.setResult("Good");
+                    return Model.result.Good;
+                }
+        }
+        model.setResult("Bad");
+        return Model.result.Bad;
     }
 
 

@@ -81,16 +81,16 @@ public class Model {
     public void setResult(String rt) {
         switch (rt) {
             case "bad":
-                this.r = result.bad;
+                this.r = result.Bad;
                 break;
             case "good":
-                this.r = result.good;
+                this.r = result.Good;
                 break;
         }
     }
 
     public boolean good(){
-        if (r == result.good)
+        if (r == result.Good)
             return true;
         return false;
     }
