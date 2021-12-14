@@ -102,7 +102,9 @@ public class GPU {
      */
     public void divide() {
         for (int i = 1; i <= model.getData().getSize(); i++) {
-            batches.add(new DataBatch(model.getData(), i * 1000));
+            DataBatch dataBatch= new DataBatch(model.getData(), i * 1000);
+            dataBatch.setGpuIndex(cluster.findGPU(this));
+            batches.add(dataBatch);
         }
     }
 

@@ -44,7 +44,7 @@ public class Cluster {
 		int index =0;
 		for (GPU g: gpu){
 			if (g.equals(gp)){
-				sendToCPU(batch,index);
+				sendToCPU(batch);
 				break;
 			}
 			index++;
@@ -52,7 +52,7 @@ public class Cluster {
 		//unProcess.add(batch);
 	}
 
-	private void sendToCPU(DataBatch batch, int gpu) {
+	private void sendToCPU(DataBatch batch) {
 		int size= cpu.get(0).getData().size();
 		int index=0;
 		for(int i=0; i< cpu.size();i++){
@@ -61,7 +61,7 @@ public class Cluster {
 				index=i;
 			}
 		}
-		cpu.get(index).receiveData(batch,gpu);
+		cpu.get(index).receiveData(batch);
 	}
 //I dont think we need it.
 	public boolean full(){
@@ -72,9 +72,14 @@ public class Cluster {
 		return true;
 	}
 
-	public void addProcessedData(DataBatch d,Integer gpuIndex) {
-		if (gpu.get(gpuIndex).getProcessed()[gpu.get(gpuIndex).getProcessed().length-1]==null)
-			gpu.get()
+	public void addProcessedData(DataBatch batch) {
+		GPU g= gpu.get(batch.getGpuIndex());
+		if (g.getProcessed()[g.getProcessed().length-1]==null){
+			g.receiveFromCluster(batch);
+		}
+		else{
+			endProcessing.add(batch);
+		}
 
 
 	}
@@ -96,5 +101,14 @@ public class Cluster {
 
 	public Queue<DataBatch> getUnProcess() {
 		return unProcess;
+	}
+
+	public int findGPU(GPU g) {
+		for (int i=0; i<gpu.size(); i++){
+			if(gpu.get(i).equals(g)){
+				return i;
+			}
+		}
+		return 0;
 	}
 }

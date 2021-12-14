@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.objects;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -20,7 +22,7 @@ public class CPU {
     public CPU(int i_cores) {
         cores = i_cores;
         cluster = Cluster.getInstance();
-        data = new LinkedBlockingDeque<>();
+        data = new LinkedList<DataBatch>();
         processed = false;
     }
 
@@ -55,7 +57,7 @@ public class CPU {
      * @inv cluster!=null
      * @post data.size()=0.
      */
-    public void sendData(DataBatch unit) {
+    public void sendData(DataBatch unit ) {
         processed = true;
         if (unit.getData().getType() == "Images")
             if (time - currentTime == 4 * cores) {
