@@ -1,11 +1,12 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Event;
+import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.DataPreProcessEvent;
-import bgu.spl.mics.application.messages.TestModelEvent;
-import bgu.spl.mics.application.messages.TickBroadcast;
-import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.messages.*;
+import bgu.spl.mics.application.objects.Cluster;
 import bgu.spl.mics.application.objects.GPU;
+import bgu.spl.mics.application.objects.Model;
 
 import java.util.Queue;
 
@@ -20,13 +21,11 @@ import java.util.Queue;
  */
 public class GPUService extends MicroService {
     private GPU gpu;
-    private Queue event;
+    private Event<Model> event;
 
     public GPUService(String name ,GPU gpu) {
         super(name);
-        this.gpu = gpu;
-
-        // TODO Implement this
+        this.gpu = new GPU(name);
     }
 
 
@@ -34,6 +33,10 @@ public class GPUService extends MicroService {
     protected void initialize() {
         // TODO Implement this
         subscribeBroadcast(TickBroadcast.class , m ->{gpu.addTime();});
-
+        subscribeEvent(TrainModelEvent.class , t->{gpu.setModel(t.getModel());
+            gpu.setEvent(t);
+            gpu.divide();});
+        subscribeEvent(TestModelEvent.class , g->gpu.test(g.getModel()));
+        subscribeBroadcast(TerminateBroadcast.class ,m1->{terminate();});
     }
 }

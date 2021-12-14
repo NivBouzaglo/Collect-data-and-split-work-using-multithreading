@@ -17,7 +17,6 @@ public class Cluster {
 	private List<CPU> cpu;
 	private List<GPU> gpu;
 	private Queue<DataBatch> endProcessing;
-	private Queue<DataBatch> unProcess;
 	private static Cluster INSTANCE= null;
 	private statistics statistics;
 
@@ -34,7 +33,6 @@ public class Cluster {
 	}
 	public Cluster(){
 		endProcessing = new LinkedBlockingDeque<>();
-		unProcess = new LinkedBlockingDeque<>();
 		cpu = new LinkedList<>();
 		gpu = new LinkedList<>();
 		statistics = new statistics();
@@ -58,12 +56,13 @@ public class Cluster {
 	}
 
 	public void addProcessedData(DataBatch batch) {
-		GPU g= gpu.get(batch.getGpuIndex());
-		if (g.getIndex()<g.getProcessed().length){
-			g.receiveFromCluster(batch);
-		}
-		else{
-			endProcessing.add(batch);
+		synchronized (gpu) {
+			GPU g = gpu.get(batch.getGpuIndex());
+			if (g.getProcessed().size() < g.getCapacity()) {
+				g.receiveFromCluster(batch);
+			} else {
+				endProcessing.add(batch);
+			}
 		}
 
 
@@ -78,14 +77,6 @@ public class Cluster {
 
 	public void setCpu(LinkedList<CPU> cpu) {
 		this.cpu = cpu;
-	}
-//ask niv
-	public DataBatch sendUnProcess() {
-		return unProcess.remove();
-	}
-
-	public Queue<DataBatch> getUnProcess() {
-		return unProcess;
 	}
 
 	public int findGPU(GPU g) {

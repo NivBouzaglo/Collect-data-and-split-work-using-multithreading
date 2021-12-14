@@ -59,19 +59,22 @@ public class CPU {
      */
     public void sendData(DataBatch unit ) {
         processed = true;
-        if (unit.getData().getType() == "Images")
-            if (time - currentTime == 4 * cores) {
+        if (unit.getData().getType().equals("Images"))
+            if (time - currentTime == 4 * (32/cores)) {
                 cluster.addProcessedData(unit);
+                cluster.getStatistics().setUnit_used_cpu(4*(32/cores));
                 data.poll();
                 processed = false;
-            } else if (unit.getData().getType() == "Text")
-                if (time - currentTime == 2 * cores) {
+            } else if (unit.getData().getType().equals("Text"))
+                if (time - currentTime == 2 * (32/cores)) {
                     cluster.addProcessedData(unit);
+                    cluster.getStatistics().setUnit_used_cpu(2*(32/cores));
                     data.poll();
                     processed = false;
-                } else if (unit.getData().getType() == "Tabular")
-                    if (time - currentTime == cores) {
+                } else if (unit.getData().getType().equals("Tabular"))
+                    if (time - currentTime == (32/cores)) {
                         cluster.addProcessedData(unit);
+                        cluster.getStatistics().setUnit_used_cpu(32/cores);
                         data.poll();
                         processed = false;
                     }
@@ -92,8 +95,6 @@ public class CPU {
     public void addTime() {
         time++;
         setCurrentTime();
-        if (!cluster.getUnProcess().isEmpty())
-            receiveData(cluster.sendUnProcess());
         if (!data.isEmpty())
             sendData(data.peek());
     }

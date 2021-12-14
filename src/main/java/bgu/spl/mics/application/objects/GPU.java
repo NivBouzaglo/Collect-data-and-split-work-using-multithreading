@@ -1,11 +1,11 @@
 package bgu.spl.mics.application.objects;
-//added by bar
-
 import bgu.spl.mics.Event;
 import bgu.spl.mics.application.services.GPUService;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Passive object representing a single GPU.
@@ -23,36 +23,25 @@ public class GPU {
     private Model model;
     private Cluster cluster;
     private Queue<DataBatch> batches;
-    private DataBatch[] processed;
-    private int index = 0;
+    private BlockingDeque processed;
+    private int processedData = 0;
+    private int capacity = 0 ,time = 1 , currentTime = 0;
     private Event event;
-    private long change = 0;
     private GPUService GPU;
-    private long time = 1;
+    private boolean free = true;
 
     public GPU(String t) {
         this.setType(t);
     }
 
     //Swe need to fix it.
-    public GPU(String type, Model model, Event event) {
+    public GPU(String type, Event event) {
         this.setType(type);
-        this.model = model;
+        this.model = null;
         cluster = Cluster.getInstance();
-        this.event = event;
+        this.event = null;
         batches = new LinkedList<DataBatch>();
-        setProcessed();
-    }
-
-    private void setProcessed() {
-        switch (type) {
-            case GTX1080:
-                processed = new DataBatch[8];
-            case RTX2080:
-                processed = new DataBatch[16];
-            case RTX3090:
-                processed = new DataBatch[32];
-        }
+        processed = new LinkedBlockingDeque();
     }
 
     public String getType() {
@@ -61,12 +50,12 @@ public class GPU {
         else if (type == Type.GTX1080) return "GTX1080";
         return null;
     }
-
-    public int getIndex() {
-        return index;
+    public void setModel(Model model){
+        this.model = model;
     }
-
-    public DataBatch[] getProcessed(){return processed;}
+    public void setEvent(Event e){
+        this.event = e;
+    }
 
     public Model getModel() {
         return model;
@@ -74,6 +63,14 @@ public class GPU {
 
     public Cluster getCluster() {
         return cluster;
+    }
+
+    public BlockingDeque getProcessed() {
+        return processed;
+    }
+
+    public int getCapacity() {
+        return capacity;
     }
 
     public Event getEvent() {
@@ -86,9 +83,9 @@ public class GPU {
     //added by bar - this feild is not recognized in the test class.
 
     public void setType(String t) {
-        if (t.compareTo("RTX3090") == 0) type = Type.RTX3090;
-        else if (t.compareTo("RTX2080") == 0) type = Type.RTX2080;
-        else if (t.compareTo("GTX1080") == 0) type = Type.GTX1080;
+        if (t.compareTo("RTX3090") == 0){ type = Type.RTX3090; capacity =32;}
+        else if (t.compareTo("RTX2080") == 0){ type = Type.RTX2080; capacity=16;}
+        else if (t.compareTo("GTX1080") == 0){ type = Type.GTX1080; capacity =8;}
     }
 
     /**
@@ -111,6 +108,9 @@ public class GPU {
             dataBatch.setGpuIndex(cluster.findGPU(this));
             batches.add(dataBatch);
         }
+        for (int i = 0; i < capacity; i++) {
+            sendToCluster();
+        }
     }
 
     /**
@@ -118,8 +118,32 @@ public class GPU {
      * @inv model.status="Training".
      * * @post model.status = "Trained".
      */
-    public void train() {
-
+    public void train(DataBatch unit) {
+        model.setStatus(Model.status.Training);
+        switch (type){
+            case RTX3090:
+                if (time - currentTime == 1) {
+                  subTrain(1);
+                }
+            case RTX2080:
+                if (time - currentTime == 2) {
+                    subTrain(2);
+                }
+            case GTX1080:
+                if (time - currentTime == 1) {
+                    subTrain(4);
+                }
+        }
+        if (processedData*1000 >= model.getData().getSize())
+            model.endTraining();
+    }
+    public void subTrain(int ticks){
+        processedData++;
+        cluster.getStatistics().setUnit_used_gpu(ticks);
+        cluster.getStatistics().setNumber_of_DB(1);
+        processed.poll();
+        if (!batches.isEmpty())
+            sendToCluster();
     }
 
     /**
@@ -129,17 +153,26 @@ public class GPU {
      */
 
     public void receiveFromCluster(DataBatch unit) {
-        if (index < processed.length) {
-            processed[index] = unit;
-            index++;
-        }
+          processed.add(unit);
     }
 
     public void addTime() {
         time++;
+        if (!free)
+            train((DataBatch) processed.peek());
+        else
+            if (!processed.isEmpty()) {
+                free = false;
+                setCurrentTime();
+                train((DataBatch) processed.peek());
+            }
     }
 
-    public long getTicks() {
+    private void setCurrentTime() {
+        currentTime = time;
+    }
+
+    public int getTicks() {
         return time;
     }
 

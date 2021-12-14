@@ -24,7 +24,7 @@ public class CRMSRunner {
         } catch (IOException e ) {
             System.out.println("Error while creating output file.");
         }
-        Cluster cluster = new Cluster();
+        Cluster cluster = Cluster.getInstance();
         LinkedList<Student> students = new LinkedList<Student>();
         LinkedList<ConfrenceInformation> conferences = new LinkedList<ConfrenceInformation>();
         LinkedList<GPU> gpus= new LinkedList<GPU>();
