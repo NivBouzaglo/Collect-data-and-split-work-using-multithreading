@@ -108,23 +108,24 @@ public class GPU {
      */
     public void train(){
         model.setStatus(Model.status.Training);
+        long before= getTicks();
         switch (type){
             case GTX1080:
-                while (4>getTicks()){
+                while (4>getTicks()-before){
                     try {
                         GPU.wait();
 
                     } catch (InterruptedException e) {}
                 }
             case RTX2080:
-                while (2>getTicks()){
+                while (2>getTicks()-before){
                     try {
                         GPU.wait();
 
                     } catch (InterruptedException e) {}
                 }
             case RTX3090:
-                while (1>getTicks()){
+                while (1>getTicks()-before){
                     try {
                         GPU.wait();
                     } catch (InterruptedException e) {}
@@ -151,10 +152,16 @@ public class GPU {
         }
 
     }
-    public void addTime() {time++;}
+    public void addTime() {
+        time++;
+        switch (type){
+            case GTX1080:
+        }
+    }
     public long getTicks(){
         return time;
     }
+    public void test(Model model){}
 
 
 }

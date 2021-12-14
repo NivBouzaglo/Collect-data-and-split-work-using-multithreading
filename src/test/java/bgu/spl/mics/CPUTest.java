@@ -20,7 +20,7 @@ public class CPUTest {
 
     @Before
     public void setUp() throws Exception {
-        test = new CPU(2,c);
+        test = new CPU(2);
         c = new Cluster();
         unit = new DataBatch(new Data("Tabular",10),1);
     }
@@ -47,7 +47,7 @@ public class CPUTest {
         col.add(unit);
         assertEquals(col,test.getData());
         //?
-        CPU cpu2= new CPU(0,c);
+        CPU cpu2= new CPU(0);
         test.receiveData(unit);
 
 
