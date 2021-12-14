@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.objects;
 
+import org.junit.Test;
+
 /**
  * Passive object representing a Deep Learning model.
  * Add all the fields described in the assignment as private fields.
@@ -18,7 +20,7 @@ public class Model {
     }
 
     enum result {
-        good, bad
+        Good, Bad , None
     }
 
     public Model(Student student, Data data, String name) {
@@ -27,6 +29,7 @@ public class Model {
         this.student = student;
         this.s = Model.status.PreTrained;
         this.publish = false;
+        this.r=result.None;
     }
 
     public String getStatus() {

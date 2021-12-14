@@ -3,7 +3,6 @@ package bgu.spl.mics.application.objects;
 
 import bgu.spl.mics.Event;
 import bgu.spl.mics.application.services.GPUService;
-import bgu.spl.mics.application.services.TimeService;
 
 import java.util.LinkedList;
 import java.util.Queue;
