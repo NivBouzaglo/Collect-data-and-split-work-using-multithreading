@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.objects;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -10,7 +11,8 @@ import java.util.LinkedList;
  */
 public class CPU {
     private int cores;
-    private Collection<DataBatch> data;
+    //private Collection<DataBatch> data;
+    private HashMap<DataBatch,Integer> data;
     private Cluster cluster;
     private boolean processed;
     private int time = 0;
@@ -19,7 +21,8 @@ public class CPU {
     public CPU(int i_cores) {
         cores = i_cores;
         cluster = Cluster.getInstance();
-        data = new LinkedList<DataBatch>();
+        //data = new LinkedList<DataBatch>();
+        data = new HashMap<DataBatch,Integer>();
         processed = false;
     }
 
@@ -27,7 +30,7 @@ public class CPU {
         return cores;
     }
 
-    public Collection<DataBatch> getData() {
+    public HashMap<DataBatch,Integer> getData() {
         return data;
     }
 
@@ -40,8 +43,8 @@ public class CPU {
      * @inv cores>0
      * @post data.size()>0
      */
-    public void receiveData(DataBatch unit) {
-        data.add(unit);
+    public void receiveData(DataBatch unit,Integer gpuIndex) {
+        data.put(unit,gpuIndex);
     }
 
     /**
@@ -49,8 +52,8 @@ public class CPU {
      * @inv cluster!=null
      * @post data.size()=0.
      */
-    public void sendData(DataBatch unit) {
-        cluster.addProcessedData(unit);
+    public void sendData(DataBatch unit,Integer gpuIndex) {
+        cluster.addProcessedData(unit,gpuIndex);
         data.remove(unit);
     }
 
