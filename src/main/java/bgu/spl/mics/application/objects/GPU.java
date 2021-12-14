@@ -3,6 +3,7 @@ package bgu.spl.mics.application.objects;
 
 import bgu.spl.mics.Event;
 import bgu.spl.mics.application.services.GPUService;
+import bgu.spl.mics.application.services.TimeService;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -24,17 +25,18 @@ public class GPU {
     private Cluster cluster;
     private Queue<DataBatch> batches;
     private DataBatch[] processed;
-    private int index=0;
+    private int index = 0;
     private Event event;
+    private long change = 0;
     private GPUService GPU;
-    private long time = 0;
+    private long time = 1;
 
-    public GPU(String t){
+    public GPU(String t) {
         this.setType(t);
     }
 
     //Swe need to fix it.
-    public  GPU(String type , Model model, Event event) {
+    public GPU(String type, Model model, Event event) {
         this.setType(type);
         this.model = model;
         cluster = Cluster.getInstance();
@@ -44,43 +46,52 @@ public class GPU {
     }
 
     private void setProcessed() {
-        switch (type){
+        switch (type) {
             case GTX1080:
-                processed=new DataBatch[8];
+                processed = new DataBatch[8];
             case RTX2080:
-                processed=new DataBatch[16];
+                processed = new DataBatch[16];
             case RTX3090:
-                processed=new DataBatch[32];
+                processed = new DataBatch[32];
         }
     }
 
-    public String getType(){
+    public String getType() {
         if (type == Type.RTX3090) return "RTX3090";
-        else
-        if(type == Type.RTX2080) return "RTX2080";
-        else
-        if(type == Type.GTX1080) return "GTX1080";
+        else if (type == Type.RTX2080) return "RTX2080";
+        else if (type == Type.GTX1080) return "GTX1080";
         return null;
     }
-    public Model getModel(){return model;}
-    public Cluster getCluster(){return cluster;}
-    public Event getEvent(){return event;}
-    public Queue<DataBatch> getDataBatchList(){ return batches;}
+
+    public Model getModel() {
+        return model;
+    }
+
+    public Cluster getCluster() {
+        return cluster;
+    }
+
+    public Event getEvent() {
+        return event;
+    }
+
+    public Queue<DataBatch> getDataBatchList() {
+        return batches;
+    }
     //added by bar - this feild is not recognized in the test class.
 
-    public void setType(String t){
-        if (t.compareTo("RTX3090") == 0) type = Type.RTX3090 ;
-        else
-        if (t.compareTo("RTX2080") == 0) type = Type.RTX2080;
-        else
-        if(t.compareTo("GTX1080") == 0) type = Type.GTX1080;
+    public void setType(String t) {
+        if (t.compareTo("RTX3090") == 0) type = Type.RTX3090;
+        else if (t.compareTo("RTX2080") == 0) type = Type.RTX2080;
+        else if (t.compareTo("GTX1080") == 0) type = Type.GTX1080;
     }
+
     /**
      * @pre batch!=null
      * @inv batches!=null.
      * @post batches.size()--.
      */
-    public void sendToCluster(){
+    public void sendToCluster() {
         while (!batches.isEmpty()) {
             while (cluster.full())
                 try {
@@ -90,14 +101,15 @@ public class GPU {
             cluster.addUnProcessed(batches.poll());
         }
     }
+
     /**
      * @pre model.data!=null
      * @inv
      * @post All the data is stores in one of the data batch.
      */
-    public void divide(){
-        for (int i=1; i<=model.getData().getSize();i++){
-            batches.add(new DataBatch(model.getData(),i*1000));
+    public void divide() {
+        for (int i = 1; i <= model.getData().getSize(); i++) {
+            batches.add(new DataBatch(model.getData(), i * 1000));
         }
     }
 
@@ -106,29 +118,31 @@ public class GPU {
      * @inv model.status="Training".
      * * @post model.status = "Trained".
      */
-    public void train(){
+    public void train() {
         model.setStatus(Model.status.Training);
-        long before= getTicks();
-        switch (type){
+        change = getTicks();
+        switch (type) {
             case GTX1080:
-                while (4>getTicks()-before){
+                while (4 > getTicks() - change) {
                     try {
                         GPU.wait();
-
-                    } catch (InterruptedException e) {}
+                    } catch (InterruptedException e) {
+                    }
                 }
             case RTX2080:
-                while (2>getTicks()-before){
+                while (2 > getTicks() - change) {
                     try {
                         GPU.wait();
 
-                    } catch (InterruptedException e) {}
+                    } catch (InterruptedException e) {
+                    }
                 }
             case RTX3090:
-                while (1>getTicks()-before){
+                while (1 > getTicks() - change) {
                     try {
                         GPU.wait();
-                    } catch (InterruptedException e) {}
+                    } catch (InterruptedException e) {
+                    }
                 }
         }
         model.setStatus(Model.status.Trained);
@@ -141,27 +155,39 @@ public class GPU {
      * @post batches!=null
      */
 
-    public void receiveFromCluster(DataBatch unit){
-        if (processed[processed.length-1] == null) {
+    public void receiveFromCluster(DataBatch unit) {
+        if (index < processed.length) {
             processed[index] = unit;
             index++;
         }
-        if(index< processed.length){
-           processed[index]=unit;
-           index++;
-        }
-
     }
+
     public void addTime() {
         time++;
-        switch (type){
-            case GTX1080:
-        }
+        checkTime();
     }
-    public long getTicks(){
+
+    public long getTicks() {
         return time;
     }
-    public void test(Model model){}
+
+    private void checkTime() {
+        switch (type) {
+            case GTX1080:
+                if (change == 1)
+                    notifyAll();
+            case RTX2080:
+                if (change == 2)
+                    notifyAll();
+            case RTX3090:
+                if (change == 4)
+                    notifyAll();
+
+        }
+    }
+
+    public void test(Model model) {
+    }
 
 
 }

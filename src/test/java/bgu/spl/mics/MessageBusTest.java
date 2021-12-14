@@ -1,5 +1,6 @@
-/*package bgu.spl.mics;
+package bgu.spl.mics;
 
+import bgu.spl.mics.application.objects.Student;
 import bgu.spl.mics.application.services.StudentService;
 import bgu.spl.mics.example.messages.ExampleBroadcast;
 import bgu.spl.mics.example.messages.ExampleEvent;
@@ -13,15 +14,17 @@ import static org.junit.Assert.*;
 
 public class MessageBusTest {
     MessageBusImpl b;
+    Student s;
 
     @Before
     public void setUp() {
         b = b.getInstance();
+        s = new Student("niv", "computer Science" , "PhD");
     }
 
     @Test
     public void subscribeEventTest() {
-        MicroService ms = new StudentService("niv");
+        MicroService ms = new StudentService(s);
         //test: if subscribeEvent when the microService unregistered
         b.subscribeEvent(ExampleEvent.class, ms);
         assertFalse(b.updateEvent(ExampleEvent.class, ms));
@@ -33,7 +36,7 @@ public class MessageBusTest {
 
     @Test
     public void subscribeBroadcastTest() {
-        MicroService ms = new StudentService("niv");
+        MicroService ms = new StudentService(s);
         //test: if subscribeBroadcast when the microService unregistered
         b.subscribeBroadcast(ExampleBroadcast.class, ms);
         assertFalse(b.updateBroadcast(ExampleBroadcast.class, ms));
@@ -45,7 +48,7 @@ public class MessageBusTest {
 
     @Test
     public void completeTest() {
-        Event<String> event = new ExampleEvent("niv");
+        Event<String> event = new ExampleEvent(s.getName());
         Future<String> future = b.sendEvent(event);
         b.complete(event, "good");
         assertEquals("good", future.get());
@@ -53,7 +56,7 @@ public class MessageBusTest {
 
     @Test
     public void sendBroadcastTest() {
-        MicroService m = new StudentService("niv");
+        MicroService m = new StudentService(s);
         b.register(m);
         Broadcast b1 = new ExampleBroadcast("notSubscribe");
         b.sendBroadcast(b1);
@@ -66,7 +69,7 @@ public class MessageBusTest {
 
     @Test
     public void sendEventTest() {
-        MicroService m = new StudentService("niv");
+        MicroService m = new StudentService(s);
         b.register(m);
         Event<String> b1 = new ExampleEvent("notSubscribe");
         Future<String> future = b.sendEvent(b1);
@@ -79,7 +82,7 @@ public class MessageBusTest {
 
     @Test
     public void registerTest(){
-        MicroService m = new StudentService("niv");
+        MicroService m = new StudentService(s);
         assertFalse(b.registered(m));//test 1
         b.register(m);
         assertTrue(b.registered(m));//test 2
@@ -87,7 +90,7 @@ public class MessageBusTest {
 
     @Test
     public void unRegisterTest(){
-        MicroService m = new StudentService("niv");
+        MicroService m = new StudentService(s);
         b.register(m);
         b.subscribeEvent(ExampleEvent.class, m);
         Event b2 = new ExampleEvent("subscribe");
@@ -99,7 +102,7 @@ public class MessageBusTest {
     @Test
     public void awaitMessageTest() {
         //test 1:
-        MicroService m = new StudentService("niv");
+        MicroService m = new StudentService(s);
         try {
             Message B = b.awaitMessage(m);
         } catch (IllegalStateException | InterruptedException e) {
@@ -118,4 +121,4 @@ public class MessageBusTest {
 
     }
 
-}*/
+}

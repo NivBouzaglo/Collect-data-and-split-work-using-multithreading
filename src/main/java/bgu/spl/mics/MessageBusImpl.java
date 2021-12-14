@@ -5,10 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -17,17 +14,17 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class MessageBusImpl implements MessageBus {
 
-    private HashMap<MicroService, BlockingQueue<Message>> microservices;
-    private HashMap<Class<? extends Event<?>>, BlockingDeque<MicroService>> events;
-    private HashMap<Class<? extends Broadcast>, BlockingDeque<MicroService>> broadcasts;
-    private HashMap<Message, Future> eventFuture;
+    private ConcurrentHashMap<MicroService, BlockingQueue<Message>> microservices;
+    private ConcurrentHashMap<Class<? extends Event<?>>, BlockingDeque<MicroService>> events;
+    private ConcurrentHashMap<Class<? extends Broadcast>, BlockingDeque<MicroService>> broadcasts;
+    private ConcurrentHashMap<Message, Future> eventFuture;
     private static MessageBusImpl INSTANCE = null;
 
     public MessageBusImpl() {
-        microservices = new HashMap<>();
-        events = new HashMap<>();
-        broadcasts = new HashMap<>();
-        eventFuture = new HashMap<>();
+        microservices = new ConcurrentHashMap<>();
+        events = new ConcurrentHashMap<>();
+        broadcasts = new ConcurrentHashMap<>();
+        eventFuture = new ConcurrentHashMap<>();
     }
 
     public static MessageBusImpl getInstance() {
@@ -121,6 +118,7 @@ public class MessageBusImpl implements MessageBus {
                         broadcasts.get(d.getClass()).remove(m);
                 }
                 notifyAll();
+                m.terminate();
             }
         }
     }

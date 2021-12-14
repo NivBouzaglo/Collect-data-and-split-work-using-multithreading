@@ -4,9 +4,11 @@ import bgu.spl.mics.Future;
 import bgu.spl.mics.Message;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
+import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
 import bgu.spl.mics.application.messages.PublishResultsEvent;
 import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.objects.ConfrenceInformation;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
 import org.junit.Test;
@@ -34,8 +36,14 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        MessageBusImpl.getInstance().subscribeEvent(TestModelEvent.class,this);
-        MessageBusImpl.getInstance().subscribeEvent(TrainModelEvent.class,this);
+        subscribeBroadcast(PublishConferenceBroadcast.class , m-> {
+            for(Model name ){
+                if (name.getStudent().equals(student))
+                    student.addPublication();
+                else
+                    student.addPapersRead();
+            }
+        });
         for (Model m : student.getModels()) {
             TrainModelEvent train = new TrainModelEvent(m);
             Future future = sendEvent(train);

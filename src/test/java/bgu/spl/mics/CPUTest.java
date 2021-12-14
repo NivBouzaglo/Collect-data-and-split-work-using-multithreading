@@ -56,7 +56,7 @@ public class CPUTest {
     public void testSendData(){
         Collection<DataBatch> col=new LinkedList<DataBatch>();
         test.receiveData(unit);
-        test.sendData();
+        test.sendData(unit);
         assertEquals(0,test.getData().size());
     }
     @Test
@@ -66,19 +66,19 @@ public class CPUTest {
         DataBatch images= new DataBatch(new Data("Images",10),3);
         test.receiveData(tabular);
         long before = test.getTicks();
-        test.process();
+        test.process(unit);
         long after = test.getTicks();
         assertEquals(32/test.getCores(),after-before);
 
         test.receiveData(text);
         before = test.getTicks();
-        test.process();
+        test.process(unit);
         after = test.getTicks();
         assertEquals((32/test.getCores())*2,after - before);
 
         test.receiveData(images);
         before = test.getTicks();
-        test.process();
+        test.process(unit);
         after = test.getTicks();
         assertEquals((32/test.getCores())*4,after - before);
     }

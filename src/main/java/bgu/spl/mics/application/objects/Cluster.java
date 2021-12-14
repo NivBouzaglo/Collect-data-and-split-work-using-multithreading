@@ -18,7 +18,7 @@ public class Cluster {
 	private List<GPU> gpu;
 	private Queue<DataBatch> endProcessing;
 	private Queue<DataBatch> unProcess;
-	private static Cluster INSTANCE= Cluster.getInstance();
+	private static Cluster INSTANCE= null;
 	private statistics statistics;
 
 
@@ -28,7 +28,9 @@ public class Cluster {
 	 */
 	public static Cluster getInstance() {
 		//TODO: Implement this
-		return new Cluster();
+		if (INSTANCE == null)
+			INSTANCE = new Cluster();
+		return INSTANCE;
 	}
 	public Cluster(){
 		endProcessing = new LinkedBlockingDeque<>();
