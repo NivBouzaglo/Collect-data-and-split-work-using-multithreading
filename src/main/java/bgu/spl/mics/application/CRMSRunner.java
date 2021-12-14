@@ -34,15 +34,13 @@ public class CRMSRunner {
 
     }
     //Reading JSON File
-    public static  void readInputFile(Cluster cluster,LinkedList<Student>students,LinkedList<GPU> gpus1,LinkedList<CPU> cpus1,LinkedList<ConfrenceInformation>confrenceInformations){
+    public static  void readInputFile(Cluster cluster,LinkedList<Student>students,LinkedList<GPU> gpus1,LinkedList<CPU> cpus1,LinkedList<ConfrenceInformation>confrenceInformations) throws FileNotFoundException {
         Reader reader =null;
         Gson g = new Gson();
         try {
             reader = Files.newBufferedReader(Paths.get("example_input.json"));
         } catch (IOException ignored) {}
-        JsonParser parser = new JsonParser();
-        JsonElement tree= parser.parse(reader);
-        // JsonArray arr = tree.getAsJsonArray();
+        JsonElement tree = JsonParser.parseReader(new FileReader("exampleInput.json"));
         JsonObject obj = tree.getAsJsonObject();
         JsonArray arr = obj.get("Students").getAsJsonArray();
         for (JsonElement e: arr){

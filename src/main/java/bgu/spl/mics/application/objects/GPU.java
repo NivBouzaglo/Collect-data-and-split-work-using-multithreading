@@ -151,6 +151,7 @@ public class GPU {
         }
 
     }
+    public void addTime() {time++;}
     public long getTicks(){
         return time;
     }

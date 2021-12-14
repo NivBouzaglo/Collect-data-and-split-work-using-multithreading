@@ -62,4 +62,5 @@ public class Cluster {
 	public void setCpu(LinkedList<CPU> cpu) {
 		this.cpu = cpu;
 	}
+
 }
