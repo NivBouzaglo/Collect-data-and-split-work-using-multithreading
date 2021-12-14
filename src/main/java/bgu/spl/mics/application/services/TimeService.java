@@ -52,6 +52,7 @@ public class TimeService extends MicroService{
 			currentTime++;
 		}
 		timer.cancel();
+		subscribeBroadcast();
 	}
 
 

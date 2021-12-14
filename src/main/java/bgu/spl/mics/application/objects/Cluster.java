@@ -40,16 +40,9 @@ public class Cluster {
 		statistics = new statistics();
 	}
 //Receives unprocessed databatch and checks what is his GPU . Then ,sending him to one of the CPUs .
-	public void addUnProcessed(DataBatch batch,GPU gp) {
-		int index =0;
-		for (GPU g: gpu){
-			if (g.equals(gp)){
-				sendToCPU(batch);
-				break;
-			}
-			index++;
-		}
-		//unProcess.add(batch);
+	public void addUnProcessed(DataBatch batch) {
+		sendToCPU(batch);
+
 	}
 
 	private void sendToCPU(DataBatch batch) {
@@ -63,18 +56,10 @@ public class Cluster {
 		}
 		cpu.get(index).receiveData(batch);
 	}
-//I dont think we need it.
-	public boolean full(){
-		for (CPU c : cpu){
-			if (!c.isProcessing())
-				return false;
-		}
-		return true;
-	}
 
 	public void addProcessedData(DataBatch batch) {
 		GPU g= gpu.get(batch.getGpuIndex());
-		if (g.getProcessed()[g.getProcessed().length-1]==null){
+		if (g.getIndex()<g.getProcessed().length){
 			g.receiveFromCluster(batch);
 		}
 		else{
@@ -94,7 +79,7 @@ public class Cluster {
 	public void setCpu(LinkedList<CPU> cpu) {
 		this.cpu = cpu;
 	}
-
+//ask niv
 	public DataBatch sendUnProcess() {
 		return unProcess.remove();
 	}

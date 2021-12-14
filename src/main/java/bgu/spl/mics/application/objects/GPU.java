@@ -61,6 +61,11 @@ public class GPU {
         else if (type == Type.GTX1080) return "GTX1080";
         return null;
     }
+
+    public int getIndex() {
+        return index;
+    }
+
     public DataBatch[] getProcessed(){return processed;}
 
     public Model getModel() {
@@ -92,7 +97,7 @@ public class GPU {
      * @post batches.size()--.
      */
     public void sendToCluster() {
-            cluster.addUnProcessed(batches.poll(),this);
+            cluster.addUnProcessed(batches.poll());
         }
 
     /**
