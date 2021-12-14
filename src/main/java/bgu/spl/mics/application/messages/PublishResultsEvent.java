@@ -7,7 +7,7 @@ import bgu.spl.mics.application.objects.Model;
 
 public class PublishResultsEvent implements Event<ConfrenceInformation>{
     private Model model;
-    private Future future;
+    private Future future=new Future();
 
     public PublishResultsEvent(Model model){
         this.model = model;
@@ -16,11 +16,13 @@ public class PublishResultsEvent implements Event<ConfrenceInformation>{
     public Model getModel() {
         return model;
     }
-
     public Future getFuture() {
         return future;
     }
     public void action(Future future){
         this.future.resolve(future.get());
+    }
+    public boolean goodOrBad(){
+        return model.good();
     }
 }
