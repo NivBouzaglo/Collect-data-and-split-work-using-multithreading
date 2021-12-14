@@ -36,9 +36,10 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(PublishConferenceBroadcast.class , m-> {
-            for(Model name ){
-                if (name.getStudent().equals(student))
+        LinkedList<Model> models=PublishConferenceBroadcast.class.g
+        subscribeBroadcast(PublishConferenceBroadcast.class , (PublishConferenceBroadcast.class.getName())-> {
+            for(Model model:){
+                if (model.getStudent().equals(student))
                     student.addPublication();
                 else
                     student.addPapersRead();
