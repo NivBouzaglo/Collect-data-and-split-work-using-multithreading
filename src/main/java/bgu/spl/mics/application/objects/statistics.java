@@ -36,4 +36,8 @@ public class statistics {
     public void setUnit_used_gpu(int unit_used_gpu) {
         this.unit_used_gpu = this.unit_used_gpu + unit_used_gpu;
     }
+
+    public void setNumber_of_DB(int number_of_DB) {
+        this.number_of_DB = number_of_DB + this.number_of_DB;
+    }
 }

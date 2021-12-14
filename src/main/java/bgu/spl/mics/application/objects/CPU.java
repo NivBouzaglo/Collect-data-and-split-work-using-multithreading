@@ -1,8 +1,7 @@
 package bgu.spl.mics.application.objects;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Passive object representing a single CPU.
@@ -11,18 +10,17 @@ import java.util.LinkedList;
  */
 public class CPU {
     private int cores;
-    //private Collection<DataBatch> data;
-    private HashMap<DataBatch,Integer> data;
+    private Queue<DataBatch> data;
     private Cluster cluster;
     private boolean processed;
     private int time = 0;
+    private int currentTime = 0;
 
 
     public CPU(int i_cores) {
         cores = i_cores;
         cluster = Cluster.getInstance();
-        //data = new LinkedList<DataBatch>();
-        data = new HashMap<DataBatch,Integer>();
+        data = new LinkedBlockingDeque<>();
         processed = false;
     }
 
@@ -30,7 +28,7 @@ public class CPU {
         return cores;
     }
 
-    public HashMap<DataBatch,Integer> getData() {
+    public Queue<DataBatch> getData() {
         return data;
     }
 
@@ -43,8 +41,13 @@ public class CPU {
      * @inv cores>0
      * @post data.size()>0
      */
-    public void receiveData(DataBatch unit,Integer gpuIndex) {
-        data.put(unit,gpuIndex);
+    public void receiveData(DataBatch unit) {
+        data.add(unit);
+    }
+
+    private void setCurrentTime() {
+        if (!processed)
+           this.currentTime = time;
     }
 
     /**
@@ -52,9 +55,25 @@ public class CPU {
      * @inv cluster!=null
      * @post data.size()=0.
      */
-    public void sendData(DataBatch unit,Integer gpuIndex) {
-        cluster.addProcessedData(unit,gpuIndex);
-        data.remove(unit);
+    public void sendData(DataBatch unit) {
+        processed = true;
+        if (unit.getData().getType() == "Images")
+            if (time - currentTime == 4 * cores) {
+                cluster.addProcessedData(unit);
+                data.poll();
+                processed = false;
+            } else if (unit.getData().getType() == "Text")
+                if (time - currentTime == 2 * cores) {
+                    cluster.addProcessedData(unit);
+                    data.poll();
+                    processed = false;
+                } else if (unit.getData().getType() == "Tabular")
+                    if (time - currentTime == cores) {
+                        cluster.addProcessedData(unit);
+                        data.poll();
+                        processed = false;
+                    }
+
     }
 
     /**
@@ -62,26 +81,6 @@ public class CPU {
      * @inv
      * @post data is processed.
      */
-    public void process(DataBatch d) {
-        if (d.getData().getType() == "Images")
-            while (time < 4*cores)
-                try {
-                    wait();
-                }catch (InterruptedException e){}
-        if (d.getData().getType() == "Text")
-            while (time < 2*cores) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {}
-            }
-        if (d.getData().getType() == "Tabular")
-            while (time < cores)
-                try {
-                    wait();
-                }catch (InterruptedException e){}
-        this.processed = true;
-    }
-
     /**
      * @return
      * @pre
@@ -90,7 +89,11 @@ public class CPU {
      */
     public void addTime() {
         time++;
-        check();
+        setCurrentTime();
+        if (!cluster.getUnProcess().isEmpty())
+            receiveData(cluster.sendUnProcess());
+        if (!data.isEmpty())
+            sendData(data.peek());
     }
 
     private void check() {

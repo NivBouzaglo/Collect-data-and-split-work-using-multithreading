@@ -112,33 +112,6 @@ public class GPU {
      * * @post model.status = "Trained".
      */
     public void train() {
-        model.setStatus(Model.status.Training);
-        change = getTicks();
-        switch (type) {
-            case GTX1080:
-                while (4 > getTicks() - change) {
-                    try {
-                        GPU.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-            case RTX2080:
-                while (2 > getTicks() - change) {
-                    try {
-                        GPU.wait();
-
-                    } catch (InterruptedException e) {
-                    }
-                }
-            case RTX3090:
-                while (1 > getTicks() - change) {
-                    try {
-                        GPU.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-        }
-        model.setStatus(Model.status.Trained);
 
     }
 
@@ -157,26 +130,10 @@ public class GPU {
 
     public void addTime() {
         time++;
-        checkTime();
     }
 
     public long getTicks() {
         return time;
-    }
-
-    private void checkTime() {
-        switch (type) {
-            case GTX1080:
-                if (change == 1)
-                    notifyAll();
-            case RTX2080:
-                if (change == 2)
-                    notifyAll();
-            case RTX3090:
-                if (change == 4)
-                    notifyAll();
-
-        }
     }
 
     public Model.result test(Model model) {

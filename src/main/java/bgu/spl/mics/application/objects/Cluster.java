@@ -90,4 +90,11 @@ public class Cluster {
 		this.cpu = cpu;
 	}
 
+	public DataBatch sendUnProcess() {
+		return unProcess.remove();
+	}
+
+	public Queue<DataBatch> getUnProcess() {
+		return unProcess;
+	}
 }
