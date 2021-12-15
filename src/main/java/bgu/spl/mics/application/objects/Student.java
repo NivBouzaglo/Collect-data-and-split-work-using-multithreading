@@ -41,6 +41,7 @@ public class Student {
         else
             return Degree.PhD;
     }
+    public String getDepartment(){return department;}
 
     public StudentService getService() {
         return service;

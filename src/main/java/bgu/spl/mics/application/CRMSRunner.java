@@ -34,7 +34,13 @@ public class CRMSRunner {
         writeOutputFile(output,students,conferences,cluster);
 
     }
-    public static void start(){}
+    public static void start(){
+
+    }
+
+
+
+
     //Reading JSON File
     public static  void readInputFile(Cluster cluster,LinkedList<Student>students,LinkedList<GPU> gpus1,LinkedList<CPU> cpus1,LinkedList<ConfrenceInformation>confrenceInformations) throws FileNotFoundException {
         Reader reader =null;
@@ -86,8 +92,16 @@ public class CRMSRunner {
         for (Student student: students){
             writer.append('\n');
             writer.append(" name: "+student.getName());
-            writer.append(" TrainedModels:");
             writer.append('\n');
+            writer.append(" department: "+student.getDepartment());
+            writer.append('\n');
+            writer.append(" degree: "+student.getStatus());
+            writer.append('\n');
+            writer.append(" publication: "+student.getPublications());
+            writer.append('\n');
+            writer.append(" papersRead: "+student.getPapersRead());
+            writer.append('\n');
+            writer.append(" TrainedModels:");
             for (Model model: student.getModels()){
                 writer.append('\n');
                 writer.append("  name: "+model.getName());
@@ -101,11 +115,10 @@ public class CRMSRunner {
                 writer.append("   status: "+model.getStatus());
                 writer.append('\n');
                 if (model.isPublish())
-                    writer.append("Published.");
+                    writer.append("  Published.");
                 else
-                    writer.append("Not published.");
+                    writer.append("  Not published.");
             }
-            writer.append((char)student.getPapersRead());
         }
         //Conferences
         writer.append('\n');
