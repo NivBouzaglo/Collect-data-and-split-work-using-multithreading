@@ -30,9 +30,11 @@ public class CRMSRunner {
         LinkedList<GPU> gpus= new LinkedList<GPU>();
         LinkedList<CPU> cpus= new LinkedList<CPU>();
         readInputFile(cluster,students,gpus,cpus,conferences);
+        start();
         writeOutputFile(output,students,conferences,cluster);
 
     }
+    public static void start(){}
     //Reading JSON File
     public static  void readInputFile(Cluster cluster,LinkedList<Student>students,LinkedList<GPU> gpus1,LinkedList<CPU> cpus1,LinkedList<ConfrenceInformation>confrenceInformations) throws FileNotFoundException {
         Reader reader =null;
