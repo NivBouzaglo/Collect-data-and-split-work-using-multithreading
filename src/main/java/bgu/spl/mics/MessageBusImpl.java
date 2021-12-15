@@ -1,11 +1,9 @@
 package bgu.spl.mics;
 
-import java.sql.Array;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -57,9 +55,10 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public void sendBroadcast(Broadcast b) {
-        if (!broadcasts.containsKey(b.getClass()))
+        if (!broadcasts.containsKey(b.getClass())) {
             // throw new IllegalArgumentException("don't have microservice that subscribe this broadcast");
             System.out.println("don't have microservice that subscribe this broadcast");
+        }
         else
             synchronized (mlock) {
                 for (MicroService m : broadcasts.get(b.getClass())) {

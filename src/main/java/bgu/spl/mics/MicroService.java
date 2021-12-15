@@ -1,6 +1,5 @@
 package bgu.spl.mics;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -93,6 +92,7 @@ public abstract class MicroService implements Runnable {
         //TODO: implement this.
         if (!callbacks.containsKey(type)) {
             callbacks.put(type, callback);
+            System.out.println("Subscribe Broadcast"+ type.toString());
         }
         mb.subscribeBroadcast(type, this);
     }
