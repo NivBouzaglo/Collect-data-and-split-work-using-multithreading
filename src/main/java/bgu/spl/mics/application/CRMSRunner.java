@@ -83,12 +83,20 @@ public class CRMSRunner {
         writer.append("Students: ");
         for (Student student: students){
             writer.append('\n');
-            writer.append("name: "+student.getName());
+            writer.append(" name: "+student.getName());
+            writer.append(" TrainedModels:");
+            writer.append('\n');
             for (Model model: student.getModels()){
                 writer.append('\n');
-                writer.append("name: "+model.getName());
+                writer.append("  name: "+model.getName());
                 writer.append('\n');
-                writer.append("status: "+model.getStatus());
+                writer.append("   Data: ");
+                writer.append('\n');
+                writer.append("    type: "+model.getData().getType());
+                writer.append('\n');
+                writer.append("    size: "+model.getData().getSize());
+                writer.append('\n');
+                writer.append("   status: "+model.getStatus());
                 writer.append('\n');
                 if (model.isPublish())
                     writer.append("Published.");

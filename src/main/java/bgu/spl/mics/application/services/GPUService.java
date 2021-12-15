@@ -37,6 +37,6 @@ public class GPUService extends MicroService {
             gpu.setEvent(t);
             gpu.divide();});
         subscribeEvent(TestModelEvent.class , g->gpu.test(g.getModel()));
-        subscribeBroadcast(TerminateBroadcast.class ,m1->{terminate();});
+        subscribeBroadcast(TerminateBroadcast.class ,m1->{terminate(); System.out.println("GPU was terminate");});
     }
 }

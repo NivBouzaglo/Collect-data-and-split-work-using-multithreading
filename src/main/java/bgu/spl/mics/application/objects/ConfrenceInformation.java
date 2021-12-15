@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.application.services.ConferenceService;
+
 import java.util.LinkedList;
 
 /**
@@ -11,6 +13,8 @@ public class ConfrenceInformation {
     private String name;
     private int date;
     private LinkedList<Model> models ;
+    private int time;
+    private ConferenceService conf;
 
     public ConfrenceInformation(String name , int date){
         this.name = name;
@@ -26,8 +30,15 @@ public class ConfrenceInformation {
     public String getName() {
         return name;
     }
-
     public int getDate() {
         return date;
     }
+
+    public void addTime(){
+        time++;
+        if (time==date)
+            conf.publish();
+    }
+
+
 }

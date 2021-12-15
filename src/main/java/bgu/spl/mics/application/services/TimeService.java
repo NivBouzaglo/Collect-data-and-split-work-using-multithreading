@@ -41,8 +41,8 @@ public class TimeService extends MicroService{
 			@Override
 			public void run() {
 				sendBroadcast(tick);
-			}
-		};
+				System.out.println(currentTime);
+			}};
 	}
 
 	@Override
@@ -51,9 +51,13 @@ public class TimeService extends MicroService{
 		while(currentTime<duration){
 			timer.scheduleAtFixedRate(task,0,speed);
 			currentTime++;
+
 		}
 		timer.cancel();
 		subscribeBroadcast(TerminateBroadcast.class, m->{terminate();});
+		System.out.println("Time was terminated");
+		terminate();
+
 	}
 
 

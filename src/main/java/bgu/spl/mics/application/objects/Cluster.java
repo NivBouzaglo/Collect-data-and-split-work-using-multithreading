@@ -37,7 +37,7 @@ public class Cluster {
 		gpu = new LinkedList<>();
 		statistics = new statistics();
 	}
-//Receives unprocessed databatch and checks what is his GPU . Then ,sending him to one of the CPUs .
+
 	public void addUnProcessed(DataBatch batch) {
 		sendToCPU(batch);
 

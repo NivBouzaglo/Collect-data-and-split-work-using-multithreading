@@ -138,6 +138,7 @@ public class GPU {
             model.endTraining();
     }
     public void subTrain(int ticks){
+        free=true;
         processedData++;
         cluster.getStatistics().setUnit_used_gpu(ticks);
         cluster.getStatistics().setNumber_of_DB(1);
