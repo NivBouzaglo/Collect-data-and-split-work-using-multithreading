@@ -19,7 +19,6 @@ import java.util.LinkedList;
 public class CRMSRunner {
 //I added throws IOSException ,Hopes its fine
     public static void main(String[] args) throws IOException {
-        //String p = args[0];
         File output = new File("output.txt");
         try {
            if( !output.createNewFile())
@@ -33,7 +32,7 @@ public class CRMSRunner {
         LinkedList<GPU> gpus= new LinkedList<GPU>();
         LinkedList<CPU> cpus= new LinkedList<CPU>();
         TimeService timeService= new TimeService();
-        readInputFile(timeService , cluster,students,gpus,cpus,conferences);
+        readInputFile(args[0] ,timeService , cluster,students,gpus,cpus,conferences);
         start(timeService,students,gpus,cpus,conferences);
         writeOutputFile(output,students,conferences,cluster);
 
@@ -69,13 +68,13 @@ public class CRMSRunner {
 
 
     //Reading JSON File
-    public static  void readInputFile(TimeService timeService, Cluster cluster,LinkedList<Student>students,LinkedList<GPU> gpus1,LinkedList<CPU> cpus1,LinkedList<ConfrenceInformation>confrenceInformations) throws FileNotFoundException {
+    public static  void readInputFile(String input , TimeService timeService, Cluster cluster,LinkedList<Student>students,LinkedList<GPU> gpus1,LinkedList<CPU> cpus1,LinkedList<ConfrenceInformation>confrenceInformations) throws FileNotFoundException {
         Reader reader =null;
         Gson g = new Gson();
         try {
-            reader = Files.newBufferedReader(Paths.get("example_input.json"));
+            reader = Files.newBufferedReader(Paths.get(input));
         } catch (IOException ignored) {}
-        JsonElement tree = JsonParser.parseReader(new FileReader("exampleInput.json"));
+        JsonElement tree = JsonParser.parseReader(new FileReader(input));
         JsonObject obj = tree.getAsJsonObject();
         JsonArray arr = obj.get("Students").getAsJsonArray();
         for (JsonElement e: arr){
@@ -85,7 +84,7 @@ public class CRMSRunner {
             JsonArray models = object.get("models").getAsJsonArray();
             LinkedList<Model> e_models= new LinkedList<Model>();
             for (JsonElement m: models ){
-                JsonObject model_object = e.getAsJsonObject();
+                JsonObject model_object = m.getAsJsonObject();
                 Data data = new Data(model_object.get("type").getAsString(),model_object.get("size").getAsInt());
                 e_models.add(new Model(students.get(students.size()-1),data,model_object.get("name").getAsString()));
             }
@@ -146,6 +145,7 @@ public class CRMSRunner {
                 else
                     writer.append("  Not published.");
             }
+            writer.append((char)student.getPapersRead());
         }
         //Conferences
         writer.append('\n');

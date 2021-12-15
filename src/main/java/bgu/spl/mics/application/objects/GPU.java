@@ -94,8 +94,8 @@ public class GPU {
      * @post batches.size()--.
      */
     public void sendToCluster() {
-            cluster.addUnProcessed(batches.poll());
-        }
+        cluster.addUnProcessed(batches.poll());
+    }
 
     /**
      * @pre model.data!=null
@@ -123,7 +123,7 @@ public class GPU {
         switch (type){
             case RTX3090:
                 if (time - currentTime == 1) {
-                  subTrain(1);
+                    subTrain(1);
                 }
             case RTX2080:
                 if (time - currentTime == 2) {
@@ -156,7 +156,7 @@ public class GPU {
      */
 
     public void receiveFromCluster(DataBatch unit) {
-          processed.add(unit);
+        processed.add(unit);
     }
 
     public void addTime() {
@@ -164,11 +164,11 @@ public class GPU {
         if (!free)
             train((DataBatch) processed.peek());
         else
-            if (!processed.isEmpty()) {
-                free = false;
-                setCurrentTime();
-                train((DataBatch) processed.peek());
-            }
+        if (!processed.isEmpty()) {
+            free = false;
+            setCurrentTime();
+            train((DataBatch) processed.peek());
+        }
     }
 
     private void setCurrentTime() {

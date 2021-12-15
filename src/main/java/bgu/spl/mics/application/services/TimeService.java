@@ -55,8 +55,8 @@ public class TimeService extends MicroService{
 			}};
 	}
 	public void set(int tick , int duration) {
-	speed=tick;
-	this.duration = duration;
+		speed=tick;
+		this.duration = duration;
 	}
 
 	@Override

@@ -35,14 +35,16 @@ public class Student {
         this.models=s_models;
     }
 
+    public String getDepartment() {
+        return department;
+    }
+
     private Degree degree(String degree) {
         if (degree.compareTo("MSc") == 0)
             return Degree.MSc;
         else
             return Degree.PhD;
     }
-    public String getDepartment(){return department;}
-
     public StudentService getService() {
         return service;
     }
