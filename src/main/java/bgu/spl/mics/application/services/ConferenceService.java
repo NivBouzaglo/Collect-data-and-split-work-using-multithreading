@@ -3,6 +3,7 @@ package bgu.spl.mics.application.services;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
+import bgu.spl.mics.application.messages.PublishResultsEvent;
 import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.ConfrenceInformation;
@@ -19,9 +20,9 @@ import bgu.spl.mics.application.objects.ConfrenceInformation;
 public class ConferenceService extends MicroService {
     ConfrenceInformation conf;
     PublishConferenceBroadcast b;
-    public ConferenceService(String name) {
-        super("Change_This_Name");
-        // TODO Implement this
+    public ConferenceService(ConfrenceInformation c) {
+        super(c.getName());
+        this.conf = c;
     }
 
     @Override
@@ -32,9 +33,11 @@ public class ConferenceService extends MicroService {
         System.out.println("Conference"+ conf.getName() + " was terminated");
         terminate();
         });
+        subscribeEvent(PublishResultsEvent.class , t ->{conf.addToModels(t.getModel());});
 
     }
     public void publish(){
+        b = new PublishConferenceBroadcast(conf.getModels());
         sendBroadcast(b);
         MessageBusImpl.getInstance().unregister(this);
 

@@ -45,25 +45,13 @@ public class StudentService extends MicroService {
             TrainModelEvent train = new TrainModelEvent(m);
             Future future = sendEvent(train);
             train.action(future);
-            while (!train.getFuture().isDone()) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                }
-            }
             if (m.getStatus() == "Trained") {
-                TestModelEvent test = new TestModelEvent(train.getModel());
+                TestModelEvent test = new TestModelEvent((Model)future.get());
                 test.action(sendEvent(test));
-                while (!test.getFuture().isDone()) {
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                    }
+                if (test.getModel().getStatus() == "Tested") {
+                    PublishResultsEvent p = new PublishResultsEvent(m);
+                    sendEvent(p);
                 }
-                m.Tested();
-                MessageBusImpl.getInstance().subscribeEvent(PublishResultsEvent.class,this);
-                PublishResultsEvent p = new PublishResultsEvent(m);
-                this.sendEvent(p);
             }
         }
     }
