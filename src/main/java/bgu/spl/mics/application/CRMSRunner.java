@@ -37,6 +37,7 @@ public class CRMSRunner {
     }
     public static void start(TimeService timeService ,LinkedList<Student> students , LinkedList<GPU> gpus , LinkedList<CPU> cpus , LinkedList<ConfrenceInformation> conference ){
         LinkedList<MicroService> threads = new LinkedList<>();
+        timeService.run();
         int i = 0;
         for (GPU gpu : gpus){
             GPUService service = new GPUService("GPUId"+i , gpu);
@@ -55,7 +56,7 @@ public class CRMSRunner {
             service.run();
             threads.add(service);
         }
-        timeService.run();
+       // timeService.run();
         for (Student s : students){
             StudentService service = new StudentService(s);
             service.run();

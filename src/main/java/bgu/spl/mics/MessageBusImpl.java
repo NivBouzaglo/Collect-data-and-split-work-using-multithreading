@@ -1,10 +1,5 @@
 package bgu.spl.mics;
 
-import java.sql.Array;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.*;
 
 /**
@@ -37,7 +32,7 @@ public class MessageBusImpl implements MessageBus {
 
     public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
         if (!events.containsKey(type)) {
-            events.put(type, (BlockingDeque<MicroService>) new LinkedBlockingQueue<MicroService>());
+            events.put(type, new LinkedBlockingDeque<MicroService>());
         } else
             events.get(type).addFirst(m);
     }
@@ -45,7 +40,7 @@ public class MessageBusImpl implements MessageBus {
     @Override
     public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
         if (!broadcasts.containsKey(type)) {
-            broadcasts.put(type, (BlockingDeque<MicroService>) new LinkedBlockingQueue<MicroService>());
+            broadcasts.put(type, new LinkedBlockingDeque<MicroService>());
         } else
             broadcasts.get(type).add(m);
 
@@ -59,7 +54,8 @@ public class MessageBusImpl implements MessageBus {
     @Override
     public void sendBroadcast(Broadcast b) {
         if (!broadcasts.containsKey(b.getClass()))
-            throw new IllegalArgumentException("don't have microservice that subscribe this broadcast");
+           // throw new IllegalArgumentException("don't have microservice that subscribe this broadcast");
+            System.out.println("don't have microservice that subscribe this broadcast");
         else
             synchronized (mlock) {
                 for (MicroService m : broadcasts.get(b.getClass())) {
@@ -130,7 +126,7 @@ public class MessageBusImpl implements MessageBus {
             throw new InterruptedException("not registered");
         else {
             while (microservices.get(m).isEmpty()) {
-                wait();
+               wait();
             }
             Message message = microservices.get(m).poll();
             return message;

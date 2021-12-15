@@ -1,6 +1,5 @@
 package bgu.spl.mics;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -28,13 +27,16 @@ public abstract class MicroService implements Runnable {
     private MessageBusImpl mb = MessageBusImpl.getInstance();
     private HashMap<Class<? extends Message> , Callback> callbacks;
     private int ticks=0;
+    private Object lock;
 
     /**
      * @param name the micro-service name (used mainly for debugging purposes -
      *             does not have to be unique)
      */
     public MicroService(String name) {
+        callbacks = new HashMap<>();
         this.name = name;
+        lock=new Object();
     }
 
     /**
@@ -188,4 +190,5 @@ public abstract class MicroService implements Runnable {
     protected void register(){
         mb.register(this);
     }
+    public Object getLock(){return lock;}
 }
