@@ -6,10 +6,8 @@ import bgu.spl.mics.application.services.*;
 import com.google.gson.*;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 /** This is the Main class of Compute Resources Management System application. You should parse the input file,
@@ -92,14 +90,12 @@ public class CRMSRunner {
         }
         JsonArray gpus = obj.get("GPUS").getAsJsonArray();
         for (JsonElement e : gpus){
-            JsonObject object = e.getAsJsonObject();
-            gpus1.add(new GPU(object.getAsString()));
+            gpus1.add(new GPU(e.getAsString()));
         }
         cluster.setGpu(gpus1);
         JsonArray cpus = obj.get("CPUS").getAsJsonArray();
         for (JsonElement e : cpus){
-            JsonObject object = e.getAsJsonObject();
-            cpus1.add(new CPU(object.getAsInt()));
+            cpus1.add(new CPU(e.getAsInt()));
         }
         cluster.setCpu(cpus1);
         JsonArray conf = obj.get("Conferences").getAsJsonArray();
