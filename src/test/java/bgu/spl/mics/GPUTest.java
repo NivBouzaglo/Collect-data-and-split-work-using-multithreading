@@ -1,4 +1,4 @@
-package bgu.spl.mics;
+/*package bgu.spl.mics;
 
 import static org.junit.Assert.*;
 import bgu.spl.mics.application.objects.*;
@@ -71,7 +71,7 @@ public class GPUTest {
         assertEquals(1,after-before);
         GPU t2080 = new GPU("RTX2080");
         before = test.getTicks();
-        t2080.train(testGet);
+        t2080.train(m.getData());
         after = test.getTicks();
         assertEquals(2,after-before);
         GPU t1080= new GPU("RTX2080" );
@@ -103,4 +103,4 @@ public class GPUTest {
         }
     }
 
-}
+}*/

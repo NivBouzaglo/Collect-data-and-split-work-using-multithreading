@@ -27,8 +27,18 @@ public class TimeService extends MicroService{
 	private TickBroadcast tick;
 
 	public TimeService() {
-		super("Change_This_Name");
+		super("TIMER SERVICE");
 		// TODO Implement this
+		this.duration=0;
+		this.speed=0;
+		this.timer=new Timer();
+		this.currentTime=1;
+		this.task= new TimerTask() {
+			@Override
+			public void run() {
+				sendBroadcast(tick);
+				System.out.println(currentTime);
+			}};
 	}
 	//added
 	public TimeService(int s, int d){
@@ -43,6 +53,10 @@ public class TimeService extends MicroService{
 				sendBroadcast(tick);
 				System.out.println(currentTime);
 			}};
+	}
+	public void set(int tick , int duration) {
+	speed=tick;
+	this.duration = duration;
 	}
 
 	@Override

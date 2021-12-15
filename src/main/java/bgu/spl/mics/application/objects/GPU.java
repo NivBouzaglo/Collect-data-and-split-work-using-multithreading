@@ -136,7 +136,7 @@ public class GPU {
         }
         if (processedData*1000 >= model.getData().getSize()) {
             model.endTraining();
-            GPU.complete(event,model);
+            GPU.completeTrain(event,model);
         }
     }
     public void subTrain(int ticks){
@@ -195,7 +195,7 @@ public class GPU {
                 else
                     model.setResult("Bad");
         }
-        GPU.complete(event,model);
+        GPU.completeTest(event,model);
 
     }
 

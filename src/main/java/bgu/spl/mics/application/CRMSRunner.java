@@ -1,12 +1,15 @@
 package bgu.spl.mics.application;
 
+import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.objects.*;
-import bgu.spl.mics.application.services.TimeService;
+import bgu.spl.mics.application.services.*;
 import com.google.gson.*;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /** This is the Main class of Compute Resources Management System application. You should parse the input file,
@@ -29,20 +32,44 @@ public class CRMSRunner {
         LinkedList<ConfrenceInformation> conferences = new LinkedList<ConfrenceInformation>();
         LinkedList<GPU> gpus= new LinkedList<GPU>();
         LinkedList<CPU> cpus= new LinkedList<CPU>();
-        readInputFile(cluster,students,gpus,cpus,conferences);
-        start();
+        TimeService timeService= new TimeService();
+        readInputFile(timeService , cluster,students,gpus,cpus,conferences);
+        start(timeService,students,gpus,cpus,conferences);
         writeOutputFile(output,students,conferences,cluster);
 
     }
-    public static void start(){
-
+    public static void start(TimeService timeService ,LinkedList<Student> students , LinkedList<GPU> gpus , LinkedList<CPU> cpus , LinkedList<ConfrenceInformation> conference ){
+        LinkedList<MicroService> threads = new LinkedList<>();
+        int i = 0;
+        for (GPU gpu : gpus){
+            GPUService service = new GPUService("GPUId"+i , gpu);
+            i++;
+            service.run();
+            threads.add(service);
+        }
+        for (CPU cpu : cpus){
+            CPUService service = new CPUService("GPUId"+i , cpu);
+            i++;
+            service.run();
+            threads.add(service);
+        }
+        for (ConfrenceInformation c: conference) {
+            ConferenceService service= new ConferenceService(c);
+            service.run();
+            threads.add(service);
+        }
+        timeService.run();
+        for (Student s : students){
+            StudentService service = new StudentService(s);
+            service.run();
+        }
     }
 
 
 
 
     //Reading JSON File
-    public static  void readInputFile(Cluster cluster,LinkedList<Student>students,LinkedList<GPU> gpus1,LinkedList<CPU> cpus1,LinkedList<ConfrenceInformation>confrenceInformations) throws FileNotFoundException {
+    public static  void readInputFile(TimeService timeService, Cluster cluster,LinkedList<Student>students,LinkedList<GPU> gpus1,LinkedList<CPU> cpus1,LinkedList<ConfrenceInformation>confrenceInformations) throws FileNotFoundException {
         Reader reader =null;
         Gson g = new Gson();
         try {
@@ -83,7 +110,7 @@ public class CRMSRunner {
         }
         int ticks = obj.get("TickTime").getAsInt();
         int duration = obj.get("Duration").getAsInt();
-        TimeService time = new TimeService(ticks, duration);
+        timeService.set(ticks , duration);
     }
     public static void writeOutputFile(File file, LinkedList<Student> students, LinkedList<ConfrenceInformation> conferences, Cluster cluster) throws IOException {
         BufferedWriter writer =new BufferedWriter(new FileWriter(file,true));
