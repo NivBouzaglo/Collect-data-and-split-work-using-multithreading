@@ -32,6 +32,7 @@ public class CRMSRunner {
         TimeService timeService = new TimeService();
         readInputFile(args[0], timeService, cluster, students, gpus, cpus, conferences);
         start(timeService, students, gpus, cpus, conferences);
+        System.out.println("Finish processing");
         if (timeService.getCurrentTime() == timeService.getDuration())
             writeOutputFile(output, students, conferences, cluster);
     }
@@ -62,14 +63,14 @@ public class CRMSRunner {
             threads.add(t);
         }
         Thread time = new Thread(timeService);
-        threads.add(time);
+        //threads.add(time);
+        timeService.setThreads(threads);
+        time.start();
         for (Thread t : threads) {
             t.start();
-          /*  try {
-                t.join();
-            } catch (InterruptedException e) {
-            }*/
         }
+        System.out.println("Finish start ");
+
     }
 
 

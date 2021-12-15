@@ -23,6 +23,7 @@ public class ConferenceService extends MicroService {
     public ConferenceService(ConfrenceInformation c) {
         super(c.getName());
         this.conf = c;
+        c.setService(this);
     }
 
     @Override

@@ -4,6 +4,7 @@ import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -24,6 +25,7 @@ public class TimeService extends MicroService{
 	private TimerTask task;
 	private int currentTime;
 	private TickBroadcast tick;
+	private LinkedList<Thread> threads;
 
 	public TimeService() {
 		super("TIMER SERVICE");
@@ -32,25 +34,54 @@ public class TimeService extends MicroService{
 		this.tick= new TickBroadcast();
 		this.speed=0;
 		this.timer=new Timer();
-		this.currentTime=1;
+		this.currentTime=0;
 		this.task= new TimerTask() {
 			@Override
 			public void run() {
 				sendBroadcast(tick);
+				currentTime++;
+				System.out.println(currentTime);
+				if(currentTime>=duration){
+					task.cancel();
+					end();
+				}
 			}};
+	}
+	public void end() {
+		timer.cancel();
+		sendBroadcast(new TerminateBroadcast());
+		timer.cancel();
+		for (Thread thread : threads){
+			thread.interrupt();
+	}
+		System.out.println("Finish "+threads.size());
+
+	}
+
+	public void setThreads(LinkedList<Thread> services){
+		threads=services;
 	}
 	//added
 	public TimeService(int s, int d){
-		super("");
+		super("timer");
 		this.duration=d;
 		this.speed=s;
 		this.timer=new Timer();
-		this.currentTime=1;
+		this.currentTime=0;
 		this.task= new TimerTask() {
 			@Override
 			public void run() {
+				currentTime++;
+				System.out.println(currentTime+"its me");
 				sendBroadcast(tick);
+				if(currentTime>=duration){
+					task.cancel();
+					timer.cancel();
+					sendBroadcast(new TerminateBroadcast());
+					System.out.println("Time was terminated");
+					terminate();
 
+					}
 			}};
 	}
 	public void set(int tick , int duration) {
@@ -62,19 +93,6 @@ public class TimeService extends MicroService{
 	protected void initialize() {
 		// TODO Implement this
 		subscribeBroadcast(TerminateBroadcast.class, m->{terminate();});
-		subscribeBroadcast(TickBroadcast.class, t->{
-			System.out.println("Got my broadcast");
-			currentTime=currentTime+1;
-			System.out.println(currentTime+"its me");
-			if(currentTime>=duration){
-				task.cancel();
-				timer.cancel();
-				sendBroadcast(new TerminateBroadcast());
-				System.out.println("Time was terminated");
-				terminate();
-
-		}
-		});
 		timer.scheduleAtFixedRate(task,0,speed);
 	}
 

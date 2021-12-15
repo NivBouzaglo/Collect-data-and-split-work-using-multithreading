@@ -39,6 +39,8 @@ public class ConfrenceInformation {
         if (time==date)
             conf.publish();
     }
-
+   public void setService(ConferenceService c){
+        this.conf=c;
+   }
 
 }

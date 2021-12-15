@@ -28,6 +28,7 @@ public abstract class MicroService implements Runnable {
     private HashMap<Class<? extends Message> , Callback> callbacks;
     private int ticks=0;
 
+
     /**
      * @param name the micro-service name (used mainly for debugging purposes -
      *             does not have to be unique)
@@ -92,7 +93,6 @@ public abstract class MicroService implements Runnable {
         //TODO: implement this.
         if (!callbacks.containsKey(type)) {
             callbacks.put(type, callback);
-            System.out.println("Subscribe Broadcast"+ type.toString());
         }
         mb.subscribeBroadcast(type, this);
     }

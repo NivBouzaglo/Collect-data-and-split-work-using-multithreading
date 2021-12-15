@@ -1,5 +1,7 @@
 package bgu.spl.mics;
 
+import bgu.spl.mics.application.messages.TickBroadcast;
+
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +14,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class MessageBusImpl implements MessageBus {
 
-    private ConcurrentHashMap<MicroService, BlockingQueue<Message>> microservices;
+    private ConcurrentHashMap<MicroService, BlockingDeque<Message>> microservices;
     private ConcurrentHashMap<Class<? extends Event<?>>, BlockingDeque<MicroService>> events;
     private ConcurrentHashMap<Class<? extends Broadcast>, BlockingDeque<MicroService>> broadcasts;
     private ConcurrentHashMap<Message, Future> eventFuture;
@@ -64,8 +66,13 @@ public class MessageBusImpl implements MessageBus {
                 for (MicroService m : broadcasts.get(b.getClass())) {
                     if (!registered(m)) {
                         throw new IllegalArgumentException("didn't register yet");
-                    } else
-                        microservices.get(m).add(b);
+                    } else{
+                        if(b.getClass().equals(TickBroadcast.class)) {
+                            microservices.get(m).addFirst(b);
+                        }
+                        else
+                               microservices.get(m).add(b);
+                    }
                 }
                 mlock.notifyAll();
             }
