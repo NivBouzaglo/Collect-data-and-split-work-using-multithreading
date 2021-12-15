@@ -52,6 +52,7 @@ public class TimeService extends MicroService{
 			public void run() {
 				sendBroadcast(tick);
 				System.out.println(currentTime++);
+				currentTime++;
 			}};
 	}
 	public void set(int tick , int duration) {
@@ -65,7 +66,7 @@ public class TimeService extends MicroService{
 		subscribeBroadcast(TickBroadcast.class, t->{
 			System.out.println("Got my broadcast");
 			currentTime++;
-			if(currentTime>=duration){
+			if(currentTime >= duration){
 				task.cancel();
 				timer.cancel();
 				subscribeBroadcast(TerminateBroadcast.class, m->{terminate();});
@@ -77,5 +78,11 @@ public class TimeService extends MicroService{
 		timer.scheduleAtFixedRate(task,speed,duration);
 	}
 
+	public int getCurrentTime() {
+		return currentTime;
+	}
 
+	public int getDuration() {
+		return duration;
+	}
 }

@@ -44,13 +44,15 @@ public class StudentService extends MicroService {
         for (Model m : student.getModels()) {
             TrainModelEvent train = new TrainModelEvent(m);
             Future future = sendEvent(train);
-            train.action(future);
-            if (m.getStatus() == "Trained") {
-                TestModelEvent test = new TestModelEvent((Model)future.get());
-                test.action(sendEvent(test));
-                if (test.getModel().getStatus() == "Tested") {
-                    PublishResultsEvent p = new PublishResultsEvent(m);
-                    sendEvent(p);
+            if (future != null) {
+                train.action(future);
+                if (m.getStatus() == "Trained") {
+                    TestModelEvent test = new TestModelEvent((Model) future.get());
+                    test.action(sendEvent(test));
+                    if (test.getModel().getStatus() == "Tested") {
+                        PublishResultsEvent p = new PublishResultsEvent(m);
+                        sendEvent(p);
+                    }
                 }
             }
         }

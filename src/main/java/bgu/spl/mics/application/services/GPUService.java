@@ -25,7 +25,7 @@ public class GPUService extends MicroService {
 
     public GPUService(String name ,GPU gpu) {
         super(name);
-        this.gpu = new GPU(name);
+        this.gpu = new GPU(gpu.getType());
     }
 
 
