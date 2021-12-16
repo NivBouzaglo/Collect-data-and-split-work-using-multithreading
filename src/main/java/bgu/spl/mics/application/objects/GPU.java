@@ -1,4 +1,5 @@
 package bgu.spl.mics.application.objects;
+
 import bgu.spl.mics.Event;
 import bgu.spl.mics.application.services.GPUService;
 
@@ -25,14 +26,14 @@ public class GPU {
     private Queue<DataBatch> batches;
     private BlockingDeque processed;
     private int processedData = 0;
-    private int capacity = 0 ,time = 1 , currentTime = 0;
+    private int capacity = 0, time = 1, currentTime = 0;
     private Event event;
     private GPUService GPU;
     private boolean free = true;
 
     public GPU(String t) {
         this.setType(t);
-        cluster= Cluster.getInstance();
+        cluster = Cluster.getInstance();
         batches = new LinkedList<DataBatch>();
         processed = new LinkedBlockingDeque();
     }
@@ -53,10 +54,12 @@ public class GPU {
         else if (type == Type.GTX1080) return "GTX1080";
         return null;
     }
-    public void setModel(Model model){
+
+    public void setModel(Model model) {
         this.model = model;
     }
-    public void setEvent(Event e){
+
+    public void setEvent(Event e) {
         this.event = e;
     }
 
@@ -86,9 +89,16 @@ public class GPU {
     //added by bar - this feild is not recognized in the test class.
 
     public void setType(String t) {
-        if (t.compareTo("RTX3090") == 0){ type = Type.RTX3090; capacity =32;}
-        else if (t.compareTo("RTX2080") == 0){ type = Type.RTX2080; capacity=16;}
-        else if (t.compareTo("GTX1080") == 0){ type = Type.GTX1080; capacity =8;}
+        if (t.compareTo("RTX3090") == 0) {
+            type = Type.RTX3090;
+            capacity = 32;
+        } else if (t.compareTo("RTX2080") == 0) {
+            type = Type.RTX2080;
+            capacity = 16;
+        } else if (t.compareTo("GTX1080") == 0) {
+            type = Type.GTX1080;
+            capacity = 8;
+        }
     }
 
     /**
@@ -106,8 +116,8 @@ public class GPU {
      * @post All the data is stores in one of the data batch.
      */
     public void divide() {
-        for (int i = 1; i <= model.getData().getSize(); i++) {
-            DataBatch dataBatch= new DataBatch(model.getData(), i * 1000);
+        for (int i = 1; i <= model.getData().getSize()/1000; i++) {
+            DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpuIndex(cluster.findGPU(this));
             batches.add(dataBatch);
         }
@@ -123,9 +133,9 @@ public class GPU {
      */
     public void train(DataBatch unit) {
         model.setStatus(Model.status.Training);
-        switch (type){
+        switch (type) {
             case RTX3090:
-                if (time - currentTime == 1) {
+                if ( - currentTime == 1) {
                     subTrain(1);
                 }
             case RTX2080:
@@ -137,13 +147,14 @@ public class GPU {
                     subTrain(4);
                 }
         }
-        if (processedData*1000 >= model.getData().getSize()) {
+        if (processedData * 1000 >= model.getData().getSize()) {
             model.endTraining();
-            GPU.completeTrain(event,model);
+            GPU.completeTrain(event, model);
         }
     }
-    public void subTrain(int ticks){
-        free=true;
+
+    public void subTrain(int ticks) {
+        free = true;
         processedData++;
         cluster.getStatistics().setUnit_used_gpu(ticks);
         cluster.getStatistics().setNumber_of_DB(1);
@@ -164,10 +175,10 @@ public class GPU {
 
     public void addTime() {
         time++;
-        if (!free)
+        if (!free) {
             train((DataBatch) processed.peek());
-        else
-           if (processed != null && !processed.isEmpty()) {
+        } else if (processed != null && !processed.isEmpty()) {
+            System.out.println("training");
             free = false;
             setCurrentTime();
             train((DataBatch) processed.peek());
@@ -184,23 +195,22 @@ public class GPU {
 
     public void test(Model model) {
         double rand = Math.random();
-        switch (model.getStudent().getStatus()){
+        switch (model.getStudent().getStatus()) {
             case PhD:
-                if (rand>=0.8){
+                if (rand >= 0.8) {
                     model.setResult("Good");
-                }
-                else
+                } else
                     model.setResult("Bad");
             case MSc:
-                if (rand>=0.6){
+                if (rand >= 0.6) {
                     model.setResult("Good");
-                }
-                else
+                } else
                     model.setResult("Bad");
         }
-        GPU.completeTest(event,model);
-
+        model.Tested();
     }
 
-
+    public void setGPU(GPUService s) {
+        this.GPU = s;
+    }
 }

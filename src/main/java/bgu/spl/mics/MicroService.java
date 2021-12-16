@@ -1,6 +1,7 @@
 package bgu.spl.mics;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.Thread.sleep;
 
@@ -27,8 +28,8 @@ public abstract class MicroService implements Runnable {
     private boolean terminated = false;
     private final String name;
     private MessageBusImpl mb = MessageBusImpl.getInstance();
-    private HashMap<Class<? extends Message> , Callback> callbacks;
-    private int ticks=0;
+    private ConcurrentHashMap<Class<? extends Message>, Callback> callbacks;
+    private int ticks = 0;
 
 
     /**
@@ -37,7 +38,7 @@ public abstract class MicroService implements Runnable {
      */
     public MicroService(String name) {
         this.name = name;
-        callbacks = new HashMap<>();
+        callbacks = new ConcurrentHashMap<>();
     }
 
     /**
@@ -64,9 +65,7 @@ public abstract class MicroService implements Runnable {
      */
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
         //TODO: implement this.
-        if (!callbacks.containsKey(type)) {
-            callbacks.put(type,callback);
-        }
+        callbacks.put(type, callback);
         mb.subscribeEvent(type, this);
     }
 
@@ -93,9 +92,7 @@ public abstract class MicroService implements Runnable {
      */
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
         //TODO: implement this.
-        if (!callbacks.containsKey(type)) {
-            callbacks.put(type, callback);
-        }
+        callbacks.put(type, callback);
         mb.subscribeBroadcast(type, this);
     }
 
@@ -113,11 +110,8 @@ public abstract class MicroService implements Runnable {
      * null in case no micro-service has subscribed to {@code e.getClass()}.
      */
     protected final <T> Future<T> sendEvent(Event<T> e) {
-        //TODO: implement this.
-        if (!callbacks.containsKey(e))
-            return null;
-        else
-            return mb.sendEvent(e);
+        //TODO: implement this
+        return mb.sendEvent(e);
     }
 
     /**
@@ -159,7 +153,6 @@ public abstract class MicroService implements Runnable {
      */
     protected final void terminate() {
         this.terminated = true;
-        System.out.println(this.name +" terminated");
     }
 
     /**
@@ -179,20 +172,18 @@ public abstract class MicroService implements Runnable {
         mb.register(this);
         initialize();
         while (!terminated) {
-            try{
-                Message m= mb.awaitMessage(this);
-                Callback c = callbacks.get(m.getClass());
-                c.call(m);
-            }
-            catch (InterruptedException e)
-            {
-                terminate();
-            }
+            try {
+                Message m = mb.awaitMessage(this);
+                if (m != null) {
+                    Callback c = callbacks.get(m.getClass());
+                    c.call(m);
+                }
+            } catch (InterruptedException e) {}
         }
         mb.unregister(this);
     }
 
-    protected void register(){
+    protected void register() {
         mb.register(this);
     }
 }

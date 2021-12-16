@@ -19,7 +19,7 @@ public class Model {
         PreTrained, Training, Trained, Tested
     }
 
-    enum result {
+    public enum result {
         Good, Bad , None
     }
 

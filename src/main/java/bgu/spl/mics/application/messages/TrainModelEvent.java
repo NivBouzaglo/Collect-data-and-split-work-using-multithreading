@@ -9,13 +9,13 @@ public class TrainModelEvent implements Event<Model> {
     private Future<Model> future;
 
     public TrainModelEvent(Model m){
-        model=m;
-        future = new Future<Model>();
+        model = m ;
+        future = new Future<>();
     }
 
 
-    public void action(TrainModelEvent future) {
-        this.future.resolve(future.getModel());
+    public void action(Model future) {
+        this.future.resolve(future);
     }
 
     public Model getModel() {
@@ -28,5 +28,9 @@ public class TrainModelEvent implements Event<Model> {
 
     public boolean process() {
         return false;
+    }
+
+    public void setFuture(Future<Model> future) {
+        this.future = future;
     }
 }

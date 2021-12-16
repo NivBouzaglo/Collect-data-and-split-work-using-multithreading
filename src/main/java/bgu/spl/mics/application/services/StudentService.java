@@ -30,7 +30,8 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        System.out.println("student service");
+        System.out.println("intilaize: " +this.getName());
+        subscribeBroadcast(TerminateBroadcast.class, t -> {terminate();});
         subscribeBroadcast(PublishConferenceBroadcast.class, t -> {
             for (Model name : t.getModelsName()) {
                 if (student.getModels().contains(name))
@@ -40,21 +41,25 @@ public class StudentService extends MicroService {
             }
         });
         for (Model m : student.getModels()) {
-            System.out.println("train");
             TrainModelEvent train = new TrainModelEvent(m);
-            Future future = sendEvent(train);
-            train.action(train);
-            if (m.getStatus() == "Trained") {
-                System.out.println("test");
-                TestModelEvent test = new TestModelEvent((Model) future.get());
-                test.action(sendEvent(test));
-                if (test.getModel().getStatus() == "Tested") {
-                    PublishResultsEvent p = new PublishResultsEvent(m);
-                    sendEvent(p);
+            train.setFuture(sendEvent(train));
+            train.action(train.getModel());
+            synchronized (this) {
+                while (!train.getModel().getStatus().equals("trained")) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                    }
                 }
             }
+            TestModelEvent test = new TestModelEvent((Model) train.getFuture().get());
+            Future future = sendEvent(test);
+            test.action(test.getModel().getR());
+            if (test.getModel().getStatus().equals("Tested")){
+                PublishResultsEvent p = new PublishResultsEvent(m);
+                sendEvent(p);
+            }
         }
-        subscribeBroadcast(TerminateBroadcast.class, t -> { terminate(); });
     }
 
 }

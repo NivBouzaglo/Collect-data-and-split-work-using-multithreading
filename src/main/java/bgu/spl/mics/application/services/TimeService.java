@@ -42,8 +42,8 @@ public class TimeService extends MicroService{
             @Override
             public void run() {
                 sendBroadcast(tick);
-                currentTime++;
                 System.out.println(currentTime);
+                currentTime++;
                 if(currentTime>=duration){
                     task.cancel();
                     end();
@@ -62,7 +62,6 @@ public class TimeService extends MicroService{
             thread.interrupt();
         }
         terminate();
-        System.out.println("Finish "+threads.size());
         end=true;
     }
 
@@ -77,7 +76,6 @@ public class TimeService extends MicroService{
     @Override
     protected void initialize() {
         // TODO Implement this
-        subscribeBroadcast(TerminateBroadcast.class, m->{terminate();});
         timer.scheduleAtFixedRate(task,0,speed);
     }
 

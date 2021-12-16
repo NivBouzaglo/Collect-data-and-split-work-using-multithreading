@@ -23,18 +23,19 @@ public class GPUService extends MicroService {
     public GPUService(String name ,GPU gpu) {
         super(name);
         this.gpu = new GPU(gpu.getType());
+        gpu.setGPU(this);
     }
 
 
     @Override
     protected void initialize() {
         // TODO Implement this
-        System.out.println("gpuservice");
-        subscribeBroadcast(TickBroadcast.class , m ->{gpu.addTime(); System.out.println("Tick GPU ");});
+        System.out.println("intilaize: " +this.getName());
+        subscribeBroadcast(TickBroadcast.class , m ->{gpu.addTime();});
         subscribeEvent(TrainModelEvent.class , t->{gpu.setModel(t.getModel());
             gpu.setEvent(t);
-            gpu.divide();});
-        subscribeEvent(TestModelEvent.class , g->{gpu.test(g.getModel());});
+            gpu.divide();gpu.addTime();});
+        subscribeEvent(TestModelEvent.class , g->{gpu.test(g.getModel()); complete(g , g.getModel().getR());});
         subscribeBroadcast(TerminateBroadcast.class ,m1->{terminate();});
     }
     public void completeTest(Event event,Model model){

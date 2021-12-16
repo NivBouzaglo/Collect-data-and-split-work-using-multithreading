@@ -35,7 +35,7 @@ public class CRMSRunner {
         System.out.println("end");
         System.out.println("Finish processing");
         writeOutputFile(output, students, conferences, cluster);
-         System.exit(0);
+        System.exit(0);
     }
 
     public static void start(TimeService timeService, LinkedList<Student> students, LinkedList<GPU> gpus, LinkedList<CPU> cpus, LinkedList<ConfrenceInformation> conference, Cluster cluster, FileWriter output) throws IOException {
@@ -47,8 +47,9 @@ public class CRMSRunner {
             Thread t = new Thread(service);
             threads.add(t);
         }
+        i = 0;
         for (CPU cpu : cpus) {
-            CPUService service = new CPUService("GPUId" + i, cpu);
+            CPUService service = new CPUService("CPUId" + i, cpu);
             i++;
             Thread t = new Thread(service);
             threads.add(t);
@@ -66,16 +67,17 @@ public class CRMSRunner {
         Thread time = new Thread(timeService);
         //threads.add(time);
         timeService.setThreads(threads);
-        time.start();
         for (Thread t : threads) {
             t.start();
-        }
+        }time.start();
         for (Thread t : threads) {
             try {
                 t.join();
             } catch (InterruptedException e) {
             }
         }
+        try {
+            time.join();}catch (InterruptedException e){}
         System.out.println("Finish start ");
     }
 

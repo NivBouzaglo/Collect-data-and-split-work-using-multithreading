@@ -22,7 +22,8 @@ public class CPUService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(TickBroadcast.class , m ->{ cpu.addTime(); });
+        System.out.println("intilaize: " +this.getName());
+        subscribeBroadcast(TickBroadcast.class , m ->{cpu.addTime(); });
         subscribeBroadcast(TerminateBroadcast.class , m ->{terminate(); });
     }
 }

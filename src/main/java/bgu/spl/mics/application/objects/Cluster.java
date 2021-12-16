@@ -40,7 +40,6 @@ public class Cluster {
 
 	public void addUnProcessed(DataBatch batch) {
 		sendToCPU(batch);
-
 	}
 
 	private void sendToCPU(DataBatch batch) {
@@ -53,6 +52,7 @@ public class Cluster {
 			}
 		}
 		cpu.get(index).receiveData(batch);
+
 	}
 
 	public void addProcessedData(DataBatch batch) {
@@ -60,6 +60,7 @@ public class Cluster {
 			GPU g = gpu.get(batch.getGpuIndex());
 			if (g.getProcessed().size() < g.getCapacity()) {
 				g.receiveFromCluster(batch);
+				System.out.println("send back to gpu");
 			} else {
 				endProcessing.add(batch);
 			}

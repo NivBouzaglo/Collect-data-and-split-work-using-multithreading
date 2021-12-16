@@ -38,13 +38,11 @@ public class Future<T> {
 
     public T get() {
         //TODO: implement this.
-        synchronized (this) {
-            while(!isDone)
-                try {
-                    wait();
-                } catch (InterruptedException ex) {
-                }
-        }
+        while (!isDone)
+            try {
+                wait();
+            } catch (InterruptedException ex) {
+            }
         return result;
     }
 
@@ -59,7 +57,7 @@ public class Future<T> {
         this.result = result;
         isDone = true;
         synchronized (this) {
-            this.notifyAll();
+            notifyAll();
         }
     }
 

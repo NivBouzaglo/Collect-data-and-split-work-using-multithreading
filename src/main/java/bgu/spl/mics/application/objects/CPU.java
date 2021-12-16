@@ -59,6 +59,7 @@ public class CPU {
         processed = true;
         if (unit.getData().getType().equals("Images"))
             if (time - currentTime == 4 * (32/cores)) {
+                System.out.println("process DataBatch");
                 cluster.addProcessedData(unit);
                 cluster.getStatistics().setUnit_used_cpu(4*(32/cores));
                 data.poll();
@@ -92,7 +93,6 @@ public class CPU {
      */
     public void addTime() {
         time++;
-        System.out.println("Im In addTime"+time +" "+ getCores());
         setCurrentTime();
         if (!data.isEmpty())
             sendData(data.peek());

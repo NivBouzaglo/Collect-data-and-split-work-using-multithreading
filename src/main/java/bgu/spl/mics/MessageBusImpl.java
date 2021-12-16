@@ -4,6 +4,7 @@ import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Queue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,18 +17,19 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class MessageBusImpl implements MessageBus {
 
-    private ConcurrentHashMap<MicroService, Deque<Message>> microservices;
-    private ConcurrentHashMap<Class<? extends Event<?>>, BlockingDeque<MicroService>> events;
-    private ConcurrentHashMap<Class<? extends Broadcast>, BlockingDeque<MicroService>> broadcasts;
-    private ConcurrentHashMap<Message, Future> eventFuture;
+    private ConcurrentHashMap<MicroService, Deque<Message>> microservices = null;
+    private ConcurrentHashMap<Class<? extends Event<?>>, Deque<MicroService>> events = null;
+    private ConcurrentHashMap<Class<? extends Broadcast>, Deque<MicroService>> broadcasts = null;
     private static MessageBusImpl INSTANCE = null;
-    private Object mlock = new Object();
+    private Object lockBroadcast;
+    private Object lockEvent;
 
     public MessageBusImpl() {
         microservices = new ConcurrentHashMap<>();
         events = new ConcurrentHashMap<>();
         broadcasts = new ConcurrentHashMap<>();
-        eventFuture = new ConcurrentHashMap<>();
+        lockBroadcast = new Object();
+        lockEvent = new Object();
     }
 
     public static MessageBusImpl getInstance() {
@@ -39,23 +41,22 @@ public class MessageBusImpl implements MessageBus {
 
     public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
         if (!events.containsKey(type))
-            events.put(type, new LinkedBlockingDeque<MicroService>());
-        events.get(type).addFirst(m);
+                events.put(type, new LinkedBlockingDeque<MicroService>());
+            events.get(type).addFirst(m);
     }
 
     @Override
     public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-        if (!broadcasts.containsKey(type)) {
+        if (!broadcasts.containsKey(type))
             broadcasts.put(type, new LinkedBlockingDeque<MicroService>());
-        } else
-            broadcasts.get(type).add(m);
-
+        broadcasts.get(type).add(m);
     }
 
     @Override
     public <T> void complete(Event<T> e, T result) {
-        eventFuture.get(e).resolve(result);
-        notifyAll();
+        synchronized (this) {
+            e.action(result);
+        }
     }
 
     @Override
@@ -63,39 +64,35 @@ public class MessageBusImpl implements MessageBus {
         if (!broadcasts.containsKey(b.getClass())) {
             // throw new IllegalArgumentException("don't have microservice that subscribe this broadcast");
             System.out.println("don't have microservice that subscribe this broadcast");
-        } else
-            for (MicroService m : broadcasts.get(b.getClass())) {
-                if (!registered(m)) {
-                    throw new IllegalArgumentException("didn't register yet");
-                } else {
-                    if (b.getClass().equals(TickBroadcast.class) || b.getClass().equals(TerminateBroadcast.class)) {
-                       microservices.get(m).add(b);
-                    } else
-                        microservices.get(m).add(b);
+        } else if (microservices != null && broadcasts != null)
+            synchronized (lockBroadcast) {
+                for (MicroService m : broadcasts.get(b.getClass())) {
+                    if (m != null && registered(m))
+                        if (b.getClass().equals(TerminateBroadcast.class))
+                            microservices.get(m).addFirst(b);
+                        else
+                            microservices.get(m).add(b);
+                    lockBroadcast.notifyAll();
                 }
             }
     }
 
     @Override
     public <T> Future<T> sendEvent(Event<T> e) {
-        if (!events.containsKey(e.getClass()) || events.get(e.getClass()).isEmpty())
+        if (!events.containsKey(e.getClass()))
             return null;
         else {
-            synchronized (mlock) {
+            synchronized (lockEvent) {
                 MicroService getTheEvent = roundRobin(events.get(e.getClass()));
-                if (getTheEvent != null) {
-                    microservices.get(getTheEvent).add(e);
-                    Future<T> future = new Future<>();
-                    eventFuture.put(e, future);
-                    mlock.notifyAll();
-                    return future;
-                }
+                microservices.get(getTheEvent).add(e);
+                Future<T> future = new Future<>();
+                lockEvent.notifyAll();
+                return future;
             }
         }
-        return null;
     }
 
-    private MicroService roundRobin(BlockingDeque<MicroService> microServices) {
+    private MicroService roundRobin(Queue<MicroService> microServices) {
         MicroService m = microServices.poll();
         microServices.add(m);
         return m;
@@ -114,34 +111,30 @@ public class MessageBusImpl implements MessageBus {
         if (!registered(m)) {
             throw new IllegalArgumentException("this microservice not registered");
         } else {
-            synchronized (m) {
-                Queue<Message> remove = microservices.remove(m);
+                Queue<Message> remove = microservices.get(m);
                 for (Message d : remove) {
                     if (d instanceof Event)
                         events.get(d.getClass()).remove(m);
                     if (d instanceof Broadcast)
                         broadcasts.get(d.getClass()).remove(m);
                 }
-                m.notifyAll();
             }
-        }
+        microservices.get(m).clear();
     }
 
     @Override
     public Message awaitMessage(MicroService m) throws InterruptedException {
-        if (!registered(m))
-            throw new InterruptedException("not registered");
-        else {
-            while (microservices.get(m).isEmpty()) {
-                synchronized (m) {
-                    m.wait();
-                    if (!microservices.get(m).isEmpty())
-                        m.notifyAll();
+        if (m != null && microservices != null && microservices.get(m) != null) {
+            System.out.println("wait for msg");
+            synchronized (lockBroadcast) {
+                while (microservices.get(m).isEmpty()) try {
+                    lockBroadcast.wait();
+                } catch (InterruptedException e) {
                 }
             }
-            Message message = microservices.get(m).poll();
-            return message;
+            return microservices.get(m).remove();
         }
+        return null;
     }
 
 
