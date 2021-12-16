@@ -27,7 +27,8 @@ public class ConferenceService extends MicroService {
     protected void initialize() {
         // TODO Implement this
         System.out.println("intilaize: " +this.getName());
-        subscribeBroadcast(TickBroadcast.class, m->{conf.addTime(); if (conf.isFinish()){sendBroadcast(new PublishConferenceBroadcast(conf.getModels())); terminate();}});
+        subscribeBroadcast(TickBroadcast.class, m->{conf.addTime(); if (conf.isFinish()){
+            System.out.println("conf publish");sendBroadcast(new PublishConferenceBroadcast(conf.getModels())); terminate();}});
         subscribeEvent(PublishResultsEvent.class , t ->{conf.addToModels(t.getModel());});
 
     }

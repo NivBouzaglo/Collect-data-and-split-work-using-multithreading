@@ -67,8 +67,7 @@ public class MessageBusImpl implements MessageBus {
                 synchronized (m) {
                     if (m != null && registered(m))
                         if (b.getClass().equals(TerminateBroadcast.class)) {
-                            m.terminate();
-                            unregister(m);
+                            microservices.get(m).addFirst(b);
                         } else
                             microservices.get(m).add(b);
                     m.notifyAll();

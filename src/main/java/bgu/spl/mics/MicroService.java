@@ -172,13 +172,16 @@ public abstract class MicroService implements Runnable {
         mb.register(this);
         initialize();
         while (!terminated) {
+            Message m = null;
             try {
-                Message m = mb.awaitMessage(this);
-                if (m != null) {
+                m = mb.awaitMessage(this);
+            } catch (InterruptedException e) {
+                terminate();
+            }
+            if (m != null) {
                     Callback c = callbacks.get(m.getClass());
                     c.call(m);
                 }
-            } catch (InterruptedException e) {}
         }
         mb.unregister(this);
     }

@@ -60,6 +60,8 @@ public class TimeService extends MicroService{
     public void end() {
         timer.cancel();
         sendBroadcast(new TerminateBroadcast());
+        for (Thread t : threads)
+            t.interrupt();
         terminate();
         end=true;
     }

@@ -65,19 +65,17 @@ public class CRMSRunner {
             threads.add(t);
         }
         Thread time = new Thread(timeService);
-        //threads.add(time);
+        threads.addLast(time);
         timeService.setThreads(threads);
         for (Thread t : threads) {
             t.start();
-        }time.start();
+        }
         for (Thread t : threads) {
             try {
                 t.join();
             } catch (InterruptedException e) {
             }
         }
-        try {
-            time.join();}catch (InterruptedException e){}
         System.out.println("Finish start ");
     }
 
