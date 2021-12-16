@@ -18,105 +18,77 @@ import java.util.TimerTask;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class TimeService extends MicroService{
-	//added by bar
-	private int speed;
-	private int duration;
-	private Timer timer;
-	private TimerTask task;
-	private int currentTime;
-	private TickBroadcast tick;
-	private LinkedList<Thread> threads;
-	private boolean end;
-	private Thread object;
+    //added by bar
+    private int speed;
+    private int duration;
+    private Timer timer;
+    private TimerTask task;
+    private int currentTime;
+    private TickBroadcast tick;
+    private LinkedList<Thread> threads;
+    private boolean end;
+    private Thread object;
 
-	public TimeService() {
-		super("TIMER SERVICE");
-		// TODO Implement this
-		this.end=false;
-		this.duration=0;
-		this.tick= new TickBroadcast();
-		this.speed=0;
-		this.timer=new Timer();
-		this.currentTime=0;
-		this.task= new TimerTask() {
-			@Override
-			public void run() {
-				sendBroadcast(tick);
-				currentTime++;
-				System.out.println(currentTime);
-				if(currentTime>=duration){
-					task.cancel();
-					end();
-				}
-			}};
-	}
+    public TimeService() {
+        super("TIMER SERVICE");
+        // TODO Implement this
+        this.end=false;
+        this.duration=0;
+        this.tick= new TickBroadcast();
+        this.speed=0;
+        this.timer=new Timer();
+        this.currentTime=0;
+        this.task= new TimerTask() {
+            @Override
+            public void run() {
+                sendBroadcast(tick);
+                currentTime++;
+                System.out.println(currentTime);
+                if(currentTime>=duration){
+                    task.cancel();
+                    end();
+                }
+            }};
+    }
 
-	public void setThread(Thread obj) {
-		this.object= obj;
-	}
+    public void setThread(Thread obj) {
+        this.object= obj;
+    }
 
-	public void end() {
-		timer.cancel();
-		sendBroadcast(new TerminateBroadcast());
-		for (Thread thread : threads){
-			thread.interrupt();
-	}
-		terminate();
-		System.out.println("Finish "+threads.size());
-		end=true;
-		synchronized (object) {
-			object.notifyAll();
-		}
+    public void end() {
+        timer.cancel();
+        sendBroadcast(new TerminateBroadcast());
+        for (Thread thread : threads){
+            thread.interrupt();
+        }
+        terminate();
+        System.out.println("Finish "+threads.size());
+        end=true;
+    }
 
+    public void setThreads(LinkedList<Thread> services){
+        threads=services;
+    }
+    public void set(int tick , int duration) {
+        speed=tick;
+        this.duration = duration;
+    }
 
-	}
+    @Override
+    protected void initialize() {
+        // TODO Implement this
+        subscribeBroadcast(TerminateBroadcast.class, m->{terminate();});
+        timer.scheduleAtFixedRate(task,0,speed);
+    }
 
-	public void setThreads(LinkedList<Thread> services){
-		threads=services;
-	}
-	//added
-	public TimeService(int s, int d){
-		super("timer");
-		this.duration=d;
-		this.speed=s;
-		this.timer=new Timer();
-		this.currentTime=0;
-		this.task= new TimerTask() {
-			@Override
-			public void run() {
-				currentTime++;
-				System.out.println(currentTime+"its me");
-				sendBroadcast(tick);
-				if(currentTime>=duration){
-					task.cancel();
-					timer.cancel();
-					sendBroadcast(new TerminateBroadcast());
-					System.out.println("Time was terminated");
-					terminate();
+    public int getCurrentTime() {
+        return currentTime;
+    }
 
-					}
-			}};
-	}
-	public void set(int tick , int duration) {
-		speed=tick;
-		this.duration = duration;
-	}
-
-	@Override
-	protected void initialize() {
-		// TODO Implement this
-		subscribeBroadcast(TerminateBroadcast.class, m->{terminate();});
-		timer.scheduleAtFixedRate(task,0,speed);
-	}
-
-	public int getCurrentTime() {
-		return currentTime;
-	}
-
-	public int getDuration() {
-		return duration;
-	}
-	public boolean isEnded(){
-		return end;
-	}
+    public int getDuration() {
+        return duration;
+    }
+    public boolean isEnded(){
+        return end;
+    }
 }

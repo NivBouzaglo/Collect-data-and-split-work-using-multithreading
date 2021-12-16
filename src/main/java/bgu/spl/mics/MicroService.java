@@ -2,6 +2,8 @@ package bgu.spl.mics;
 
 import java.util.HashMap;
 
+import static java.lang.Thread.sleep;
+
 /**
  * The MicroService is an abstract class that any micro-service in the system
  * must extend. The abstract MicroService class is responsible to get and
@@ -177,14 +179,17 @@ public abstract class MicroService implements Runnable {
         mb.register(this);
         initialize();
         while (!terminated) {
-            try {
-                Message m = mb.awaitMessage(this);
-                if (m != null && callbacks.containsKey(m.getClass())) {
-                    Callback c = callbacks.get(m.getClass());
-                    c.call(m);
-                }
-            } catch (InterruptedException e) {}
+            try{
+                Message m= mb.awaitMessage(this);
+                Callback c = callbacks.get(m.getClass());
+                c.call(m);
+            }
+            catch (InterruptedException e)
+            {
+                terminate();
+            }
         }
+        mb.unregister(this);
     }
 
     protected void register(){

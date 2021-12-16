@@ -33,7 +33,10 @@ public class CRMSRunner {
         TimeService timeService = new TimeService();
         readInputFile(args[0], timeService, cluster, students, gpus, cpus, conferences);
         start(timeService, students, gpus, cpus, conferences, cluster, output);
+        System.out.println("end");
         System.out.println("Finish processing");
+        writeOutputFile(output, students, conferences, cluster);
+         System.exit(0);
     }
 
     public static void start(TimeService timeService, LinkedList<Student> students, LinkedList<GPU> gpus, LinkedList<CPU> cpus, LinkedList<ConfrenceInformation> conference, Cluster cluster, FileWriter output) throws IOException {
@@ -74,7 +77,6 @@ public class CRMSRunner {
             } catch (InterruptedException e) {
             }
         }
-        writeOutputFile(output, students, conference, cluster);
         System.out.println("Finish start ");
     }
 

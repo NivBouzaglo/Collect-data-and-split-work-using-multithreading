@@ -3,6 +3,8 @@ package bgu.spl.mics;
 import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
+import java.util.Deque;
+import java.util.Queue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +17,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class MessageBusImpl implements MessageBus {
 
-    private ConcurrentHashMap<MicroService, BlockingDeque<Message>> microservices;
+    private ConcurrentHashMap<MicroService, Deque<Message>> microservices;
     private ConcurrentHashMap<Class<? extends Event<?>>, BlockingDeque<MicroService>> events;
     private ConcurrentHashMap<Class<? extends Broadcast>, BlockingDeque<MicroService>> broadcasts;
     private ConcurrentHashMap<Message, Future> eventFuture;
@@ -62,21 +64,16 @@ public class MessageBusImpl implements MessageBus {
         if (!broadcasts.containsKey(b.getClass())) {
             // throw new IllegalArgumentException("don't have microservice that subscribe this broadcast");
             System.out.println("don't have microservice that subscribe this broadcast");
-        }
-        else
-            synchronized (mlock) {
-                for (MicroService m : broadcasts.get(b.getClass())) {
-                    if (!registered(m)) {
-                        throw new IllegalArgumentException("didn't register yet");
-                    } else{
-                        if(b.getClass().equals(TickBroadcast.class)|| b.getClass().equals(TerminateBroadcast.class)) {
-                            microservices.get(m).addFirst(b);
-                        }
-                        else
-                               microservices.get(m).add(b);
-                    }
+        } else
+            for (MicroService m : broadcasts.get(b.getClass())) {
+                if (!registered(m)) {
+                    throw new IllegalArgumentException("didn't register yet");
+                } else {
+                    if (b.getClass().equals(TickBroadcast.class) || b.getClass().equals(TerminateBroadcast.class)) {
+                        microservices.get(m).addFirst(b);
+                    } else
+                        microservices.get(m).add(b);
                 }
-                mlock.notifyAll();
             }
     }
 
@@ -118,16 +115,15 @@ public class MessageBusImpl implements MessageBus {
         if (!registered(m)) {
             throw new IllegalArgumentException("this microservice not registered");
         } else {
-            synchronized (mlock) {
-                BlockingQueue<Message> remove = microservices.remove(m);
+            synchronized (m) {
+                Queue<Message> remove = microservices.remove(m);
                 for (Message d : remove) {
                     if (d instanceof Event)
                         events.get(d.getClass()).remove(m);
                     if (d instanceof Broadcast)
                         broadcasts.get(d.getClass()).remove(m);
                 }
-                mlock.notifyAll();
-                m.terminate();
+                m.notifyAll();
             }
         }
     }
@@ -137,19 +133,18 @@ public class MessageBusImpl implements MessageBus {
         if (!registered(m))
             throw new InterruptedException("not registered");
         else {
-            synchronized (microservices.get(m)) {
-                while (microservices.get(m).isEmpty()) {
-                    synchronized (m) {
-                        m.wait();
-                        if (!microservices.get(m).isEmpty())
-                            m.notifyAll();
-                    }
+            while (microservices.get(m).isEmpty()) {
+                synchronized (m) {
+                    m.wait();
+                    if (!microservices.get(m).isEmpty())
+                        m.notifyAll();
                 }
-                Message message = microservices.get(m).poll();
-                return message;
             }
+            Message message = microservices.get(m).poll();
+            return message;
         }
     }
+
 
     @Override
     public boolean BroadcastSended(Broadcast b) {

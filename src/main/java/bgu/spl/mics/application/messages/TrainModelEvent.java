@@ -14,9 +14,8 @@ public class TrainModelEvent implements Event<Model> {
     }
 
 
-    public void action(Future future) {
-        this.future.resolve((Model)future.get());
-        notifyAll();
+    public void action(TrainModelEvent future) {
+        this.future.resolve(future.getModel());
     }
 
     public Model getModel() {

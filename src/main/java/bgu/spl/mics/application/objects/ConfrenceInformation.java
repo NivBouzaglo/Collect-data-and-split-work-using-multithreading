@@ -2,6 +2,7 @@ package bgu.spl.mics.application.objects;
 
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
+import bgu.spl.mics.application.messages.finishBroadcast;
 import bgu.spl.mics.application.services.ConferenceService;
 
 import java.util.LinkedList;
@@ -17,6 +18,7 @@ public class ConfrenceInformation {
     private LinkedList<Model> models ;
     private int time;
     private ConferenceService conf;
+    private boolean finish =false;
 
     public ConfrenceInformation(String name , int date){
         this.name = name;
@@ -38,11 +40,16 @@ public class ConfrenceInformation {
 
     public void addTime(){
         time++;
-        if (time == date)
-            conf.publish();
+        if (time == date) {
+            finish = true;
+            MessageBusImpl.getInstance().sendBroadcast(new finishBroadcast());
+        }
     }
    public void setService(ConferenceService c){
         this.conf=c;
    }
 
+    public boolean isFinish() {
+        return finish;
+    }
 }

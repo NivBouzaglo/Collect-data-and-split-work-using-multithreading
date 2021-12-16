@@ -43,7 +43,7 @@ public class StudentService extends MicroService {
             System.out.println("train");
             TrainModelEvent train = new TrainModelEvent(m);
             Future future = sendEvent(train);
-            train.action(future);
+            train.action(train);
             if (m.getStatus() == "Trained") {
                 System.out.println("test");
                 TestModelEvent test = new TestModelEvent((Model) future.get());
