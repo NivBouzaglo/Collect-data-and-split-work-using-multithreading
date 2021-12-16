@@ -1,5 +1,7 @@
 package bgu.spl.mics.application.objects;
 
+import bgu.spl.mics.MessageBusImpl;
+import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
 import bgu.spl.mics.application.services.ConferenceService;
 
 import java.util.LinkedList;
@@ -36,7 +38,7 @@ public class ConfrenceInformation {
 
     public void addTime(){
         time++;
-        if (time==date)
+        if (time == date)
             conf.publish();
     }
    public void setService(ConferenceService c){

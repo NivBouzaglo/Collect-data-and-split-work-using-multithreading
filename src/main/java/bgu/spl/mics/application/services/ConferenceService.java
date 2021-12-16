@@ -40,6 +40,7 @@ public class ConferenceService extends MicroService {
     public void publish(){
         b = new PublishConferenceBroadcast(conf.getModels());
         sendBroadcast(b);
+        System.out.println("publish" + conf.getName());
         MessageBusImpl.getInstance().unregister(this);
 
     }

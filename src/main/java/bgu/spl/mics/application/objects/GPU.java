@@ -164,7 +164,7 @@ public class GPU {
         if (!free)
             train((DataBatch) processed.peek());
         else
-        if (!processed.isEmpty()) {
+           if (processed != null && !processed.isEmpty()) {
             free = false;
             setCurrentTime();
             train((DataBatch) processed.peek());

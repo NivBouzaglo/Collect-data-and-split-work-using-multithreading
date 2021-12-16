@@ -1,5 +1,6 @@
 package bgu.spl.mics.application;
 
+import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.objects.*;
 import bgu.spl.mics.application.services.*;
 import com.google.gson.*;
@@ -17,13 +18,13 @@ import java.util.LinkedList;
 public class CRMSRunner {
     //I added throws IOSException ,Hopes its fine
     public static void main(String[] args) throws IOException {
-        File output = new File("output.txt");
-        try {
+        FileWriter output = new FileWriter("output.txt");
+        /*try {
             if (!output.createNewFile())
                 System.out.println("File is already exists");
         } catch (IOException e) {
             System.out.println("Error while creating output file.");
-        }
+        }*/
         Cluster cluster = Cluster.getInstance();
         LinkedList<Student> students = new LinkedList<Student>();
         LinkedList<ConfrenceInformation> conferences = new LinkedList<ConfrenceInformation>();
@@ -31,13 +32,11 @@ public class CRMSRunner {
         LinkedList<CPU> cpus = new LinkedList<CPU>();
         TimeService timeService = new TimeService();
         readInputFile(args[0], timeService, cluster, students, gpus, cpus, conferences);
-        start(timeService, students, gpus, cpus, conferences);
+        start(timeService, students, gpus, cpus, conferences, cluster, output);
         System.out.println("Finish processing");
-        if (timeService.getCurrentTime() == timeService.getDuration())
-            writeOutputFile(output, students, conferences, cluster);
     }
 
-    public static void start(TimeService timeService, LinkedList<Student> students, LinkedList<GPU> gpus, LinkedList<CPU> cpus, LinkedList<ConfrenceInformation> conference) {
+    public static void start(TimeService timeService, LinkedList<Student> students, LinkedList<GPU> gpus, LinkedList<CPU> cpus, LinkedList<ConfrenceInformation> conference, Cluster cluster, FileWriter output) throws IOException {
         LinkedList<Thread> threads = new LinkedList<>();
         int i = 0;
         for (GPU gpu : gpus) {
@@ -69,8 +68,14 @@ public class CRMSRunner {
         for (Thread t : threads) {
             t.start();
         }
+        for (Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+            }
+        }
+        writeOutputFile(output, students, conference, cluster);
         System.out.println("Finish start ");
-
     }
 
 
@@ -120,75 +125,72 @@ public class CRMSRunner {
         timeService.set(ticks, duration);
     }
 
-    public static void writeOutputFile(File file, LinkedList<Student> students, LinkedList<ConfrenceInformation> conferences, Cluster cluster) throws
-            IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));
-        //Students
-        writer.append("Students: ");
+    public static void writeOutputFile(FileWriter file, LinkedList<Student> students, LinkedList<ConfrenceInformation> conferences, Cluster cluster) throws
+            IOException {        //Students
+        file.write("Students: ");
         for (Student student : students) {
-            writer.append('\n');
-            writer.append(" name: " + student.getName());
-            writer.append('\n');
-            writer.append(" department: " + student.getDepartment());
-            writer.append('\n');
-            writer.append(" degree: " + student.getStatus());
-            writer.append('\n');
-            writer.append(" publication: " + student.getPublications());
-            writer.append('\n');
-            writer.append(" papersRead: " + student.getPapersRead());
-            writer.append('\n');
-            writer.append(" TrainedModels:");
+            file.write('\n');
+            file.write(" name: " + student.getName());
+            file.write('\n');
+            file.write(" department: " + student.getDepartment());
+            file.write('\n');
+            file.write(" degree: " + student.getStatus());
+            file.write('\n');
+            file.write(" publication: " + student.getPublications());
+            file.write('\n');
+            file.write(" papersRead: " + student.getPapersRead());
+            file.write('\n');
+            file.write(" TrainedModels:");
             for (Model model : student.getModels()) {
-                writer.append('\n');
-                writer.append("  name: " + model.getName());
-                writer.append('\n');
-                writer.append("   Data: ");
-                writer.append('\n');
-                writer.append("    type: " + model.getData().getType());
-                writer.append('\n');
-                writer.append("    size: " + model.getData().getSize());
-                writer.append('\n');
-                writer.append("   status: " + model.getStatus());
-                writer.append('\n');
+                file.write('\n');
+                file.write("            name: " + model.getName());
+                file.write('\n');
+                file.write("            Data: ");
+                file.write('\n');
+                file.write("            type: " + model.getData().getType());
+                file.write('\n');
+                file.write("                   size: " + model.getData().getSize());
+                file.write('\n');
+                file.write("                   status: " + model.getStatus());
+                file.write('\n');
                 if (model.isPublish())
-                    writer.append("  Published.");
+                    file.write("               Published.");
                 else
-                    writer.append("  Not published.");
+                    file.write("               Not published.");
             }
-            writer.append((char) student.getPapersRead());
         }
         //Conferences
-        writer.append('\n');
-        writer.append("Conferences: ");
-        writer.append('\n');
+        file.write('\n');
+        file.write("Conferences: ");
+        file.write('\n');
         for (ConfrenceInformation conf : conferences) {
-            writer.append("name: " + conf.getName());
-            writer.append('\n');
-            writer.append("date: " + conf.getDate());
-            writer.append('\n');
-            writer.append("Publications: ");
-            writer.append('\n');
+            file.write("name: " + conf.getName());
+            file.write('\n');
+            file.write("date: " + conf.getDate());
+            file.write('\n');
+            file.write("Publications: ");
+            file.write('\n');
             for (Model m : conf.getModels()) {
-                writer.append("name: " + m.getName());
-                writer.append('\n');
-                writer.append("  Data: ");
-                writer.append('\n');
-                writer.append("   type: " + m.getData().getType());
-                writer.append('\n');
-                writer.append("   size: " + m.getData().getSize());
-                writer.append('\n');
-                writer.append("  status: " + m.getStatus());
-                writer.append('\n');
-                writer.append("  result: " + m.getR());
-                writer.append('\n');
+                file.write("     name: " + m.getName());
+                file.write('\n');
+                file.write("     Data: ");
+                file.write('\n');
+                file.write("     type: " + m.getData().getType());
+                file.write('\n');
+                file.write("     size: " + m.getData().getSize());
+                file.write('\n');
+                file.write("     status: " + m.getStatus());
+                file.write('\n');
+                file.write("     result: " + m.getR());
+                file.write('\n');
             }
-            //GPU time use.
-            writer.append("cpuTimeUsed: " + (char) cluster.getStatistics().getUnit_used_cpu());
-            writer.append('\n');
-            writer.append("gpuTimeUsed: " + (char) cluster.getStatistics().getUnit_used_gpu());
-            writer.append('\n');
-            writer.append("batchesProcessed: " + (char) cluster.getStatistics().getNumber_of_DB());
         }
-        writer.close();
+        //GPU time use.
+        file.write("cpuTimeUsed: " + cluster.getStatistics().getUnit_used_cpu());
+        file.write('\n');
+        file.write("gpuTimeUsed: " + cluster.getStatistics().getUnit_used_gpu());
+        file.write('\n');
+        file.write("batchesProcessed: " + cluster.getStatistics().getNumber_of_DB());
+        file.close();
     }
 }

@@ -4,8 +4,7 @@
             "name": "Simba",
             "department": "Computer Science",
             "status": "MSc",
-            "publications"
-            0,
+            "publications": 0,
             "papersRead": 3,
             "trainedModels": [
                 {

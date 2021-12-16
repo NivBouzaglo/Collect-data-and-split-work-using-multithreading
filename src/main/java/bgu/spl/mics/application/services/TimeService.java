@@ -96,11 +96,11 @@ public class TimeService extends MicroService{
 		timer.scheduleAtFixedRate(task,0,speed);
 	}
 
-	public int getCurrentTime() {
-		return currentTime;
-	}
+    public int getCurrentTime() {
+        return currentTime;
+    }
 
-	public int getDuration() {
-		return duration;
-	}
+    public int getDuration() {
+        return duration;
+    }
 }

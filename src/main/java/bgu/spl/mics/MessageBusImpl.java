@@ -53,6 +53,7 @@ public class MessageBusImpl implements MessageBus {
     @Override
     public <T> void complete(Event<T> e, T result) {
         eventFuture.get(e).resolve(result);
+        notifyAll();
     }
 
     @Override
@@ -139,6 +140,8 @@ public class MessageBusImpl implements MessageBus {
                 while (microservices.get(m).isEmpty()) {
                     synchronized (m) {
                         m.wait();
+                        if (!microservices.get(m).isEmpty())
+                            m.notifyAll();
                     }
                 }
                 Message message = microservices.get(m).poll();

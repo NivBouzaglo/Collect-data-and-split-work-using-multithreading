@@ -32,6 +32,7 @@ public class GPUService extends MicroService {
     @Override
     protected void initialize() {
         // TODO Implement this
+        System.out.println("gpuservice");
         subscribeBroadcast(TickBroadcast.class , m ->{gpu.addTime();});
         subscribeEvent(TrainModelEvent.class , t->{gpu.setModel(t.getModel());
             gpu.setEvent(t);

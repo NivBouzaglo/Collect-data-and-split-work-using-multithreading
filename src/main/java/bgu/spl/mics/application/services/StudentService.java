@@ -1,10 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.*;
-import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
-import bgu.spl.mics.application.messages.PublishResultsEvent;
-import bgu.spl.mics.application.messages.TestModelEvent;
-import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.ConfrenceInformation;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
@@ -33,8 +30,9 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(PublishConferenceBroadcast.class , t -> {
-            for(Model name : t.getModelsName()){
+        System.out.println("student service");
+        subscribeBroadcast(PublishConferenceBroadcast.class, t -> {
+            for (Model name : t.getModelsName()) {
                 if (student.getModels().contains(name))
                     student.addPublication();
                 else
@@ -42,19 +40,21 @@ public class StudentService extends MicroService {
             }
         });
         for (Model m : student.getModels()) {
+            System.out.println("train");
             TrainModelEvent train = new TrainModelEvent(m);
             Future future = sendEvent(train);
-            if (future != null) {
-                train.action(future);
-                if (m.getStatus() == "Trained") {
-                    TestModelEvent test = new TestModelEvent((Model) future.get());
-                    test.action(sendEvent(test));
-                    if (test.getModel().getStatus() == "Tested") {
-                        PublishResultsEvent p = new PublishResultsEvent(m);
-                        sendEvent(p);
-                    }
+            train.action(future);
+            if (m.getStatus() == "Trained") {
+                System.out.println("test");
+                TestModelEvent test = new TestModelEvent((Model) future.get());
+                test.action(sendEvent(test));
+                if (test.getModel().getStatus() == "Tested") {
+                    PublishResultsEvent p = new PublishResultsEvent(m);
+                    sendEvent(p);
                 }
             }
         }
+        subscribeBroadcast(TerminateBroadcast.class, t -> { terminate(); });
     }
+
 }
