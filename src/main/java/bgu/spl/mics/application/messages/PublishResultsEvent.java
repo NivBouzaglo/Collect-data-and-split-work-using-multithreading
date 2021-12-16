@@ -25,4 +25,7 @@ public class PublishResultsEvent implements Event<String>{
     public boolean goodOrBad(){
         return model.good();
     }
+    public Class getType(){
+        return PublishResultsEvent.class;
+    }
 }
