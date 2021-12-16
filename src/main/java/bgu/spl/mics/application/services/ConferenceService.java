@@ -30,10 +30,7 @@ public class ConferenceService extends MicroService {
     protected void initialize() {
         // TODO Implement this
         subscribeBroadcast(TickBroadcast.class, m->{conf.addTime();});
-        subscribeBroadcast(TerminateBroadcast.class,t->{
-        System.out.println("Conference"+ conf.getName() + " was terminated");
-        terminate();
-        });
+        subscribeBroadcast(TerminateBroadcast.class,t->{terminate();});
         subscribeEvent(PublishResultsEvent.class , t ->{conf.addToModels(t.getModel());});
 
     }

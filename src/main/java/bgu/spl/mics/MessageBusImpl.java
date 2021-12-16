@@ -1,5 +1,6 @@
 package bgu.spl.mics;
 
+import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
 
 import java.util.concurrent.BlockingDeque;
@@ -67,7 +68,7 @@ public class MessageBusImpl implements MessageBus {
                     if (!registered(m)) {
                         throw new IllegalArgumentException("didn't register yet");
                     } else{
-                        if(b.getClass().equals(TickBroadcast.class)) {
+                        if(b.getClass().equals(TickBroadcast.class)|| b.getClass().equals(TerminateBroadcast.class)) {
                             microservices.get(m).addFirst(b);
                         }
                         else
