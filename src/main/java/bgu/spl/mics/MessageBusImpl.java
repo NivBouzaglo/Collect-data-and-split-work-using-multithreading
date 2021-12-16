@@ -106,7 +106,7 @@ public class MessageBusImpl implements MessageBus {
     }
 
     public void unregister(MicroService m) {
-        // TODO Auto-generated method stuif (!registered(m)) {
+        if (!registered(m)) {
             throw new IllegalArgumentException("this microservice not registered");
         } else {
             synchronized (m) {
