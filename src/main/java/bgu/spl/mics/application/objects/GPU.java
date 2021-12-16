@@ -106,6 +106,7 @@ public class GPU {
      * @post All the data is stores in one of the data batch.
      */
     public void divide() {
+        System.out.println("Start training ");
         for (int i = 1; i <= model.getData().getSize(); i++) {
             DataBatch dataBatch= new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpuIndex(cluster.findGPU(this));
@@ -139,6 +140,7 @@ public class GPU {
         }
         if (processedData*1000 >= model.getData().getSize()) {
             model.endTraining();
+            System.out.println("Finish training ");
             GPU.completeTrain(event,model);
         }
     }

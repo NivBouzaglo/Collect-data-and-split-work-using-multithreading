@@ -38,8 +38,9 @@ public class MessageBusImpl implements MessageBus {
     }
 
     public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-        if (!events.containsKey(type))
+        if (!events.containsKey(type)) {
             events.put(type, new LinkedBlockingDeque<MicroService>());
+        }
         events.get(type).addFirst(m);
     }
 
