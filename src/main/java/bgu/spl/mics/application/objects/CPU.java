@@ -1,9 +1,7 @@
 package bgu.spl.mics.application.objects;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Passive object representing a single CPU.
@@ -94,6 +92,7 @@ public class CPU {
      */
     public void addTime() {
         time++;
+        System.out.println("Im In addTime"+time +" "+ getCores());
         setCurrentTime();
         if (!data.isEmpty())
             sendData(data.peek());

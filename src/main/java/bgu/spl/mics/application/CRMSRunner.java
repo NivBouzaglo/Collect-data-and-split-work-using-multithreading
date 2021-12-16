@@ -1,6 +1,5 @@
 package bgu.spl.mics.application;
 
-import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.objects.*;
 import bgu.spl.mics.application.services.*;
 import com.google.gson.*;

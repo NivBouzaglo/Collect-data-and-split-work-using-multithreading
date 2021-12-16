@@ -6,7 +6,6 @@ import bgu.spl.mics.application.messages.TickBroadcast;
 import java.util.Deque;
 import java.util.Queue;
 import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -70,7 +69,7 @@ public class MessageBusImpl implements MessageBus {
                     throw new IllegalArgumentException("didn't register yet");
                 } else {
                     if (b.getClass().equals(TickBroadcast.class) || b.getClass().equals(TerminateBroadcast.class)) {
-                        microservices.get(m).addFirst(b);
+                       microservices.get(m).add(b);
                     } else
                         microservices.get(m).add(b);
                 }
