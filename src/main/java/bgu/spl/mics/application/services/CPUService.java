@@ -23,6 +23,6 @@ public class CPUService extends MicroService {
     @Override
     protected void initialize() {
         subscribeBroadcast(TickBroadcast.class , m ->{cpu.addTime(); });
-        subscribeBroadcast(TerminateBroadcast.class , m ->{terminate();System.out.println("CPU is terminated"); });
+        subscribeBroadcast(TerminateBroadcast.class , m ->{terminate(); });
     }
 }

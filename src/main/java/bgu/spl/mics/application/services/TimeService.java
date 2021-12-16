@@ -26,10 +26,13 @@ public class TimeService extends MicroService{
 	private int currentTime;
 	private TickBroadcast tick;
 	private LinkedList<Thread> threads;
+	private boolean end;
+	private Thread object;
 
 	public TimeService() {
 		super("TIMER SERVICE");
 		// TODO Implement this
+		this.end=false;
 		this.duration=0;
 		this.tick= new TickBroadcast();
 		this.speed=0;
@@ -47,14 +50,24 @@ public class TimeService extends MicroService{
 				}
 			}};
 	}
+
+	public void setThread(Thread obj) {
+		this.object= obj;
+	}
+
 	public void end() {
 		timer.cancel();
 		sendBroadcast(new TerminateBroadcast());
-		timer.cancel();
 		for (Thread thread : threads){
 			thread.interrupt();
 	}
+		terminate();
 		System.out.println("Finish "+threads.size());
+		end=true;
+		synchronized (object) {
+			object.notifyAll();
+		}
+
 
 	}
 
@@ -96,11 +109,14 @@ public class TimeService extends MicroService{
 		timer.scheduleAtFixedRate(task,0,speed);
 	}
 
-    public int getCurrentTime() {
-        return currentTime;
-    }
+	public int getCurrentTime() {
+		return currentTime;
+	}
 
-    public int getDuration() {
-        return duration;
-    }
+	public int getDuration() {
+		return duration;
+	}
+	public boolean isEnded(){
+		return end;
+	}
 }

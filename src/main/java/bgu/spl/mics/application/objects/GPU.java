@@ -32,6 +32,9 @@ public class GPU {
 
     public GPU(String t) {
         this.setType(t);
+        cluster= Cluster.getInstance();
+        batches = new LinkedList<DataBatch>();
+        processed = new LinkedBlockingDeque();
     }
 
     //Swe need to fix it.

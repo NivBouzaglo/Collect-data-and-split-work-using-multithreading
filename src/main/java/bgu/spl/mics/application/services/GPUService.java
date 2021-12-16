@@ -4,11 +4,8 @@ import bgu.spl.mics.Event;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
-import bgu.spl.mics.application.objects.Cluster;
 import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
-
-import java.util.Queue;
 
 /**
  * GPU service is responsible for handling the
@@ -38,7 +35,7 @@ public class GPUService extends MicroService {
             gpu.setEvent(t);
             gpu.divide();});
         subscribeEvent(TestModelEvent.class , g->{gpu.test(g.getModel());});
-        subscribeBroadcast(TerminateBroadcast.class ,m1->{terminate(); System.out.println("GPU was terminate");});
+        subscribeBroadcast(TerminateBroadcast.class ,m1->{terminate();});
     }
     public void completeTest(Event event,Model model){
         MessageBusImpl.getInstance().complete(event,model.getR());
