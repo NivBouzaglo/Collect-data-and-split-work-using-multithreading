@@ -44,14 +44,6 @@ public class StudentService extends MicroService {
             TrainModelEvent train = new TrainModelEvent(m);
             train.setFuture(sendEvent(train));
             train.action(train.getModel());
-            synchronized (this) {
-                while (!train.getModel().getStatus().equals("trained")) {
-                    try {
-                        wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
             TestModelEvent test = new TestModelEvent((Model) train.getFuture().get());
             Future future = sendEvent(test);
             test.action(test.getModel().getR());

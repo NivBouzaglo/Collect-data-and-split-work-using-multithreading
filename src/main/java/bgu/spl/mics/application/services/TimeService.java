@@ -1,5 +1,6 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.TerminateBroadcast;
 import bgu.spl.mics.application.messages.TickBroadcast;
@@ -28,6 +29,7 @@ public class TimeService extends MicroService{
     private LinkedList<Thread> threads;
     private boolean end;
     private Thread object;
+    private MessageBusImpl inc = MessageBusImpl.getInstance();
 
     public TimeService() {
         super("TIMER SERVICE");
@@ -58,9 +60,6 @@ public class TimeService extends MicroService{
     public void end() {
         timer.cancel();
         sendBroadcast(new TerminateBroadcast());
-        for (Thread thread : threads){
-            thread.interrupt();
-        }
         terminate();
         end=true;
     }
