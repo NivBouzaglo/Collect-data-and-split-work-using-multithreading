@@ -139,7 +139,6 @@ public class GPU {
      * * @post model.status = "Trained".
      */
     public void train(DataBatch unit) {
-        System.out.println("Start training ");
         model.setStatus(Model.status.Training);
         switch (type) {
             case RTX3090:
@@ -180,11 +179,10 @@ public class GPU {
     public void receiveFromCluster(DataBatch unit) {
         processed.add(unit);
         if(free){
-            System.out.println("im trying to sent for train");
+            setCurrentTime();
             free=false;
             train(unit);
         }
-        System.out.println(processed.peek().equals(unit));
     }
 
     public void addTime() {

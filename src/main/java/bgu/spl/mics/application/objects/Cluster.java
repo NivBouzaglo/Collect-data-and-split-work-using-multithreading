@@ -59,12 +59,10 @@ public class Cluster {
 	}
 
 	public void addProcessedData(DataBatch batch) {
-		System.out.println("sending to train ");
 		synchronized (gpu) {
 			GPU g = gpu.get(batch.getGpuIndex());
 			if (g.getProcessed().size() < g.getCapacity()) {
 				g.receiveFromCluster(batch);
-				System.out.println("send back to gpu");
 			} else {
 				endProcessing.add(batch);
 			}

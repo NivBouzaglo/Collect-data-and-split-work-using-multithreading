@@ -60,7 +60,6 @@ public class CPU {
         if (unit!=null){
         if (unit.getData().getType().equals(Data.Type.Images))
             if (time - currentTime == 4 * (32/cores)) {
-                System.out.println("Im in ");
                 cluster.addProcessedData(unit);
                 cluster.getStatistics().setUnit_used_cpu(4*(32/cores));
                 data.poll();
