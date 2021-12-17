@@ -127,6 +127,9 @@ public class MessageBusImpl implements MessageBus {
                 }
             }
         }
+        synchronized (this) {
+            notifyAll();
+        }
         return microservices.get(m).remove();
     }
 
