@@ -1,7 +1,6 @@
 package bgu.spl.mics.application.objects;
 
-import static bgu.spl.mics.application.objects.Data.Type.Images;
-import static bgu.spl.mics.application.objects.Data.Type.Text;
+import static bgu.spl.mics.application.objects.Data.Type.*;
 
 /**
  * Passive object representing a data used by a model.
@@ -48,6 +47,6 @@ public class Data {
         else if (type == Images)
             return Images;
         else
-            return Type.Tabular;
+            return Tabular;
     }
 }

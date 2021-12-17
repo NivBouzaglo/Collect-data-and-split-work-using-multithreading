@@ -72,8 +72,16 @@ public class Model {
         publish = true;
     }
 
-    public result getR() {
-        return r;
+    public String getR() {
+        switch (r){
+            case Bad:
+                return "Bad";
+            case Good:
+                return "Good";
+            case None:
+                return "None";
+        }
+        return null;
     }
 
     public void setResult(String rt) {

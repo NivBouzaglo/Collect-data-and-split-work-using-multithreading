@@ -10,7 +10,7 @@ public class TrainModelEvent implements Event<Model> {
 
     public TrainModelEvent(Model m){
         model = m ;
-        future = new Future<>();
+        future = null ;
     }
 
 

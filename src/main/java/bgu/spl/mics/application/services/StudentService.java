@@ -26,8 +26,9 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        System.out.println("intilaize: " +this.getName());
-        subscribeBroadcast(TerminateBroadcast.class, t -> {terminate();});
+        subscribeBroadcast(TerminateBroadcast.class, t -> {
+            terminate();
+        });
         subscribeBroadcast(PublishConferenceBroadcast.class, t -> {
             for (Model name : t.getModelsName()) {
                 if (student.getModels().contains(name))
@@ -38,17 +39,20 @@ public class StudentService extends MicroService {
         });
         for (Model m : student.getModels()) {
             TrainModelEvent train = new TrainModelEvent(m);
-            train.setFuture(sendEvent(train));
-            train.action(train.getModel());
-            if (m.getStatus().equals(Model.status.Trained)){
-            TestModelEvent test = new TestModelEvent((Model) train.getFuture().get());
-            Future future = sendEvent(test);
-            test.action(test.getModel().getR());
-            if (test.getModel().getStatus().equals("Tested")){
+            Future future = sendEvent(train);
+            while (train.getModel().getStatus() != "Trained"){
+                train.setFuture(future);
+            }
+            TestModelEvent test = new TestModelEvent(m);
+            Future f = sendEvent(test);
+            while (test.getModel().getStatus() != "Tested"){
+                test.setFuture(f);
+            }
+            if (test.getModel().getR() == "Good") {
                 PublishResultsEvent p = new PublishResultsEvent(m);
                 sendEvent(p);
             }
-        }}
+        }
     }
-
 }
+

@@ -110,7 +110,7 @@ public class GPU {
      * @post batches.size()--.
      */
     public void sendToCluster() {
-        cluster.addUnProcessed(batches.poll());
+        cluster.addUnProcessed(batches.remove());
     }
 
     /**
@@ -119,7 +119,6 @@ public class GPU {
      * @post All the data is stores in one of the data batch.
      */
     public void divide() {
-        System.out.println("divide");
         for (int i = 1; i <= model.getData().getSize()/1000; i++) {
             DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpuIndex(cluster.findGPU(this));
@@ -142,7 +141,7 @@ public class GPU {
         model.setStatus(Model.status.Training);
         switch (type) {
             case RTX3090:
-                if ( - currentTime == 1) {
+                if (time - currentTime == 1) {
                     subTrain(1);
                 }
             case RTX2080:
@@ -191,7 +190,6 @@ public class GPU {
             train((DataBatch) processed.peek());
         }
         else if (processed != null && !processed.isEmpty()) {
-            System.out.println("training");
             free = false;
             setCurrentTime();
             train((DataBatch) processed.peek());
@@ -207,7 +205,7 @@ public class GPU {
     }
 
     public void test(Model model) {
-        System.out.println("Start  testing");
+        System.out.println("Start testing");
         double rand = Math.random();
         switch (model.getStudent().getStatus()) {
             case PhD:

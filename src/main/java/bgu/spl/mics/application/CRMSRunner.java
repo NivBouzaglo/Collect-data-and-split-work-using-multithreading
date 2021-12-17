@@ -149,21 +149,25 @@ public class CRMSRunner {
             file.write('\n');
             file.write(" TrainedModels:");
             for (Model model : student.getModels()) {
-                file.write('\n');
-                file.write("            name: " + model.getName());
-                file.write('\n');
-                file.write("            Data: ");
-                file.write('\n');
-                file.write("            type: " + model.getData().getType());
-                file.write('\n');
-                file.write("                   size: " + model.getData().getSize());
-                file.write('\n');
-                file.write("                   status: " + model.getStatus());
-                file.write('\n');
-                if (model.isPublish())
-                    file.write("               Published.");
-                else
-                    file.write("               Not published.");
+                if (model.getStatus() == "Tested") {
+                    file.write('\n');
+                    file.write("            name: " + model.getName());
+                    file.write('\n');
+                    file.write("            Data: ");
+                    file.write('\n');
+                    file.write("            type: " + model.getData().getType());
+                    file.write('\n');
+                    file.write("                   size: " + model.getData().getSize());
+                    file.write('\n');
+                    file.write("                   status: " + model.getStatus());
+                    file.write('\n');
+                    file.write("                   result: " + model.getR());
+                    file.write('\n');
+                    if (model.isPublish())
+                        file.write("               Published.");
+                    else
+                        file.write("               Not published.");
+                }
             }
         }
         //Conferences
