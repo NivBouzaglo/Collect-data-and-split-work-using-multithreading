@@ -86,10 +86,10 @@ public class Model {
 
     public void setResult(String rt) {
         switch (rt) {
-            case "bad":
+            case "Bad":
                 this.r = result.Bad;
                 break;
-            case "good":
+            case "Good":
                 this.r = result.Good;
                 break;
         }

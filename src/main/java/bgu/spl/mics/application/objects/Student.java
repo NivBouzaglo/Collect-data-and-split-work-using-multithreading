@@ -52,6 +52,10 @@ public class Student {
         return status;
     }
 
+    public void setService(StudentService service) {
+        this.service = service;
+    }
+
     public int getPublications() {
         return publications;
     }

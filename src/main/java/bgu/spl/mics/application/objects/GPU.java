@@ -29,14 +29,14 @@ public class GPU {
     private int capacity = 0, time = 1, currentTime = 0;
     private Event event;
     private GPUService GPU;
-    private boolean free ;
+    private boolean free;
 
     public GPU(String t) {
         this.setType(t);
         cluster = Cluster.getInstance();
         batches = new LinkedList<DataBatch>();
         processed = new LinkedBlockingDeque();
-        free=true;
+        free = true;
     }
 
     //Swe need to fix it.
@@ -84,7 +84,9 @@ public class GPU {
         return event;
     }
 
-    public GPUService getGPU(){return GPU;}
+    public GPUService getGPU() {
+        return GPU;
+    }
 
     public Queue<DataBatch> getDataBatchList() {
         return batches;
@@ -110,7 +112,8 @@ public class GPU {
      * @post batches.size()--.
      */
     public void sendToCluster() {
-        cluster.addUnProcessed(batches.remove());
+        if (!batches.isEmpty())
+            cluster.addUnProcessed(batches.remove());
     }
 
     /**
@@ -119,7 +122,7 @@ public class GPU {
      * @post All the data is stores in one of the data batch.
      */
     public void divide() {
-        for (int i = 1; i <= model.getData().getSize()/1000; i++) {
+        for (int i = 1; i <= model.getData().getSize() / 1000; i++) {
             DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpuIndex(cluster.findGPU(this));
             batches.add(dataBatch);
@@ -128,7 +131,8 @@ public class GPU {
             sendToCluster();
         }
     }
-    public String getName(){
+
+    public String getName() {
         return GPU.getName();
     }
 
@@ -177,9 +181,9 @@ public class GPU {
 
     public void receiveFromCluster(DataBatch unit) {
         processed.add(unit);
-        if(free){
+        if (free) {
             setCurrentTime();
-            free=false;
+            free = false;
             train(unit);
         }
     }
@@ -188,8 +192,7 @@ public class GPU {
         time++;
         if (!free) {
             train((DataBatch) processed.peek());
-        }
-        else if (processed != null && !processed.isEmpty()) {
+        } else if (processed != null && !processed.isEmpty()) {
             free = false;
             setCurrentTime();
             train((DataBatch) processed.peek());

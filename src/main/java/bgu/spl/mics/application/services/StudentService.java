@@ -30,11 +30,15 @@ public class StudentService extends MicroService {
 
     @Override
     protected void initialize() {
-        subscribeBroadcast(TerminateBroadcast.class, t -> {terminate();});
+        subscribeBroadcast(TerminateBroadcast.class, t -> {
+            terminate();
+        });
         subscribeBroadcast(PublishConferenceBroadcast.class, t -> {
             for (Model name : t.getModelsName()) {
-                if (student.getModels().contains(name))
+                if (student.getModels().contains(name)) {
                     student.addPublication();
+                    name.setPublish();
+                }
                 else
                     student.addPapersRead();
             }
@@ -46,7 +50,7 @@ public class StudentService extends MicroService {
             TestModelEvent test = new TestModelEvent(m);
             Future future = sendEvent(test);
             test.action(test.getModel());
-            if (test.getModel().getStatus().compareTo("Tested") == 0 ){
+            if (test.getModel().getStatus().compareTo("Tested") == 0) {
                 PublishResultsEvent p = new PublishResultsEvent(m);
                 sendEvent(p);
             }
