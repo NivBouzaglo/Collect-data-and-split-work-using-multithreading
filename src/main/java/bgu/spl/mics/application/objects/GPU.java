@@ -29,13 +29,14 @@ public class GPU {
     private int capacity = 0, time = 1, currentTime = 0;
     private Event event;
     private GPUService GPU;
-    private boolean free = true;
+    private boolean free ;
 
     public GPU(String t) {
         this.setType(t);
         cluster = Cluster.getInstance();
         batches = new LinkedList<DataBatch>();
         processed = new LinkedBlockingDeque();
+        free=true;
     }
 
     //Swe need to fix it.
@@ -83,6 +84,8 @@ public class GPU {
         return event;
     }
 
+    public GPUService getGPU(){return GPU;}
+
     public Queue<DataBatch> getDataBatchList() {
         return batches;
     }
@@ -116,6 +119,7 @@ public class GPU {
      * @post All the data is stores in one of the data batch.
      */
     public void divide() {
+        System.out.println("divide");
         for (int i = 1; i <= model.getData().getSize()/1000; i++) {
             DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpuIndex(cluster.findGPU(this));
@@ -125,6 +129,9 @@ public class GPU {
             sendToCluster();
         }
     }
+    public String getName(){
+        return GPU.getName();
+    }
 
     /**
      * @pre batches!=null
@@ -132,6 +139,7 @@ public class GPU {
      * * @post model.status = "Trained".
      */
     public void train(DataBatch unit) {
+        System.out.println("Start training ");
         model.setStatus(Model.status.Training);
         switch (type) {
             case RTX3090:
@@ -171,13 +179,20 @@ public class GPU {
 
     public void receiveFromCluster(DataBatch unit) {
         processed.add(unit);
+        if(free){
+            System.out.println("im trying to sent for train");
+            free=false;
+            train(unit);
+        }
+        System.out.println(processed.peek().equals(unit));
     }
 
     public void addTime() {
         time++;
         if (!free) {
             train((DataBatch) processed.peek());
-        } else if (processed != null && !processed.isEmpty()) {
+        }
+        else if (processed != null && !processed.isEmpty()) {
             System.out.println("training");
             free = false;
             setCurrentTime();
@@ -194,6 +209,7 @@ public class GPU {
     }
 
     public void test(Model model) {
+        System.out.println("Start  testing");
         double rand = Math.random();
         switch (model.getStudent().getStatus()) {
             case PhD:

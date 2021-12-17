@@ -9,22 +9,22 @@
             [
                 {
                     "name": "YOLO10",
-                    "type": "images",
-                    "size": 200000
+                    "type": "Images",
+                    "size": 20000
                 },
                 {
                     "name": "ResNet9000",
-                    "type": "images",
+                    "type": "Images",
                     "size": 200000
                 },
                 {
                     "name": "LessEfficientNet",
-                    "type": "images",
+                    "type": "Images",
                     "size": 20000
                 },
                 {
                     "name": "DensestNet",
-                    "type": "images",
+                    "type": "Images",
                     "size": 200000
                 }
             ]
@@ -38,7 +38,7 @@
             [
                 {
                     "name": "VIT",
-                    "type": "images",
+                    "type": "Images",
                     "size": 100000000
                 }
             ]

@@ -26,7 +26,6 @@ public class Student {
     public Student(String name, String department, String degree ) {
         this.name = name;
         this.department = department;
-        this.models = new LinkedList<Model>();
         this.models=new LinkedList<Model>();
         this.service = new StudentService(this);
         status = degree(degree);

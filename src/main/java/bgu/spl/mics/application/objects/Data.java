@@ -34,11 +34,11 @@ public class Data {
     }
 
     public void setType(String t) {
-        if (t.compareTo("images") == 0)
+        if (t.compareTo("Images") == 0)
             this.type = Type.Images;
-        else if (t.compareTo("text") == 0)
+        else if (t.compareTo("Text") == 0)
             this.type = Text;
-        else if (t.compareTo("tabular") == 0)
+        else if (t.compareTo("Tabular") == 0)
             this.type = Type.Tabular;
     }
 

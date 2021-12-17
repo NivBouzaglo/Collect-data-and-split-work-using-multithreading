@@ -4,6 +4,7 @@ import bgu.spl.mics.Event;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
+import bgu.spl.mics.application.objects.Cluster;
 import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
 
@@ -22,7 +23,8 @@ public class GPUService extends MicroService {
 
     public GPUService(String name ,GPU gpu) {
         super(name);
-        this.gpu = new GPU(gpu.getType());
+        //this.gpu = new GPU(gpu.getType());
+        this.gpu= gpu;
         gpu.setGPU(this);
     }
 
@@ -30,6 +32,8 @@ public class GPUService extends MicroService {
     @Override
     protected void initialize() {
         // TODO Implement this
+        gpu.setGPU(this);
+        Cluster.getInstance().findGPU(gpu);
         System.out.println("intilaize: " +this.getName());
         subscribeBroadcast(TickBroadcast.class , m ->{gpu.addTime();});
         subscribeEvent(TrainModelEvent.class , t->{gpu.setModel(t.getModel());

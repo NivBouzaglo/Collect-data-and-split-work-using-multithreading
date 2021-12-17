@@ -1,14 +1,10 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.*;
+import bgu.spl.mics.Future;
+import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
-import bgu.spl.mics.application.objects.ConfrenceInformation;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
-import org.junit.Test;
-
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * Student is responsible for sending the {@link TrainModelEvent},
@@ -44,6 +40,7 @@ public class StudentService extends MicroService {
             TrainModelEvent train = new TrainModelEvent(m);
             train.setFuture(sendEvent(train));
             train.action(train.getModel());
+            if (m.getStatus().equals(Model.status.Trained)){
             TestModelEvent test = new TestModelEvent((Model) train.getFuture().get());
             Future future = sendEvent(test);
             test.action(test.getModel().getR());
@@ -51,7 +48,7 @@ public class StudentService extends MicroService {
                 PublishResultsEvent p = new PublishResultsEvent(m);
                 sendEvent(p);
             }
-        }
+        }}
     }
 
 }

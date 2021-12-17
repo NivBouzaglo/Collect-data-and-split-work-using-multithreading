@@ -37,6 +37,9 @@ public class Cluster {
 		gpu = new LinkedList<>();
 		statistics = new statistics();
 	}
+	public List<GPU> getGpu(){
+		return gpu;
+	}
 
 	public void addUnProcessed(DataBatch batch) {
 		sendToCPU(batch);
@@ -56,6 +59,7 @@ public class Cluster {
 	}
 
 	public void addProcessedData(DataBatch batch) {
+		System.out.println("sending to train ");
 		synchronized (gpu) {
 			GPU g = gpu.get(batch.getGpuIndex());
 			if (g.getProcessed().size() < g.getCapacity()) {
@@ -82,7 +86,8 @@ public class Cluster {
 
 	public int findGPU(GPU g) {
 		for (int i=0; i<gpu.size(); i++){
-			if(gpu.get(i).equals(g)){
+			if(gpu.get(i).getName().equals(g.getName())){
+				gpu.get(i).setModel(g.getModel());
 				return i;
 			}
 		}

@@ -41,7 +41,8 @@ public class CRMSRunner {
     public static void start(TimeService timeService, LinkedList<Student> students, LinkedList<GPU> gpus, LinkedList<CPU> cpus, LinkedList<ConfrenceInformation> conference, Cluster cluster, FileWriter output) throws IOException {
         LinkedList<Thread> threads = new LinkedList<>();
         int i = 0;
-        for (GPU gpu : gpus) {
+       // for (GPU gpu : gpus) {
+        for(GPU gpu :Cluster.getInstance().getGpu()){
             GPUService service = new GPUService("GPUId" + i, gpu);
             i++;
             Thread t = new Thread(service);
@@ -93,6 +94,7 @@ public class CRMSRunner {
         JsonElement tree = JsonParser.parseReader(new FileReader(input));
         JsonObject obj = tree.getAsJsonObject();
         JsonArray arr = obj.get("Students").getAsJsonArray();
+        int x=0;
         for (JsonElement e : arr) {
             JsonObject object = e.getAsJsonObject();
             students.add(new Student(object.get("name").getAsString(),
@@ -102,9 +104,11 @@ public class CRMSRunner {
             for (JsonElement m : models) {
                 JsonObject model_object = m.getAsJsonObject();
                 Data data = new Data(model_object.get("type").getAsString(), model_object.get("size").getAsInt());
-                e_models.add(new Model(students.get(students.size() - 1), data, model_object.get("name").getAsString()));
+                e_models.add(new Model(students.get(x), data, model_object.get("name").getAsString()));
+
             }
-            students.get(students.size() - 1).setModels(e_models);
+            students.get(x).setModels(e_models);
+            x++;
         }
         JsonArray gpus = obj.get("GPUS").getAsJsonArray();
         for (JsonElement e : gpus) {
@@ -127,7 +131,9 @@ public class CRMSRunner {
     }
 
     public static void writeOutputFile(FileWriter file, LinkedList<Student> students, LinkedList<ConfrenceInformation> conferences, Cluster cluster) throws
-            IOException {        //Students
+            IOException {
+        System.out.println("Start writing ");
+        //Students
         file.write("Students: ");
         for (Student student : students) {
             file.write('\n');

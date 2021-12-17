@@ -1,7 +1,5 @@
 package bgu.spl.mics.application.objects;
 
-import org.junit.Test;
-
 /**
  * Passive object representing a Deep Learning model.
  * Add all the fields described in the assignment as private fields.
@@ -15,7 +13,7 @@ public class Model {
     private boolean publish;
     private result r;
 
-    enum status {
+    public enum status {
         PreTrained, Training, Trained, Tested
     }
 

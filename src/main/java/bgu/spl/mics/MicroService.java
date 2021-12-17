@@ -1,9 +1,8 @@
 package bgu.spl.mics;
 
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
+import bgu.spl.mics.application.messages.TrainModelEvent;
 
-import static java.lang.Thread.sleep;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The MicroService is an abstract class that any micro-service in the system
@@ -176,11 +175,15 @@ public abstract class MicroService implements Runnable {
             try {
                 m = mb.awaitMessage(this);
             } catch (InterruptedException e) {
-                terminate();
+               //terminate();
             }
             if (m != null) {
                     Callback c = callbacks.get(m.getClass());
-                    c.call(m);
+                    if(m.getClass().equals(TrainModelEvent.class)){
+                        c.call(m);
+                    }
+                    else
+                      c.call(m);
                 }
         }
         mb.unregister(this);
