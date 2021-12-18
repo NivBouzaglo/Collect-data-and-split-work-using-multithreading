@@ -1,14 +1,10 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.*;
+import bgu.spl.mics.Future;
+import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
-import bgu.spl.mics.application.objects.ConfrenceInformation;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
-import org.junit.Test;
-
-import java.util.LinkedList;
-import java.util.Queue;
 
 /**
  * Student is responsible for sending the {@link TrainModelEvent},
@@ -25,12 +21,17 @@ public class StudentService extends MicroService {
     public StudentService(Student student) {
         super(student.getName());
         this.student = student;
+        student.setService(this);
         // TODO Implement this
     }
 
+
+
     @Override
     protected void initialize() {
-        subscribeBroadcast(TerminateBroadcast.class, t -> {terminate();});
+        subscribeBroadcast(TerminateBroadcast.class, t -> {terminate();
+        for (Model model: student.getModels())
+        System.out.println(model + "  "+ model.getStatus());});
         subscribeBroadcast(PublishConferenceBroadcast.class, t -> {
             for (Model name : t.getModelsName()) {
                 if (student.getModels().contains(name))
@@ -41,16 +42,19 @@ public class StudentService extends MicroService {
         });
         for (Model m : student.getModels()) {
             TrainModelEvent train = new TrainModelEvent(m);
-            train.setFuture(sendEvent(train));
-            train.action(train.getModel());
-            TestModelEvent test = new TestModelEvent(m);
-            Future future = sendEvent(test);
-            test.action(test.getModel());
-            if (test.getModel().getStatus().compareTo("Tested") == 0 ){
+            Future f = sendEvent(train);
+            train.setFuture(f);
+
+            if (m.getStatus().equals(Model.status.Trained)){
+                System.out.println("Test");
+                TestModelEvent test = new TestModelEvent(m);
+                sendEvent(test);
+                test.action(test.getModel());
+                if (test.getModel().getStatus().compareTo("Tested") == 0 ){
                 PublishResultsEvent p = new PublishResultsEvent(m);
                 sendEvent(p);
-            }
-        }
+            }}
+        }}
     }
 
-}
+

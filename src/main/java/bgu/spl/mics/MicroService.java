@@ -1,7 +1,5 @@
 package bgu.spl.mics;
 
-import bgu.spl.mics.application.messages.TrainModelEvent;
-
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -152,6 +150,7 @@ public abstract class MicroService implements Runnable {
      */
     protected final void terminate() {
         this.terminated = true;
+        System.out.println(this.name +" terminated");
     }
 
     /**
@@ -174,20 +173,14 @@ public abstract class MicroService implements Runnable {
             Message m = null;
             try {
                 m = mb.awaitMessage(this);
-            } catch (InterruptedException e) {
-               //terminate();
-            }
+            } catch (InterruptedException e) {}
             if (m != null) {
                     Callback c = callbacks.get(m.getClass());
-                    if(m.getClass().equals(TrainModelEvent.class)){
-                        c.call(m);
-                    }
-                    else
-                      c.call(m);
-                }
-        }
+                    c.call(m);
+                }}
         mb.unregister(this);
     }
+
 
     protected void register() {
         mb.register(this);

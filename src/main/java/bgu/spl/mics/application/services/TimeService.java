@@ -44,7 +44,6 @@ public class TimeService extends MicroService{
             @Override
             public void run() {
                 sendBroadcast(tick);
-                System.out.println(currentTime);
                 currentTime++;
                 if(currentTime>=duration){
                     task.cancel();
@@ -58,6 +57,7 @@ public class TimeService extends MicroService{
     }
 
     public void end() {
+        System.out.println("time is over ");
         timer.cancel();
         sendBroadcast(new TerminateBroadcast());
         for (Thread t : threads)

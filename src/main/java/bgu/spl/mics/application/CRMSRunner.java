@@ -49,7 +49,7 @@ public class CRMSRunner {
             threads.add(t);
         }
         i = 0;
-        for (CPU cpu : cpus) {
+        for (CPU cpu : Cluster.getInstance().getCpu()) {
             CPUService service = new CPUService("CPUId" + i, cpu);
             i++;
             Thread t = new Thread(service);

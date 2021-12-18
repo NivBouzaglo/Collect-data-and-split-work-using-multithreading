@@ -4,7 +4,6 @@ import bgu.spl.mics.Event;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
-import bgu.spl.mics.application.objects.Cluster;
 import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
 
@@ -34,11 +33,15 @@ public class GPUService extends MicroService {
         // TODO Implement this
         //gpu.setGPU(this);
         subscribeBroadcast(TickBroadcast.class , m ->{gpu.addTime();});
-        subscribeEvent(TrainModelEvent.class , t->{gpu.setModel(t.getModel());
+        subscribeEvent(TrainModelEvent.class , t->{
+            t.setService(this);
+            gpu.setModel(t.getModel());
             gpu.setEvent(t);
             gpu.divide();});
-        subscribeEvent(TestModelEvent.class , g->{gpu.test(g.getModel());
-        complete((Event)g , g.getModel());});
+        subscribeEvent(TestModelEvent.class , g->{
+            g.setService(this);
+            gpu.test(g.getModel());
+        complete((Event)g,gpu.getModel());});
         subscribeBroadcast(TerminateBroadcast.class ,m1->{terminate();});
     }
     public void completeTest(Event event,Model model){
