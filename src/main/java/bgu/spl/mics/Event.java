@@ -1,8 +1,5 @@
 package bgu.spl.mics;
 
-import bgu.spl.mics.application.messages.TrainModelEvent;
-import bgu.spl.mics.application.objects.Model;
-
 /**
  * A "Marker" interface extending {@link Message}. A micro-service that sends an
  * Event message expects to receive a result of type {@code <T>} when a
@@ -14,4 +11,5 @@ import bgu.spl.mics.application.objects.Model;
 public interface Event<T> extends Message {
     public void action(T future);
     public Future getFuture();
+    public MicroService getService();
 }

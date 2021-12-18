@@ -10,11 +10,25 @@ public class DataBatch {
     private int start_index;
     private boolean proccesed;
     private int gpuIndex;
+    private int ticks;
+
 
     public DataBatch(Data d, int start){
         data=d;
         start_index = start;
         this.proccesed = false;
+        switch (data.getType()){
+            case Text:
+                ticks=2;
+            case Images:
+                ticks= 4;
+            case Tabular:
+                ticks= 1;
+        }
+    }
+
+    public int getTicks() {
+        return ticks;
     }
 
     public int getGpuIndex() {

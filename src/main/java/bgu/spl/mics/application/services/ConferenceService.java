@@ -1,8 +1,9 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
-import bgu.spl.mics.application.messages.*;
+import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
+import bgu.spl.mics.application.messages.PublishResultsEvent;
+import bgu.spl.mics.application.messages.TickBroadcast;
 import bgu.spl.mics.application.objects.ConfrenceInformation;
 
 /**
@@ -27,7 +28,9 @@ public class ConferenceService extends MicroService {
     protected void initialize() {
         // TODO Implement this
         subscribeBroadcast(TickBroadcast.class, m->{conf.addTime(); if (conf.isFinish()){sendBroadcast(new PublishConferenceBroadcast(conf.getModels())); terminate();}});
-        subscribeEvent(PublishResultsEvent.class , t ->{conf.addToModels(t.getModel());});
+        subscribeEvent(PublishResultsEvent.class , t ->{
+            t.setService(this);
+            conf.addToModels(t.getModel());});
 
     }
 }

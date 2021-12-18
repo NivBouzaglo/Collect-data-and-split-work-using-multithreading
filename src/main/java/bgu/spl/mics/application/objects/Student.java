@@ -27,9 +27,14 @@ public class Student {
         this.name = name;
         this.department = department;
         this.models=new LinkedList<Model>();
-        this.service = new StudentService(this);
+        //this.service = new StudentService(this);
         status = degree(degree);
     }
+
+    public void setService(StudentService service) {
+        this.service = service;
+    }
+
     public  void setModels(LinkedList<Model> s_models){
         this.models=s_models;
     }

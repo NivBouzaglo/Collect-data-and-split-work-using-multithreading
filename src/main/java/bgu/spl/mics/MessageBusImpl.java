@@ -1,6 +1,8 @@
 package bgu.spl.mics;
 
 import bgu.spl.mics.application.messages.TerminateBroadcast;
+import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.services.ConferenceService;
 
 import java.util.Deque;
 import java.util.Queue;
@@ -20,6 +22,7 @@ public class MessageBusImpl implements MessageBus {
     private static MessageBusImpl INSTANCE = null;
     private Object lockBroadcast;
     private Object lockEvent;
+    private ConcurrentHashMap<MicroService, Boolean> busyServices =null;
 
     public MessageBusImpl() {
         microservices = new ConcurrentHashMap<>();
@@ -27,6 +30,7 @@ public class MessageBusImpl implements MessageBus {
         broadcasts = new ConcurrentHashMap<>();
         lockBroadcast = new Object();
         lockEvent = new Object();
+        busyServices = new ConcurrentHashMap<>();
     }
 
     public static MessageBusImpl getInstance() {
@@ -52,6 +56,9 @@ public class MessageBusImpl implements MessageBus {
     @Override
     public <T> void complete(Event<T> e, T result) {
         e.action(result);
+        busyServices.remove(e.getService());
+        busyServices.put(e.getService(),false);
+
     }
 
     @Override
@@ -61,9 +68,9 @@ public class MessageBusImpl implements MessageBus {
             System.out.println("don't have microservice that subscribe this broadcast");
         } else if (microservices != null && broadcasts != null)
             for (MicroService m : broadcasts.get(b.getClass())) {
-                synchronized (m) {
+               synchronized (m) {
                     if (m != null && registered(m))
-                        if (b.getClass().equals(TerminateBroadcast.class)) {
+                        if (b.getClass().equals(TickBroadcast.class)|| b.getClass().equals(TerminateBroadcast.class)) {
                             microservices.get(m).addFirst(b);
                         } else
                             microservices.get(m).add(b);
@@ -89,15 +96,20 @@ public class MessageBusImpl implements MessageBus {
     }
 
     private MicroService roundRobin(Queue<MicroService> microServices) {
+        synchronized (microServices){
+        if(!microServices.isEmpty()){
             MicroService m = microServices.poll();
             microServices.add(m);
             return m;
+        }}
+        return null;
     }
 
     @Override
     public void register(MicroService m) {
         if (!microservices.containsKey(m)) {
             microservices.put(m, new LinkedBlockingDeque<>());
+            busyServices.put(m,false);
         }
     }
 
@@ -130,7 +142,17 @@ public class MessageBusImpl implements MessageBus {
         synchronized (this) {
             notifyAll();
         }
-        return microservices.get(m).remove();
+        Message e = microservices.get(m).peek();
+        if (e.getClass().equals(TickBroadcast.class) | e.getClass().equals(TerminateBroadcast.class)| e.getClass().equals(ConferenceService.class)) {
+            return microservices.get(m).remove();
+        }
+        else if (busyServices.get(m).equals(false)){
+            busyServices.remove(m);
+            busyServices.put(m,true);
+            return microservices.get(m).remove();
+        }
+        else
+            return null;
     }
 
 

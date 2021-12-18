@@ -29,14 +29,15 @@ public class GPU {
     private int capacity = 0, time = 1, currentTime = 0;
     private Event event;
     private GPUService GPU;
-    private boolean free;
+    private boolean free ;
+    private int ticks;
 
     public GPU(String t) {
         this.setType(t);
         cluster = Cluster.getInstance();
         batches = new LinkedList<DataBatch>();
         processed = new LinkedBlockingDeque();
-        free = true;
+        free=true;
     }
 
     //Swe need to fix it.
@@ -84,9 +85,7 @@ public class GPU {
         return event;
     }
 
-    public GPUService getGPU() {
-        return GPU;
-    }
+    public GPUService getGPU(){return GPU;}
 
     public Queue<DataBatch> getDataBatchList() {
         return batches;
@@ -97,12 +96,15 @@ public class GPU {
         if (t.compareTo("RTX3090") == 0) {
             type = Type.RTX3090;
             capacity = 32;
+            ticks=1;
         } else if (t.compareTo("RTX2080") == 0) {
             type = Type.RTX2080;
             capacity = 16;
+            ticks=2;
         } else if (t.compareTo("GTX1080") == 0) {
             type = Type.GTX1080;
             capacity = 8;
+            ticks=4;
         }
     }
 
@@ -112,8 +114,8 @@ public class GPU {
      * @post batches.size()--.
      */
     public void sendToCluster() {
-        if (!batches.isEmpty())
-            cluster.addUnProcessed(batches.remove());
+        if(!batches.isEmpty())
+        cluster.addUnProcessed(batches.poll());
     }
 
     /**
@@ -122,17 +124,20 @@ public class GPU {
      * @post All the data is stores in one of the data batch.
      */
     public void divide() {
-        for (int i = 1; i <= model.getData().getSize() / 1000; i++) {
+        System.out.println("Start train model event " + model.getName());
+        for (int i = 1; i <= model.getData().getSize()/1000; i++) {
             DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpuIndex(cluster.findGPU(this));
             batches.add(dataBatch);
+            //sendToCluster();
         }
-        for (int i = 0; i < capacity; i++) {
+        for ( int i=0; i<capacity/2 & !batches.isEmpty(); i++)
             sendToCluster();
-        }
+//        for (int i = 0; i < capacity; i++) {
+//            sendToCluster();
+//        }
     }
-
-    public String getName() {
+    public String getName(){
         return GPU.getName();
     }
 
@@ -143,60 +148,90 @@ public class GPU {
      */
     public void train(DataBatch unit) {
         model.setStatus(Model.status.Training);
-        switch (type) {
-            case RTX3090:
-                if (time - currentTime == 1) {
-                    subTrain(1);
-                }
-            case RTX2080:
-                if (time - currentTime == 2) {
-                    subTrain(2);
-                }
-            case GTX1080:
-                if (time - currentTime == 1) {
-                    subTrain(4);
-                }
-        }
-        if (processedData * 1000 >= model.getData().getSize()) {
-            model.endTraining();
-            GPU.completeTrain(event, model);
-        }
+        System.out.println("Train");
+        if (time-currentTime>=ticks)
+            subTrain(ticks);
+
+//        switch (type) {
+//            case RTX3090:
+//                if (time - currentTime >= 1) {
+//                    subTrain(1);
+//                }
+//            case RTX2080:
+//                if (time - currentTime >= 2) {
+//                    subTrain(2);
+//                }
+//            case GTX1080:
+//                if (time - currentTime >= 4) {
+//                    subTrain(4);
+//                }
+//        }
+
     }
 
     public void subTrain(int ticks) {
         free = true;
         processedData++;
+        processed.poll();
+        //System.out.println("ProcessedData "+processedData);
+        //System.out.println("Size "+model.getData().getSize());
+        if (processedData * 1000 >= model.getData().getSize()) {
+            processedData=0;
+            System.out.println("Finish *******************************************");
+            model.endTraining();
+            GPU.completeTrain(event, model);
+        }
+        if (!batches.isEmpty()){
+            sendToCluster();
+        cluster.askForBatch(this);
+        if(!processed.isEmpty()) {
+            free=false;
+            currentTime=time;
+            train((DataBatch) processed.peek());
+           // System.out.println("from subtrain "+ model.getName());
+        }
         cluster.getStatistics().setUnit_used_gpu(ticks);
         cluster.getStatistics().setNumber_of_DB(1);
-        processed.poll();
-        if (!batches.isEmpty())
-            sendToCluster();
-    }
+}}
 
+public void deliver(){
+        for ( int i=0; i<capacity & !batches.isEmpty(); i++)
+            sendToCluster();
+}
     /**
      * @pre
      * @inv
      * @post batches!=null
      */
 
-    public void receiveFromCluster(DataBatch unit) {
-        processed.add(unit);
-        if (free) {
-            setCurrentTime();
-            free = false;
-            train(unit);
+    public void startTraining() {
+        if(free){
+            //System.out.println("from receiv data " + model.getName());
+            currentTime=time;
+            free=false;
+            train((DataBatch) processed.peek());
         }
     }
 
     public void addTime() {
         time++;
+       // System.out.println("I sould atart train");
         if (!free) {
             train((DataBatch) processed.peek());
-        } else if (processed != null && !processed.isEmpty()) {
-            free = false;
-            setCurrentTime();
-            train((DataBatch) processed.peek());
+            //System.out.println("continue training  " + model.getName());
         }
+         else if(capacity>processed.size()) {
+            //System.out.println("there is free place " +  processed.size());
+            cluster.askForBatch(this);
+            if(!processed.isEmpty())
+             startTraining();
+        }
+//        else if (processed != null && !processed.isEmpty()) {
+//            System.out.println("start training new one   " + model.getName());
+//            free = false;
+//            currentTime=time;
+//            train((DataBatch) processed.peek());
+//        }
     }
 
     private void setCurrentTime() {
