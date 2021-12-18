@@ -1,6 +1,7 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Event;
+import bgu.spl.mics.Future;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
@@ -34,11 +35,13 @@ public class GPUService extends MicroService {
         //gpu.setGPU(this);
         subscribeBroadcast(TickBroadcast.class , m ->{gpu.addTime();});
         subscribeEvent(TrainModelEvent.class , t->{
+            this.event=t;
             t.setService(this);
             gpu.setModel(t.getModel());
             gpu.setEvent(t);
             gpu.divide();});
         subscribeEvent(TestModelEvent.class , g->{
+            this.event=g;
             g.setService(this);
             gpu.test(g.getModel());
         complete((Event)g,gpu.getModel());});
@@ -50,6 +53,13 @@ public class GPUService extends MicroService {
     }
     public void completeTrain(Event event,Model model){
         MessageBusImpl.getInstance().complete(event,model);
-
+        testing(model);
+    }
+    public void testing(Model model){
+        TestModelEvent test = new TestModelEvent(model);
+        Future f = sendEvent(test);
+        MessageBusImpl.getInstance().complete(event, model);
+        if (model.getResult().equals(Model.result.Good))
+            model.getStudent().getService().publish(model);
     }
 }

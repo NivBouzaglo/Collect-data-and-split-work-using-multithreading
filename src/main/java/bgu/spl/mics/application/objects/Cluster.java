@@ -21,6 +21,7 @@ public class Cluster {
     private Queue<DataBatch> endProcessing;
     private static Cluster INSTANCE = null;
     private statistics statistics;
+    private int index=0;
 
 
     /**
@@ -51,16 +52,19 @@ public class Cluster {
         sendToCPU(batch);
     }
 
-    private void sendToCPU(DataBatch batch) {
-        int size = cpu.get(0).getData().size();
-        int index = 0;
-        for (int i = 0; i < cpu.size(); i++) {
-            if (cpu.get(i).getData().size() < size) {
-                size = cpu.get(i).getData().size();
-                index = i;
-            }
-        }
+    public void sendToCPU(DataBatch batch) {
+//        int size = cpu.get(0).getData().size();
+//        int index = 0;
+//        for (int i = 0; i < cpu.size(); i++) {
+//            if (cpu.get(i).getData().size() < size) {
+//                size = cpu.get(i).getData().size();
+//                index = i;
+//            }
         cpu.get(index).receiveData(batch);
+        if(index>=cpu.size()-1)
+            index=0;
+        else
+            index++;
 
     }
 

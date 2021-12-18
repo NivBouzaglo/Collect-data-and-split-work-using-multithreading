@@ -115,7 +115,7 @@ public class GPU {
      */
     public void sendToCluster() {
         if(!batches.isEmpty())
-        cluster.addUnProcessed(batches.poll());
+        cluster.sendToCPU(batches.poll());
     }
 
     /**
@@ -124,7 +124,7 @@ public class GPU {
      * @post All the data is stores in one of the data batch.
      */
     public void divide() {
-        System.out.println("Start train model event " + model.getName());
+        System.out.println("Start train model event " + model.getName()+ " "+ this.getName());
         for (int i = 1; i <= model.getData().getSize()/1000; i++) {
             DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpuIndex(cluster.findGPU(this));
@@ -148,7 +148,6 @@ public class GPU {
      */
     public void train(DataBatch unit) {
         model.setStatus(Model.status.Training);
-        System.out.println("Train");
         if (time-currentTime>=ticks)
             subTrain(ticks);
 
