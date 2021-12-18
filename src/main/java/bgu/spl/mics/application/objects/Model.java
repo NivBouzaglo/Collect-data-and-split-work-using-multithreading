@@ -72,6 +72,10 @@ public class Model {
         publish = true;
     }
 
+    public result getResult(){
+        return r;
+    }
+
     public String getR() {
         switch (r){
             case Bad:

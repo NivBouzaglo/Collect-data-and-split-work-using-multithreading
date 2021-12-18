@@ -71,13 +71,14 @@ public class CRMSRunner {
         for (Thread t : threads) {
             t.start();
         }
+        System.out.println("Finish start ");
         for (Thread t : threads) {
             try {
                 t.join();
             } catch (InterruptedException e) {
             }
         }
-        System.out.println("Finish start ");
+        System.out.println("Finish all ");
     }
 
 

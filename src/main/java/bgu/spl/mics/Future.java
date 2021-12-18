@@ -53,7 +53,6 @@ public class Future<T> {
      */
     public void resolve(T result) {
         //TODO: implement this.
-        System.out.println("im resolving "+ result.toString());
         this.result = result;
         isDone = true;
         synchronized (this) {
