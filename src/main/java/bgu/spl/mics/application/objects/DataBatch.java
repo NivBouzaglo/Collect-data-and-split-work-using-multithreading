@@ -11,6 +11,7 @@ public class DataBatch {
     private boolean proccesed;
     private int gpuIndex;
     private int ticks;
+    private int tickCounter=0;
 
 
     public DataBatch(Data d, int start){
@@ -25,6 +26,14 @@ public class DataBatch {
             case Tabular:
                 ticks= 1;
         }
+    }
+
+    public void setTickCounter() {
+        this.tickCounter ++;
+    }
+
+    public int getTickCounter() {
+        return tickCounter;
     }
 
     public int getTicks() {

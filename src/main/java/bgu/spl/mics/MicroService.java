@@ -1,6 +1,7 @@
 package bgu.spl.mics;
 
-import bgu.spl.mics.application.services.StudentService;
+import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.services.ConferenceService;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -182,10 +183,13 @@ public abstract class MicroService implements Runnable {
             } catch (InterruptedException e) {
             }
             if (m != null) {
+                if(m.getClass().equals(TrainModelEvent.class))
+                    System.out.println("getting tarin "+ this.getName());
                 Callback c = callbacks.get(m.getClass());
                 c.call(m);
             }
         }
+        if (!this.getClass().equals(ConferenceService.class))
         mb.unregister(this);
     }
 

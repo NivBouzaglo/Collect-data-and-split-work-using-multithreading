@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Passive object representing the cluster.
@@ -72,6 +71,7 @@ public class Cluster {
             return;
         //else{
         if (g.getProcessed().size() < g.getCapacity() && !processedData.get(g).isEmpty()) {
+            System.out.println("asking for data ");
             DataBatch d = processedData.get(g).poll();
             if (d != null & g.getProcessed() != null)
                 g.getProcessed().add(d);

@@ -1,14 +1,10 @@
 package bgu.spl.mics.application.services;
 
 import bgu.spl.mics.Event;
-import bgu.spl.mics.Future;
-import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * GPU service is responsible for handling the
@@ -54,6 +50,10 @@ public class GPUService extends MicroService {
             gpu.setModel(t.getModel());
             gpu.setEvent(t);
             gpu.divide();
+            gpu.setModel(null);
+            gpu.setBatches();
+            gpu.setProcessed();
+
         });
         subscribeBroadcast(TerminateBroadcast.class, m1 -> {
             terminate();

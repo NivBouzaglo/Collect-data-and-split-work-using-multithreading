@@ -5,7 +5,6 @@ import bgu.spl.mics.Future;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
-import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
 
@@ -61,7 +60,13 @@ public class StudentService extends MicroService {
             PublishResultsEvent p = new PublishResultsEvent(model);
             future = sendEvent(p);
         }
-    }
+
+        else{
+        inProgress=false;
+        modelCounter++;
+        if (modelCounter < student.getModels().size())
+            progress(student.getModels().get(modelCounter));
+    }}
 
     public void setTerminate() {
         terminate = true;

@@ -24,7 +24,7 @@ public class GPU {
     private Model model;
     private Cluster cluster;
     private Queue<DataBatch> batches;
-    private BlockingDeque processed;
+    private BlockingDeque<DataBatch> processed;
     private int processedData;
     private int capacity = 0, time = 1, currentTime = 0;
     private Event event;
@@ -58,9 +58,14 @@ public class GPU {
         else if (type == Type.GTX1080) return "GTX1080";
         return null;
     }
+    public void setProcessed(){
+        while ((!processed.isEmpty()))
+            processed.poll();
+    }
 
     public void setBatches() {
-        batches = null;
+        while ((!batches.isEmpty()))
+            batches.poll();
     }
 
     public void setBusy() {
@@ -160,14 +165,6 @@ public class GPU {
      * @inv model.status="Training".
      * * @post model.status = "Trained".
      */
-    public void train(DataBatch unit) {
-        if (model != null) {
-            model.setStatus(Model.status.Training);
-            cluster.getStatistics().setUnit_used_gpu(1);
-            if (time - currentTime >= ticks)
-                subTrain(ticks);
-        }
-    }
 
     public void subTrain(int ticks) {
         free = true;
@@ -184,13 +181,7 @@ public class GPU {
             sendToCluster();
         }
         cluster.askForBatch(this);
-        if (!processed.isEmpty()) {
-            free = false;
-            currentTime = time;
-            startTraining();
-        }
-        cluster.getStatistics().setUnit_used_gpu(ticks);
-        cluster.getStatistics().setNumber_of_DB(1);
+        cluster.getStatistics().setNumber_of_DB();
     }
 
     public void deliver() {
@@ -204,27 +195,17 @@ public class GPU {
      * @post batches!=null
      */
 
-    public void startTraining() {
-        if (free) {
-            currentTime = time;
-            free = false;
-            train((DataBatch) processed.peek());
-        }
-    }
 
     public void addTime() {
-        time++;
-        if (!free) {
-            train((DataBatch) processed.peek());
-        } else if (capacity > processed.size()) {
-            cluster.askForBatch(this);
-            if (!processed.isEmpty())
-                startTraining();
+        //time++;
+        if (!processed.isEmpty()) {
+            if (processed.peek().getTickCounter() < ticks) {
+                processed.peek().setTickCounter();
+                cluster.getStatistics().setUnit_used_gpu();
+            } else {
+                subTrain(ticks);
+            }
         }
-    }
-
-    private void setCurrentTime() {
-        currentTime = time;
     }
 
     public int getTicks() {

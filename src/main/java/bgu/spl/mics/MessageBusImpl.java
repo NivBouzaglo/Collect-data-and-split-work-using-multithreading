@@ -1,12 +1,14 @@
 package bgu.spl.mics;
 
-import bgu.spl.mics.application.messages.*;
-import bgu.spl.mics.application.objects.GPU;
-import bgu.spl.mics.application.services.ConferenceService;
+import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
+import bgu.spl.mics.application.messages.TerminateBroadcast;
+import bgu.spl.mics.application.messages.TestModelEvent;
 import bgu.spl.mics.application.services.GPUService;
 import bgu.spl.mics.application.services.StudentService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -70,6 +72,7 @@ public class MessageBusImpl implements MessageBus {
                             microservicesBroadcast.get(m).addFirst(b);
                         } else
                             microservicesBroadcast.get(m).add(b);
+                //   System.out.println("Notify "+ m.getName());
                     m.notifyAll();
                 }
             }
@@ -94,6 +97,7 @@ public class MessageBusImpl implements MessageBus {
                     microservicesEvent.get(getTheEvent).addFirst(e);
                     Future<T> future = new Future<>();
                     getTheEvent.notifyAll();
+                  //  System.out.println("Notify "+ getTheEvent.getName());
                     return future;
                 }
             }
@@ -153,6 +157,7 @@ public class MessageBusImpl implements MessageBus {
                     return microservicesBroadcast.get(m).poll();}
                 else
                     synchronized (m) {
+                    System.out.println("Wait "+ m.getName());
                         m.wait();
                     }
             }

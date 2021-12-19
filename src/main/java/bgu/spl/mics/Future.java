@@ -38,12 +38,13 @@ public class Future<T> {
     public T get() {
         //TODO: implement this.
         while (!isDone)
+            synchronized (this){
             try {
                 synchronized (this) {
                     wait();
                 }
             } catch (InterruptedException ex) {
-            }
+            }}
         return result;
     }
 

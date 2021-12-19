@@ -15,6 +15,7 @@ public class CPU {
     private boolean processed;
     private int time = 0;
     private int currentTime = 0;
+    private int ticks = 0;
 
 
     public CPU(int i_cores) {
@@ -47,7 +48,7 @@ public class CPU {
 
     private void setCurrentTime() {
         if (!processed)
-           this.currentTime = time;
+            this.currentTime = time;
     }
 
     /**
@@ -55,17 +56,18 @@ public class CPU {
      * @inv cluster!=null
      * @post data.size()=0.
      */
-    public void sendData(DataBatch unit ) {
-        processed = true;
-        if (unit !=null ) {
-            cluster.getStatistics().setUnit_used_cpu(1);
-            if (time-currentTime>= unit.getTicks()*(32/cores)){
-                cluster.addProcessedData(unit);
-                data.poll();
-                processed = false;
-            }
+    public void sendData(DataBatch unit) {
+        //   System.out.println("Sending from CPU");
+        //  processed = true;
+        ticks=0;
+        if (unit != null) {
+            cluster.addProcessedData(unit);
+            //if (time-currentTime>= unit.getTicks()*(32/cores)){
+            // data.poll();
+            //    processed = false;
         }
     }
+
 
     /**
      * @pre data!=null & cores>0
@@ -79,12 +81,16 @@ public class CPU {
      * @post
      */
     public void addTime() {
-        time++;
-        setCurrentTime();
-         if (!data.isEmpty()) {
-             sendData(data.peek());
-         }
-    }
+
+        if (!data.isEmpty()) {
+            cluster.getStatistics().setUnit_used_cpu();
+            if (ticks < data.peek().getTicks() * (32 / cores))
+                ticks++;
+            else
+                sendData(data.poll());
+            }
+        }
+
     public long getTicks() {
         return time;
     }
