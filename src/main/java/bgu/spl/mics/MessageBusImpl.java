@@ -1,15 +1,11 @@
 package bgu.spl.mics;
 
-import bgu.spl.mics.application.messages.PublishResultsEvent;
-import bgu.spl.mics.application.messages.TerminateBroadcast;
-import bgu.spl.mics.application.messages.TickBroadcast;
-import bgu.spl.mics.application.messages.TrainModelEvent;
+import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.services.ConferenceService;
 import bgu.spl.mics.application.services.GPUService;
 import bgu.spl.mics.application.services.StudentService;
 
-import java.util.Deque;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -21,7 +17,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class MessageBusImpl implements MessageBus {
 
     private ConcurrentHashMap<MicroService, Deque<Message>> microservices = null;
-    private ConcurrentHashMap<Class<? extends Event<?>>, Deque<MicroService>> events = null;
+    private ConcurrentHashMap<Class<? extends Event<?>>, List<MicroService>> events = null;
     private ConcurrentHashMap<Class<? extends Broadcast>, Deque<MicroService>> broadcasts = null;
     private static MessageBusImpl INSTANCE = null;
     private Object lockBroadcast;
@@ -46,8 +42,8 @@ public class MessageBusImpl implements MessageBus {
 
     public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
         if (!events.containsKey(type))
-            events.put(type, new LinkedBlockingDeque<>());
-        events.get(type).addFirst(m);
+            events.put(type, new ArrayList<>());
+        events.get(type).add(m);
     }
 
     @Override
@@ -89,7 +85,14 @@ public class MessageBusImpl implements MessageBus {
         if (!events.containsKey(e.getClass()))
             return null;
         else {
-            MicroService getTheEvent = roundRobin(events.get(e.getClass()));
+            MicroService getTheEvent = null;
+            if (e instanceof TestModelEvent) {
+                for (int i = 0; i < events.get(TestModelEvent.class).size(); i++) {
+                    if (events.get(TestModelEvent.class).get(i).equals(((TestModelEvent) e).getModel()))
+                        getTheEvent = events.get(TestModelEvent.class).get(i);
+                }
+            } else
+                getTheEvent = roundRobin(events.get(e.getClass()));
             if (getTheEvent != null) {
                 synchronized (getTheEvent) {
                     microservices.get(getTheEvent).add(e);
@@ -98,129 +101,130 @@ public class MessageBusImpl implements MessageBus {
                     return future;
                 }
             }
-        }return null;
-
         }
-
-        private MicroService roundRobin (Queue < MicroService > microServices) {
-            if (!microServices.isEmpty()) {
-                MicroService m = microServices.poll();
-                if (busyServices.get(m) != null) {
-                    int count =0 ;
-                    while (busyServices.get(m) && count < microServices.size()) {
-                        m = microServices.poll();
-                        microServices.add(m);
-                        count++;
-                    }
-                } else
-                    microServices.add(m);
-                return m;
-            }
-            return null;
-        }
-
-        @Override
-        public void register (MicroService m){
-            if (!microservices.containsKey(m)) {
-                microservices.put(m, new LinkedBlockingDeque<>());
-                busyServices.put(m, false);
-            }
-        }
-
-        public void unregister (MicroService m){
-            if (!registered(m)) {
-                throw new IllegalArgumentException("this microservice not registered");
-            } else {
-                synchronized (m) {
-                    microservices.remove(m);
-                    for (Class d : events.keySet())
-                        if (checkEvent(d, m))
-                            events.get(d).remove(m);
-                    for (Class d : broadcasts.keySet())
-                        if (checkBroadcast(d, m))
-                            broadcasts.get(d).remove(m);
-
-                }
-            }
-        }
-
-        @Override
-        public Message awaitMessage (MicroService m) throws InterruptedException {
-            if (m != null && microservices != null && microservices.get(m) != null) {
-                synchronized (m) {
-                    while (microservices.get(m).isEmpty()) {
-                        m.wait();
-                    }
-                }
-            }
-            synchronized (this) {
-                notifyAll();
-            }
-            Message e = microservices.get(m).peek();
-            if (m instanceof GPUService && e.getClass().equals(TrainModelEvent.class)) {
-                busyServices.remove(m);
-                busyServices.put(m, true);
-                return microservices.get(m).remove();
-            } else
-                return microservices.get(m).remove();
-        }
-
-
-        @Override
-        public boolean BroadcastSended (Broadcast b){
-            if (broadcasts.containsKey(b.getClass())) {
-                for (MicroService m : broadcasts.get(b.getClass())) {
-                    if (!microservices.get(m).contains(b))
-                        return false;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean EventSended (Event b){
-            if (events.containsKey(b.getClass())) {
-                for (MicroService m : events.get(b.getClass())) {
-                    if (!microservices.get(m).contains(b))
-                        return false;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean registered (MicroService m){
-            return microservices.containsKey(m);
-        }
-
-        public <T > boolean updateEvent (Class < ? extends Event<T>>type, MicroService m){
-            if (events.containsKey(type.getClass()))
-                return events.get(type.getClass()).contains(m);
-            else
-                return false;
-        }
-
-        public <T > boolean checkEvent (Class c, MicroService m){
-            if (events.containsKey(c))
-                return events.get(c).contains(m);
-            else
-                return false;
-        }
-
-        public <T > boolean updateBroadcast (Class < ? extends Broadcast > type, MicroService m){
-            if (broadcasts.containsKey(type.getClass()))
-                return broadcasts.get(type.getClass()).contains(m);
-            else
-                return false;
-        }
-
-        public <T > boolean checkBroadcast (Class c, MicroService m){
-            if (broadcasts.containsKey(c))
-                return broadcasts.get(c).contains(m);
-            else
-                return false;
-        }
+        return null;
 
     }
+
+    private MicroService roundRobin(List<MicroService> microServices) {
+        if (!microServices.isEmpty()) {
+            int count = 0;
+            MicroService m = microServices.remove(count);
+            if (busyServices.get(m) != null) {
+                while (busyServices.get(m) && count < microServices.size()) {
+                    microServices.add(m);
+                    count++;
+                    microServices.get(count);
+                }
+            } else
+                microServices.add(m);
+            return m;
+        }
+        return null;
+    }
+
+    @Override
+    public void register(MicroService m) {
+        if (!microservices.containsKey(m)) {
+            microservices.put(m, new LinkedBlockingDeque<>());
+            busyServices.put(m, false);
+        }
+    }
+
+    public void unregister(MicroService m) {
+        if (!registered(m)) {
+            throw new IllegalArgumentException("this microservice not registered");
+        } else {
+            synchronized (m) {
+                microservices.remove(m);
+                for (Class d : events.keySet())
+                    if (checkEvent(d, m))
+                        events.get(d).remove(m);
+                for (Class d : broadcasts.keySet())
+                    if (checkBroadcast(d, m))
+                        broadcasts.get(d).remove(m);
+
+            }
+        }
+    }
+
+    @Override
+    public Message awaitMessage(MicroService m) throws InterruptedException {
+        if (m != null && microservices != null && microservices.get(m) != null) {
+            synchronized (m) {
+                while (microservices.get(m).isEmpty()) {
+                    m.wait();
+                }
+            }
+        }
+        synchronized (this) {
+            notifyAll();
+        }
+        Message e = microservices.get(m).peek();
+        if (m instanceof GPUService && e.getClass().equals(TrainModelEvent.class)) {
+            busyServices.remove(m);
+            busyServices.put(m, true);
+            return microservices.get(m).remove();
+        } else
+            return microservices.get(m).remove();
+    }
+
+
+    @Override
+    public boolean BroadcastSended(Broadcast b) {
+        if (broadcasts.containsKey(b.getClass())) {
+            for (MicroService m : broadcasts.get(b.getClass())) {
+                if (!microservices.get(m).contains(b))
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean EventSended(Event b) {
+        if (events.containsKey(b.getClass())) {
+            for (MicroService m : events.get(b.getClass())) {
+                if (!microservices.get(m).contains(b))
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean registered(MicroService m) {
+        return microservices.containsKey(m);
+    }
+
+    public <T> boolean updateEvent(Class<? extends Event<T>> type, MicroService m) {
+        if (events.containsKey(type.getClass()))
+            return events.get(type.getClass()).contains(m);
+        else
+            return false;
+    }
+
+    public <T> boolean checkEvent(Class c, MicroService m) {
+        if (events.containsKey(c))
+            return events.get(c).contains(m);
+        else
+            return false;
+    }
+
+    public <T> boolean updateBroadcast(Class<? extends Broadcast> type, MicroService m) {
+        if (broadcasts.containsKey(type.getClass()))
+            return broadcasts.get(type.getClass()).contains(m);
+        else
+            return false;
+    }
+
+    public <T> boolean checkBroadcast(Class c, MicroService m) {
+        if (broadcasts.containsKey(c))
+            return broadcasts.get(c).contains(m);
+        else
+            return false;
+    }
+
+}
