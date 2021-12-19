@@ -28,8 +28,7 @@ public class ConferenceService extends MicroService {
     protected void initialize() {
         // TODO Implement this
         subscribeBroadcast(TickBroadcast.class, m->{conf.addTime(); if (conf.isFinish()){
-            sendBroadcast(new PublishConferenceBroadcast(conf.getModels()));System.out.println("conf");
-
+            sendBroadcast(new PublishConferenceBroadcast(conf.getModels()));
             terminate();}});
         subscribeEvent(PublishResultsEvent.class , t ->{
             t.setService(this);

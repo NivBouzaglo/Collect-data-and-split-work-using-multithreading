@@ -1,5 +1,7 @@
 package bgu.spl.mics;
 
+import bgu.spl.mics.application.services.StudentService;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -150,7 +152,11 @@ public abstract class MicroService implements Runnable {
      */
     protected final void terminate() {
         this.terminated = true;
-        System.out.println(this.name +" terminated");
+        System.out.println(this.name + " terminated");
+    }
+
+    protected final boolean isTerminated() {
+        return this.terminated;
     }
 
     /**
@@ -173,11 +179,13 @@ public abstract class MicroService implements Runnable {
             Message m = null;
             try {
                 m = mb.awaitMessage(this);
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+            }
             if (m != null) {
-                    Callback c = callbacks.get(m.getClass());
-                    c.call(m);
-                }}
+                Callback c = callbacks.get(m.getClass());
+                c.call(m);
+            }
+        }
         mb.unregister(this);
     }
 

@@ -21,7 +21,7 @@ public class Cluster {
     private Queue<DataBatch> endProcessing;
     private static Cluster INSTANCE = null;
     private statistics statistics;
-    private int index=0;
+    private int index= -1;
 
 
     /**
@@ -53,19 +53,12 @@ public class Cluster {
     }
 
     public void sendToCPU(DataBatch batch) {
-//        int size = cpu.get(0).getData().size();
-//        int index = 0;
-//        for (int i = 0; i < cpu.size(); i++) {
-//            if (cpu.get(i).getData().size() < size) {
-//                size = cpu.get(i).getData().size();
-//                index = i;
-//            }
-        cpu.get(index).receiveData(batch);
-        if(index>=cpu.size()-1)
-            index=0;
-        else
-            index++;
-
+            if (index >= cpu.size() - 1)
+                index = 0;
+            else
+                index++;
+            if (index < cpu.size())
+            cpu.get(index).receiveData(batch);
     }
 
     public List<GPU> getGpu() {
@@ -74,23 +67,22 @@ public class Cluster {
     public List<CPU> getCpu(){return cpu;}
 
     public void addProcessedData(DataBatch batch) {
-            GPU g = gpu.get(batch.getGpuIndex());
-            processedData.get(g).add(batch);
-            //if (g.getProcessed().size() < g.getCapacity())
-                //if (endProcessing.isEmpty())
-                //g.receiveFromCluster(processedData.get(g).peek());
+        GPU g = gpu.get(batch.getGpuIndex());
+        processedData.get(g).add(batch);
+
     }
     public void askForBatch(GPU g){
-        if (processedData.get(g).isEmpty() | g.getProcessed()==null)
+        if (processedData.get(g).isEmpty() || g.getProcessed()==null)
             return;
         //else{
-        while (g.getProcessed().size()<g.getCapacity() & !processedData.get(g).isEmpty()){
+        if (g.getProcessed().size()<g.getCapacity() && !processedData.get(g).isEmpty()){
+            System.out.println("send to gpu to train");
             DataBatch d = processedData.get(g).poll();
             if (d!=null& g.getProcessed()!=null)
                 g.getProcessed().add(d);
+        }
+        //  }
     }
-  //  }
-}
 
     public statistics getStatistics() {
         return statistics;

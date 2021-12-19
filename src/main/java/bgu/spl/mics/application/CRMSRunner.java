@@ -31,22 +31,22 @@ public class CRMSRunner {
         LinkedList<CPU> cpus = new LinkedList<CPU>();
         TimeService timeService = new TimeService();
         readInputFile(args[0], timeService, cluster, students, gpus, cpus, conferences);
-        start(timeService, students, gpus, cpus, conferences, cluster, output);
+        start(timeService, students, conferences, cluster, output);
         System.out.println("end");
         System.out.println("Finish processing");
         writeOutputFile(output, students, conferences, cluster);
-        System.exit(0);
     }
 
-    public static void start(TimeService timeService, LinkedList<Student> students, LinkedList<GPU> gpus, LinkedList<CPU> cpus, LinkedList<ConfrenceInformation> conference, Cluster cluster, FileWriter output) throws IOException {
+    public static void start(TimeService timeService, LinkedList<Student> students, LinkedList<ConfrenceInformation> conference, Cluster cluster, FileWriter output) throws IOException {
         LinkedList<Thread> threads = new LinkedList<>();
         int i = 0;
-       // for (GPU gpu : gpus) {
-        for(GPU gpu :Cluster.getInstance().getGpu()){
+        // for (GPU gpu : gpus) {
+        for (GPU gpu : Cluster.getInstance().getGpu()) {
             GPUService service = new GPUService("GPUId" + i, gpu);
             i++;
             Thread t = new Thread(service);
             threads.add(t);
+            t.start();
         }
         i = 0;
         for (CPU cpu : Cluster.getInstance().getCpu()) {
@@ -54,24 +54,24 @@ public class CRMSRunner {
             i++;
             Thread t = new Thread(service);
             threads.add(t);
+            t.start();
         }
         for (ConfrenceInformation c : conference) {
             ConferenceService service = new ConferenceService(c);
             Thread t = new Thread(service);
             threads.add(t);
-        }
-        for (Student s : students) {
-            StudentService service = new StudentService(s);
-            Thread t = new Thread(service);
-            threads.add(t);
+            t.start();
         }
         Thread time = new Thread(timeService);
         threads.addLast(time);
         timeService.setThreads(threads);
-        for (Thread t : threads) {
+        time.start();
+        for (Student s : students) {
+            StudentService service = new StudentService(s);
+            Thread t = new Thread(service);
+            threads.add(t);
             t.start();
         }
-        System.out.println("Finish start ");
         for (Thread t : threads) {
             try {
                 t.join();
@@ -95,7 +95,7 @@ public class CRMSRunner {
         JsonElement tree = JsonParser.parseReader(new FileReader(input));
         JsonObject obj = tree.getAsJsonObject();
         JsonArray arr = obj.get("Students").getAsJsonArray();
-        int x=0;
+        int x = 0;
         for (JsonElement e : arr) {
             JsonObject object = e.getAsJsonObject();
             students.add(new Student(object.get("name").getAsString(),
@@ -150,7 +150,7 @@ public class CRMSRunner {
             file.write('\n');
             file.write(" TrainedModels:");
             for (Model model : student.getModels()) {
-                if (model.getStatus() == "Tested") {
+                if (model.getStatus().compareTo("Tested") == 0) {
                     file.write('\n');
                     file.write("            name: " + model.getName());
                     file.write('\n');
@@ -164,10 +164,6 @@ public class CRMSRunner {
                     file.write('\n');
                     file.write("                   result: " + model.getR());
                     file.write('\n');
-                    if (model.isPublish())
-                        file.write("               Published.");
-                    else
-                        file.write("               Not published.");
                 }
             }
         }

@@ -5,16 +5,16 @@ import bgu.spl.mics.Future;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.objects.Model;
 //the t was added by bar
-public class TestModelEvent implements Event<Model> {
+public class TestModelEvent implements Event<String> {
     private Model model ;
-    private Future<Model> future;
+    private Future<String> future;
     private MicroService service;
 
     public TestModelEvent(Model m){
         model=m;
         future = new Future();
     }
-    public void action(Model future) {
+    public void action(String future) {
         this.future.resolve(future);
     }
     public MicroService getService(){
@@ -36,7 +36,7 @@ public class TestModelEvent implements Event<Model> {
         future.get();
     }
 
-    public void setFuture(Future<Model> future) {
+    public void setFuture(Future<String> future) {
         this.future = future;
     }
 }

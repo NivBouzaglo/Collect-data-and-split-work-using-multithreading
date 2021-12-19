@@ -17,8 +17,8 @@ import bgu.spl.mics.application.objects.Student;
  */
 public class StudentService extends MicroService {
     private Student student;
-    private boolean terminate=false,inProgress=false;
-    private int modelCounter=0;
+    private boolean terminate = false, inProgress = false;
+    private int modelCounter = 0;
 
 
     public StudentService(Student student) {
@@ -29,13 +29,14 @@ public class StudentService extends MicroService {
     }
 
 
-
     @Override
     protected void initialize() {
-        subscribeBroadcast(TerminateBroadcast.class, t -> {terminate();
+        subscribeBroadcast(TerminateBroadcast.class, t -> {
+            terminate();
             setTerminate();
-        for (Model model: student.getModels())
-        System.out.println(model + "  "+ model.getStatus());});
+            for (Model model : student.getModels())
+                System.out.println(model + "  " + model.getStatus());
+        });
         subscribeBroadcast(PublishConferenceBroadcast.class, t -> {
             for (Model name : t.getModelsName()) {
                 if (student.getModels().contains(name))
@@ -45,42 +46,32 @@ public class StudentService extends MicroService {
             }
         });
         progress(student.getModels().get(0));
-//        for (Model m : student.getModels() ) {
-//            System.out.println("taking care of "+  m.getName());
-//            TrainModelEvent train = new TrainModelEvent(m);
-//            Future f = sendEvent(train);
-//            train.setFuture(f);
-//            if (m.getStatus().equals(Model.status.Trained)){
-//                System.out.println("Test");
-//                TestModelEvent test = new TestModelEvent(m);
-//                sendEvent(test);
-//                test.action(test.getModel());
-//                if (test.getModel().getStatus().compareTo("Tested") == 0 ){
-//                PublishResultsEvent p = new PublishResultsEvent(m);
-//                sendEvent(p);
-//            }}
+    }
+
+    public void publish(Model model) {
+        if (model.getR().compareTo("Good") == 0) {
+            PublishResultsEvent p = new PublishResultsEvent(model);
+            sendEvent(p);
         }
-    public void publish(Model model){
-        PublishResultsEvent p = new PublishResultsEvent(model);
-        sendEvent(p);
-        inProgress=false;
+        inProgress = false;
         modelCounter++;
-        if (modelCounter<student.getModels().size())
-                progress(student.getModels().get(modelCounter));
+        if (modelCounter < student.getModels().size())
+            progress(student.getModels().get(modelCounter));
 
     }
-    public  void setTerminate(){
-        terminate=true;
+
+    public void setTerminate() {
+        terminate = true;
     }
-    public void progress(Model model ){
-        if(!inProgress){
-            inProgress=true;
-            System.out.println("taking care of "+  model.getName());
+
+    public void progress(Model model) {
+        if (!inProgress) {
+            inProgress = true;
             TrainModelEvent train = new TrainModelEvent(model);
             Future f = sendEvent(train);
             train.setFuture(f);
         }
     }
-    }
+}
 
 

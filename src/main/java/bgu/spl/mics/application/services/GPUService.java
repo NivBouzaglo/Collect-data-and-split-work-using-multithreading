@@ -32,34 +32,31 @@ public class GPUService extends MicroService {
     @Override
     protected void initialize() {
         // TODO Implement this
-        //gpu.setGPU(this);
         subscribeBroadcast(TickBroadcast.class , m ->{gpu.addTime();});
         subscribeEvent(TrainModelEvent.class , t->{
             this.event=t;
             t.setService(this);
             gpu.setModel(t.getModel());
             gpu.setEvent(t);
-            gpu.divide();});
-        subscribeEvent(TestModelEvent.class , g->{
-            this.event=g;
-            g.setService(this);
-            gpu.test(g.getModel());
-        complete((Event)g,gpu.getModel());});
+            gpu.divide(); gpu.addTime();});
+        subscribeEvent(TestModelEvent.class , t->{gpu.test(t.getModel());gpu.addTime();});
         subscribeBroadcast(TerminateBroadcast.class ,m1->{terminate();});
     }
-    public void completeTest(Event event,Model model){
-        MessageBusImpl.getInstance().complete(event,model.getR());
-
+    public void completeTest(Event event,String f){
+        MessageBusImpl.getInstance().complete(event, f);
     }
     public void completeTrain(Event event,Model model){
         MessageBusImpl.getInstance().complete(event,model);
         testing(model);
     }
-    public void testing(Model model){
+    public void testing(Model model) {
         TestModelEvent test = new TestModelEvent(model);
-        Future f = sendEvent(test);
-        MessageBusImpl.getInstance().complete(event, model);
-        if (model.getResult().equals(Model.result.Good))
+        Future<String> future =sendEvent(test);
+        test.action(test.getModel().getR());
+        completeTest(test , future.get());
+        if (model.getStatus().compareTo("Tested") == 0) {
+            System.out.println("publish " + model.getName());
             model.getStudent().getService().publish(model);
+        }
     }
 }
