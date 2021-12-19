@@ -103,12 +103,14 @@ public class MessageBusImpl implements MessageBus {
     }
 
     private MicroService roundRobin(List<MicroService> microServices) {
-        if (!microServices.isEmpty()) {
-            MicroService m = microServices.get(count);
-            count++;
-            if (count == microServices.size())
-                count = 0;
-            return m;
+        synchronized (microServices) {
+            if (!microServices.isEmpty()) {
+                MicroService m = microServices.get(count);
+                count++;
+                if (count == microServices.size())
+                    count = 0;
+                return m;
+            }
         }
         return null;
     }
@@ -156,10 +158,10 @@ public class MessageBusImpl implements MessageBus {
         }
         else{
             while (true){
-                if (microservicesEvent.get(m).isEmpty()){
+                if (!microservicesEvent.get(m).isEmpty()){
                     return microservicesEvent.get(m).poll();
                 }
-                else if (microservicesBroadcast.get(m).isEmpty()){
+                else if (!microservicesBroadcast.get(m).isEmpty()){
                     return microservicesBroadcast.get(m).poll();
                 }else synchronized (m){
                     m.wait();

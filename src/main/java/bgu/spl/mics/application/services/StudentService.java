@@ -5,6 +5,7 @@ import bgu.spl.mics.Future;
 import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
+import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
 
@@ -50,7 +51,9 @@ public class StudentService extends MicroService {
                     student.addPapersRead();
             }
         });
+        subscribeBroadcast(finishBroadcast.class  , t->{this.completeTrain(t.getEvent() , t.getModel());});
         progress(student.getModels().get(0));
+
     }
 
     public void publish(Model model) {
@@ -82,11 +85,19 @@ public class StudentService extends MicroService {
         return future;
     }
     public void completeTrain( Event event, Model model) {
+        future.resolve(model);
         MessageBusImpl.getInstance().complete(event, model);
-        if (model.getStudent().getService().getFuture().get(2, TimeUnit.MILLISECONDS) != null)
+        if (model.getStudent().getService().getFuture().get(2, TimeUnit.MILLISECONDS) != null) {
             if (model.getStatus().compareTo("Trained") == 0) {
                 TestModelEvent test = new TestModelEvent(model);
                 this.future = sendEvent(test);
-            }
+                test.setFuture(future);
+                test.action();
+                completeTest(event ,model);
+            }}
+    }
+    public void completeTest(Event event, Model f) {
+        MessageBusImpl.getInstance().complete(event, f);
+        this.publish(f);
     }
 }

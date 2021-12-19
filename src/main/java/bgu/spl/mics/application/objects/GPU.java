@@ -233,21 +233,4 @@ public class GPU {
         this.GPU = s;
     }
 
-    public void test(Model model) {
-        double rand = Math.random();
-        switch (model.getStudent().getStatus()) {
-            case PhD:
-                if (rand >= 0.8) {
-                    model.setResult("Good");
-                } else
-                    model.setResult("Bad");
-            case MSc:
-                if (rand >= 0.6) {
-                    model.setResult("Good");
-                } else
-                    model.setResult("Bad");
-        }
-        this.model.Tested();
-        GPU.completeTest(event, this.model);
-    }
 }

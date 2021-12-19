@@ -41,7 +41,7 @@ public class GPUService extends MicroService {
         subscribeBroadcast(TickBroadcast.class, m -> {
             gpu.addTime();
             if (gpu.getModel() != null && gpu.getModel().getStatus().compareTo("Trained") == 0){
-                completeTest(event , gpu.getModel());
+                sendBroadcast(new finishBroadcast( gpu.getModel() , event));
                 gpu.setModel(null);
                 gpu.setEvent(null);
             }
@@ -53,17 +53,9 @@ public class GPUService extends MicroService {
             gpu.setEvent(t);
             gpu.divide();
         });
-        subscribeEvent(TestModelEvent.class, t -> {
-            gpu.test(t.getModel());
-            gpu.addTime();
-        });
         subscribeBroadcast(TerminateBroadcast.class, m1 -> {
             terminate();
         });
     }
 
-    public void completeTest(Event event, Model f) {
-        MessageBusImpl.getInstance().complete(event, f);
-        this.gpu.getModel().getStudent().getService().publish(f);
-    }
 }
