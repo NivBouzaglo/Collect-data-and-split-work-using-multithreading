@@ -1,10 +1,14 @@
 package bgu.spl.mics.application.services;
 
+import bgu.spl.mics.Event;
 import bgu.spl.mics.Future;
+import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.Model;
 import bgu.spl.mics.application.objects.Student;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Student is responsible for sending the {@link TrainModelEvent},
@@ -19,6 +23,7 @@ public class StudentService extends MicroService {
     private Student student;
     private boolean terminate = false, inProgress = false;
     private int modelCounter = 0;
+    private Future future =new Future();
 
 
     public StudentService(Student student) {
@@ -51,7 +56,7 @@ public class StudentService extends MicroService {
     public void publish(Model model) {
         if (model.getR().compareTo("Good") == 0) {
             PublishResultsEvent p = new PublishResultsEvent(model);
-            sendEvent(p);
+            future = sendEvent(p);
         }
         inProgress = false;
         modelCounter++;
@@ -68,10 +73,20 @@ public class StudentService extends MicroService {
         if (!inProgress) {
             inProgress = true;
             TrainModelEvent train = new TrainModelEvent(model);
-            Future f = sendEvent(train);
-            train.setFuture(f);
+            train.setFuture(future);
+            future = sendEvent(train);
         }
     }
+
+    public Future getFuture() {
+        return future;
+    }
+    public void completeTrain( Event event, Model model) {
+        MessageBusImpl.getInstance().complete(event, model);
+        if (model.getStudent().getService().getFuture().get(2, TimeUnit.MILLISECONDS) != null)
+            if (model.getStatus().compareTo("Trained") == 0) {
+                TestModelEvent test = new TestModelEvent(model);
+                this.future = sendEvent(test);
+            }
+    }
 }
-
-

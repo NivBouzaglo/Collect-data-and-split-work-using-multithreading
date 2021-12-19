@@ -9,7 +9,7 @@ package bgu.spl.mics;
  */
 
 public interface Event<T> extends Message {
-    public void action(T future);
+    public void action();
     public Future getFuture();
     public MicroService getService();
 }

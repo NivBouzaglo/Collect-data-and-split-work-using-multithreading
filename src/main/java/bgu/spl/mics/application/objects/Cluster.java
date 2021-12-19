@@ -17,11 +17,10 @@ import java.util.concurrent.LinkedBlockingDeque;
 public class Cluster {
     private List<CPU> cpu;
     private List<GPU> gpu;
-    private ConcurrentHashMap<GPU,Queue<DataBatch>> processedData=null;
-    private Queue<DataBatch> endProcessing;
+    private ConcurrentHashMap<GPU, Queue<DataBatch>> processedData;
     private static Cluster INSTANCE = null;
     private statistics statistics;
-    private int index= -1;
+    private int index = -1;
 
 
     /**
@@ -35,50 +34,47 @@ public class Cluster {
     }
 
     public Cluster() {
-        endProcessing = new LinkedBlockingDeque<>();
         cpu = new LinkedList<>();
         gpu = new LinkedList<>();
         statistics = new statistics();
-        processedData=new ConcurrentHashMap<>();
+        processedData = new ConcurrentHashMap<>();
     }
 
     public void setProcessedData() {
-        for(GPU g: gpu ){
-            processedData.put(g, new LinkedList<DataBatch>());
+        for (GPU g : gpu) {
+            processedData.put(g, new LinkedList<>());
         }
     }
 
-    public void addUnProcessed(DataBatch batch) {
-        sendToCPU(batch);
-    }
-
     public void sendToCPU(DataBatch batch) {
-            if (index >= cpu.size() - 1)
-                index = 0;
-            else
-                index++;
-            if (index < cpu.size())
-            cpu.get(index).receiveData(batch);
+        if(index>=cpu.size()-1)
+            index=0;
+        else
+            index++;
+        cpu.get(index).receiveData(batch);
     }
 
     public List<GPU> getGpu() {
         return gpu;
     }
-    public List<CPU> getCpu(){return cpu;}
+
+    public List<CPU> getCpu() {
+        return cpu;
+    }
 
     public void addProcessedData(DataBatch batch) {
         GPU g = gpu.get(batch.getGpuIndex());
         processedData.get(g).add(batch);
 
     }
-    public void askForBatch(GPU g){
-        if (processedData.get(g).isEmpty() || g.getProcessed()==null)
+
+    public void askForBatch(GPU g) {
+        if (processedData.get(g).isEmpty() || g.getProcessed() == null)
             return;
         //else{
-        if (g.getProcessed().size()<g.getCapacity() && !processedData.get(g).isEmpty()){
-            System.out.println("send to gpu to train");
+        if (g.getProcessed().size() < g.getCapacity() && !processedData.get(g).isEmpty()) {
             DataBatch d = processedData.get(g).poll();
-            if (d!=null& g.getProcessed()!=null)
+            if (d != null & g.getProcessed() != null)
                 g.getProcessed().add(d);
         }
         //  }

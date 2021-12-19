@@ -26,9 +26,7 @@ public class PublishResultsEvent implements Event<String>{
     public Future getFuture() {
         return future;
     }
-    public void action(String future){
-        this.future.resolve(future);
-    }
+    public void action(){}
     public boolean goodOrBad(){
         return model.good();
     }

@@ -25,7 +25,7 @@ public class ExampleEvent implements Event<String>{
     public String getSenderName() {
         return senderName;
     }
-    public void action(String future){}
+    public void action(){}
 
     @Override
     public Future getFuture() {

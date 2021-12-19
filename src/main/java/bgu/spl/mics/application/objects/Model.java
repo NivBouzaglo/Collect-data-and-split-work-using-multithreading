@@ -62,9 +62,6 @@ public class Model {
 
     public void endTraining() {
         s = status.Trained;
-        synchronized (student.getService()) {
-            student.getService().notifyAll();
-        }
     }
 
     public void Tested() {

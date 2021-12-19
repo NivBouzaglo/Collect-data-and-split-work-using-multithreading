@@ -56,11 +56,12 @@ public class CPU {
      * @post data.size()=0.
      */
     public void sendData(DataBatch unit ) {
+        System.out.println("cpu get data");
         cluster.getStatistics().setUnit_used_cpu(1);
         processed = true;
         if (unit !=null ) {
             if (time-currentTime>= unit.getTicks()*(32/cores)){
-                System.out.println("process databatch");
+                System.out.println("send to cluster");
                 cluster.addProcessedData(unit);
                 data.poll();
                 processed = false;
@@ -82,8 +83,10 @@ public class CPU {
     public void addTime() {
         time++;
         setCurrentTime();
-         if (!data.isEmpty())
-            sendData(data.peek());
+         if (!data.isEmpty()) {
+             System.out.println("send data to process");
+             sendData(data.peek());
+         }
     }
 
     private void check() {

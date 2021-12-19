@@ -22,8 +22,8 @@ public class TrainModelEvent implements Event<Model> {
         this.service = service;
     }
 
-    public void action(Model future) {
-        this.future.resolve(future);
+    public void action() {
+        this.future.resolve(model);
     }
 
     public Model getModel() {

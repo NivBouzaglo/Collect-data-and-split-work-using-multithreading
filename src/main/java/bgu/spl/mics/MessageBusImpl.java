@@ -1,6 +1,7 @@
 package bgu.spl.mics;
 
 import bgu.spl.mics.application.messages.*;
+import bgu.spl.mics.application.objects.GPU;
 import bgu.spl.mics.application.services.ConferenceService;
 import bgu.spl.mics.application.services.GPUService;
 import bgu.spl.mics.application.services.StudentService;
@@ -16,21 +17,19 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class MessageBusImpl implements MessageBus {
 
-    private ConcurrentHashMap<MicroService, Deque<Message>> microservices = null;
+    private ConcurrentHashMap<MicroService, Deque<Event>> microservicesEvent;
+    private ConcurrentHashMap<MicroService, Deque<Broadcast>> microservicesBroadcast;
     private ConcurrentHashMap<Class<? extends Event<?>>, List<MicroService>> events = null;
     private ConcurrentHashMap<Class<? extends Broadcast>, Deque<MicroService>> broadcasts = null;
     private static MessageBusImpl INSTANCE = null;
-    private Object lockBroadcast;
-    private Object lockEvent;
-    private ConcurrentHashMap<MicroService, Boolean> busyServices = null;
+    int count = 0;
+
 
     public MessageBusImpl() {
-        microservices = new ConcurrentHashMap<>();
+        microservicesEvent = new ConcurrentHashMap<>();
+        microservicesBroadcast = new ConcurrentHashMap<>();
         events = new ConcurrentHashMap<>();
         broadcasts = new ConcurrentHashMap<>();
-        lockBroadcast = new Object();
-        lockEvent = new Object();
-        busyServices = new ConcurrentHashMap<>();
     }
 
     public static MessageBusImpl getInstance() {
@@ -55,10 +54,7 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public <T> void complete(Event<T> e, T result) {
-        e.action(result);
-        busyServices.remove(e.getService());
-        busyServices.put(e.getService(), false);
-
+        e.getFuture().resolve(result);
     }
 
     @Override
@@ -66,14 +62,14 @@ public class MessageBusImpl implements MessageBus {
         if (!broadcasts.containsKey(b.getClass())) {
             // throw new IllegalArgumentException("don't have microservice that subscribe this broadcast");
             System.out.println("don't have microservice that subscribe this broadcast");
-        } else if (microservices != null && broadcasts != null)
+        } else if (microservicesBroadcast != null && broadcasts != null)
             for (MicroService m : broadcasts.get(b.getClass())) {
                 synchronized (m) {
                     if (m != null && registered(m))
-                        if (b.getClass().equals(TickBroadcast.class) || b.getClass().equals(TerminateBroadcast.class) && !(m instanceof StudentService)) {
-                            microservices.get(m).addFirst(b);
+                        if (b.getClass().equals(TerminateBroadcast.class) && !(m instanceof StudentService)) {
+                            microservicesBroadcast.get(m).addFirst(b);
                         } else
-                            microservices.get(m).add(b);
+                            microservicesBroadcast.get(m).add(b);
                     m.notifyAll();
                 }
             }
@@ -95,7 +91,7 @@ public class MessageBusImpl implements MessageBus {
                 getTheEvent = roundRobin(events.get(e.getClass()));
             if (getTheEvent != null) {
                 synchronized (getTheEvent) {
-                    microservices.get(getTheEvent).add(e);
+                    microservicesEvent.get(getTheEvent).addFirst(e);
                     Future<T> future = new Future<>();
                     getTheEvent.notifyAll();
                     return future;
@@ -108,16 +104,10 @@ public class MessageBusImpl implements MessageBus {
 
     private MicroService roundRobin(List<MicroService> microServices) {
         if (!microServices.isEmpty()) {
-            int count = 0;
-            MicroService m = microServices.remove(count);
-            if (busyServices.get(m) != null) {
-                while (busyServices.get(m) && count < microServices.size()) {
-                    microServices.add(m);
-                    count++;
-                    microServices.get(count);
-                }
-            } else
-                microServices.add(m);
+            MicroService m = microServices.get(count);
+            count++;
+            if (count == microServices.size())
+                count = 0;
             return m;
         }
         return null;
@@ -125,48 +115,58 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public void register(MicroService m) {
-        if (!microservices.containsKey(m)) {
-            microservices.put(m, new LinkedBlockingDeque<>());
-            busyServices.put(m, false);
+        if (!microservicesBroadcast.containsKey(m)) {
+            microservicesBroadcast.put(m, new LinkedBlockingDeque<>());
         }
+        if (!microservicesEvent.containsKey(m))
+            microservicesEvent.put(m, new LinkedBlockingDeque<>());
     }
 
     public void unregister(MicroService m) {
         if (!registered(m)) {
             throw new IllegalArgumentException("this microservice not registered");
         } else {
-            synchronized (m) {
-                microservices.remove(m);
-                for (Class d : events.keySet())
-                    if (checkEvent(d, m))
-                        events.get(d).remove(m);
-                for (Class d : broadcasts.keySet())
-                    if (checkBroadcast(d, m))
-                        broadcasts.get(d).remove(m);
-
-            }
+            microservicesBroadcast.remove(m);
+            microservicesEvent.remove(m);
+            for (Class d : events.keySet())
+                if (checkEvent(d, m))
+                    events.get(d).remove(m);
+            for (Class d : broadcasts.keySet())
+                if (checkBroadcast(d, m))
+                    broadcasts.get(d).remove(m);
         }
     }
 
     @Override
     public Message awaitMessage(MicroService m) throws InterruptedException {
-        if (m != null && microservices != null && microservices.get(m) != null) {
-            synchronized (m) {
-                while (microservices.get(m).isEmpty()) {
-                    m.wait();
-                }
+        if (m == null) {
+            throw new IllegalArgumentException("M IS NULL");
+        }
+        if (m instanceof GPUService) {
+            while (true) {
+                if (((GPUService) m).getGpu().getModel() == null && !microservicesEvent.get(m).isEmpty()) {
+                    return microservicesEvent.get(m).poll();
+                } else if (!microservicesBroadcast.get(m).isEmpty()){
+                    return microservicesBroadcast.get(m).poll();}
+                else
+                    synchronized (m) {
+                        m.wait();
+                    }
             }
         }
-        synchronized (this) {
-            notifyAll();
+        else{
+            while (true){
+                if (microservicesEvent.get(m).isEmpty()){
+                    return microservicesEvent.get(m).poll();
+                }
+                else if (microservicesBroadcast.get(m).isEmpty()){
+                    return microservicesBroadcast.get(m).poll();
+                }else synchronized (m){
+                    m.wait();
+                }
+
+            }
         }
-        Message e = microservices.get(m).peek();
-        if (m instanceof GPUService && e.getClass().equals(TrainModelEvent.class)) {
-            busyServices.remove(m);
-            busyServices.put(m, true);
-            return microservices.get(m).remove();
-        } else
-            return microservices.get(m).remove();
     }
 
 
@@ -174,7 +174,7 @@ public class MessageBusImpl implements MessageBus {
     public boolean BroadcastSended(Broadcast b) {
         if (broadcasts.containsKey(b.getClass())) {
             for (MicroService m : broadcasts.get(b.getClass())) {
-                if (!microservices.get(m).contains(b))
+                if (!microservicesBroadcast.get(m).contains(b))
                     return false;
             }
             return true;
@@ -186,7 +186,7 @@ public class MessageBusImpl implements MessageBus {
     public boolean EventSended(Event b) {
         if (events.containsKey(b.getClass())) {
             for (MicroService m : events.get(b.getClass())) {
-                if (!microservices.get(m).contains(b))
+                if (!microservicesEvent.get(m).contains(b))
                     return false;
             }
             return true;
@@ -196,7 +196,7 @@ public class MessageBusImpl implements MessageBus {
 
     @Override
     public boolean registered(MicroService m) {
-        return microservices.containsKey(m);
+        return microservicesBroadcast.containsKey(m) || microservicesEvent.containsKey(m);
     }
 
     public <T> boolean updateEvent(Class<? extends Event<T>> type, MicroService m) {

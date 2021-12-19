@@ -39,7 +39,9 @@ public class Future<T> {
         //TODO: implement this.
         while (!isDone)
             try {
-                wait();
+                synchronized (this) {
+                    wait();
+                }
             } catch (InterruptedException ex) {
             }
         return result;
@@ -89,7 +91,7 @@ public class Future<T> {
             return result;
         synchronized (this) {
             try {
-                unit.wait(timeout);
+                wait(timeout);
                 if (isDone)
                     return result;
             } catch (InterruptedException ignored) {

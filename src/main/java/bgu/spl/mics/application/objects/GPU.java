@@ -31,6 +31,7 @@ public class GPU {
     private GPUService GPU;
     private boolean free;
     private int ticks;
+    private boolean busy = false;
 
     public GPU(String t) {
         this.setType(t);
@@ -38,7 +39,7 @@ public class GPU {
         batches = new LinkedList<DataBatch>();
         processed = new LinkedBlockingDeque();
         free = true;
-        processedData =0;
+        processedData = 0;
     }
 
     //Swe need to fix it.
@@ -56,6 +57,10 @@ public class GPU {
         else if (type == Type.RTX2080) return "RTX2080";
         else if (type == Type.GTX1080) return "GTX1080";
         return null;
+    }
+
+    public void setBusy() {
+        busy = !busy;
     }
 
     public void setModel(Model model) {
@@ -93,6 +98,10 @@ public class GPU {
     public Queue<DataBatch> getDataBatchList() {
         return batches;
     }
+
+    public boolean isBusy() {
+        return busy;
+    }
     //added by bar - this feild is not recognized in the test class.
 
     public void setType(String t) {
@@ -118,7 +127,8 @@ public class GPU {
      */
     public void sendToCluster() {
         if (!batches.isEmpty())
-            cluster.sendToCPU(batches.poll());
+            System.out.println("send to cpu");
+        cluster.sendToCPU(batches.poll());
     }
 
     /**
@@ -132,9 +142,10 @@ public class GPU {
             DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpuIndex(cluster.findGPU(this));
             batches.add(dataBatch);
+            if (i < capacity / 2)
+                sendToCluster();
         }
-        for (int i = 0; i < capacity / 2 && !batches.isEmpty(); i++)
-            sendToCluster();
+
     }
 
     public String getName() {
@@ -147,33 +158,37 @@ public class GPU {
      * * @post model.status = "Trained".
      */
     public void train(DataBatch unit) {
-        model.setStatus(Model.status.Training);
-        if (time - currentTime >= ticks)
-            subTrain(ticks);
+        if (model != null) {
+            model.setStatus(Model.status.Training);
+            cluster.getStatistics().setUnit_used_gpu(1);
+            if (time - currentTime >= ticks)
+                subTrain(ticks);
+        }
     }
 
     public void subTrain(int ticks) {
+        System.out.println("gpu training");
         free = true;
         processedData++;
         processed.poll();
 
         if (processedData * 1000 >= model.getData().getSize()) {
+            System.out.println("work");
             processedData = 0;
-            System.out.println("Finish *******************************************");
             model.endTraining();
-            GPU.completeTrain(event, model);
+            model.getStudent().getService().completeTrain(event, model);
         }
         if (!batches.isEmpty()) {
             sendToCluster();
-            cluster.askForBatch(this);
-            if (!processed.isEmpty()) {
-                free = false;
-                currentTime = time;
-                train((DataBatch) processed.peek());
-            }
-            cluster.getStatistics().setUnit_used_gpu(ticks);
-            cluster.getStatistics().setNumber_of_DB(1);
         }
+        cluster.askForBatch(this);
+        if (!processed.isEmpty()) {
+            free = false;
+            currentTime = time;
+            startTraining();
+        }
+
+        cluster.getStatistics().setNumber_of_DB(1);
     }
 
     public void deliver() {
@@ -214,8 +229,11 @@ public class GPU {
         return time;
     }
 
+    public void setGPU(GPUService s) {
+        this.GPU = s;
+    }
+
     public void test(Model model) {
-        System.out.println("Start testing");
         double rand = Math.random();
         switch (model.getStudent().getStatus()) {
             case PhD:
@@ -229,10 +247,7 @@ public class GPU {
                 } else
                     model.setResult("Bad");
         }
-        model.Tested();
-    }
-
-    public void setGPU(GPUService s) {
-        this.GPU = s;
+        this.model.Tested();
+        GPU.completeTest(event, this.model);
     }
 }

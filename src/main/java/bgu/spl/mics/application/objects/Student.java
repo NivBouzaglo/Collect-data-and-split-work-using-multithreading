@@ -12,7 +12,7 @@ public class Student {
     /**
      * Enum representing the Degree the student is studying for.
      */
-    enum Degree {MSc, PhD}
+    public enum Degree {MSc, PhD}
 
     private String name;
     private String department;
