@@ -59,8 +59,8 @@ public class TimeService extends MicroService {
         System.out.println("time is over ");
         timer.cancel();
         sendBroadcast(new TerminateBroadcast());
-        for (Thread t : threads)
-            t.interrupt();
+        /*for (Thread t : threads)
+            t.interrupt();*/
         end = true;
     }
 

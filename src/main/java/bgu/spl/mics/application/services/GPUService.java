@@ -24,7 +24,6 @@ public class GPUService extends MicroService {
         //this.gpu = new GPU(gpu.getType());
         this.gpu = gpu;
         this.gpu.setGPU(this);
-        this.gpu.setBusy();
     }
 
     public GPU getGpu() {
@@ -40,7 +39,6 @@ public class GPUService extends MicroService {
                 sendBroadcast(new finishBroadcast( gpu.getModel() , event));
                 gpu.setModel(null);
                 gpu.setEvent(null);
-                gpu.setBatches();
             }
         });
         subscribeEvent(TrainModelEvent.class, t -> {
@@ -50,9 +48,6 @@ public class GPUService extends MicroService {
             gpu.setModel(t.getModel());
             gpu.setEvent(t);
             gpu.divide();
-            gpu.setModel(null);
-            gpu.setBatches();
-            gpu.setProcessed();
 
         });
         subscribeBroadcast(TerminateBroadcast.class, m1 -> {

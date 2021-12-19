@@ -90,7 +90,6 @@ public class StudentService extends MicroService {
         if (model.getStudent().getService().getFuture().get(2, TimeUnit.MILLISECONDS) != null) {
             if (model.getStatus().compareTo("Trained") == 0) {
                 TestModelEvent test = new TestModelEvent(model);
-                this.future = sendEvent(test);
                 test.setFuture(future);
                 test.action();
                 completeTest(event ,model);

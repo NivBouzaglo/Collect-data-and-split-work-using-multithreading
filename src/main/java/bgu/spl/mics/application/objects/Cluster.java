@@ -19,8 +19,6 @@ public class Cluster {
     private ConcurrentHashMap<GPU, Queue<DataBatch>> processedData;
     private static Cluster INSTANCE = null;
     private statistics statistics;
-    private int index = -1;
-
 
     /**
      * Retrieves the single instance of this class.
@@ -67,16 +65,12 @@ public class Cluster {
     }
 
     public void askForBatch(GPU g) {
-        if (processedData.get(g).isEmpty() || g.getProcessed() == null)
-            return;
-        //else{
         if (g.getProcessed().size() < g.getCapacity() && !processedData.get(g).isEmpty()) {
             System.out.println("asking for data ");
             DataBatch d = processedData.get(g).poll();
             if (d != null & g.getProcessed() != null)
                 g.getProcessed().add(d);
         }
-        //  }
     }
 
     public statistics getStatistics() {

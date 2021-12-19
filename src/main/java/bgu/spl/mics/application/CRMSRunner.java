@@ -41,7 +41,6 @@ public class CRMSRunner {
         LinkedList<Thread> threads = new LinkedList<>();
         int i = 0;
         // for (GPU gpu : gpus) {
-        Thread time = new Thread(timeService);
         for (GPU gpu : Cluster.getInstance().getGpu()) {
             GPUService service = new GPUService("GPUId" + i, gpu);
             i++;
@@ -63,14 +62,15 @@ public class CRMSRunner {
             threads.add(t);
             t.start();
         }
-        threads.addLast(time);
-        timeService.setThreads(threads);
+        Thread time = new Thread(timeService);
         for (Student s : students) {
             StudentService service = new StudentService(s);
             Thread t = new Thread(service);
             threads.add(t);
             t.start();
         }
+        threads.addLast(time);
+        timeService.setThreads(threads);
         time.start();
         for (Thread t : threads) {
             try {

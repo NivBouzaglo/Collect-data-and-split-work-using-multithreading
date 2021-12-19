@@ -83,40 +83,35 @@ public class MessageBusImpl implements MessageBus {
     public <T> Future<T> sendEvent(Event<T> e) {
         if (!events.containsKey(e.getClass()))
             return null;
-        else {
-            MicroService getTheEvent = null;
-            if (e instanceof TestModelEvent) {
-                for (int i = 0; i < events.get(TestModelEvent.class).size(); i++) {
-                    if (events.get(TestModelEvent.class).get(i).equals(((TestModelEvent) e).getModel()))
-                        getTheEvent = events.get(TestModelEvent.class).get(i);
-                }
-            } else
-                getTheEvent = roundRobin(events.get(e.getClass()));
-            if (getTheEvent != null) {
-                synchronized (getTheEvent) {
-                    microservicesEvent.get(getTheEvent).addFirst(e);
-                    Future<T> future = new Future<>();
-                    getTheEvent.notifyAll();
-                  //  System.out.println("Notify "+ getTheEvent.getName());
-                    return future;
-                }
+        MicroService getTheEvent = roundRobin(events.get(e.getClass()));
+        while (getTheEvent==null){
+
+        }
+        if (getTheEvent != null) {
+            synchronized (getTheEvent) {
+                microservicesEvent.get(getTheEvent).addFirst(e);
+                Future<T> future = new Future<>();
+                getTheEvent.notifyAll();
+                //  System.out.println("Notify "+ getTheEvent.getName());
+                return future;
             }
         }
         return null;
-
     }
 
+
+
     private MicroService roundRobin(List<MicroService> microServices) {
-        synchronized (microServices) {
             if (!microServices.isEmpty()) {
                 MicroService m = microServices.get(count);
                 count++;
                 if (count == microServices.size())
                     count = 0;
-                microServices.notifyAll();
+                synchronized (microServices) {
+                    microServices.notifyAll();
+                }
                 return m;
             }
-        }
         return null;
     }
 

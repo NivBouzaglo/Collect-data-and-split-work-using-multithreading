@@ -172,7 +172,6 @@ public class GPU {
         processed.poll();
 
         if (processedData * 1000 >= model.getData().getSize()) {
-            System.out.println("work");
             processedData = 0;
             model.endTraining();
             model.getStudent().getService().completeTrain(event, model);
@@ -199,6 +198,7 @@ public class GPU {
     public void addTime() {
         //time++;
         if (!processed.isEmpty()) {
+            model.setStatus(Model.status.Training);
             if (processed.peek().getTickCounter() < ticks) {
                 processed.peek().setTickCounter();
                 cluster.getStatistics().setUnit_used_gpu();
