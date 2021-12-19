@@ -63,7 +63,6 @@ public class CRMSRunner {
             threads.add(t);
             t.start();
         }
-        time.start();
         threads.addLast(time);
         timeService.setThreads(threads);
         for (Student s : students) {
@@ -72,6 +71,7 @@ public class CRMSRunner {
             threads.add(t);
             t.start();
         }
+        time.start();
         for (Thread t : threads) {
             try {
                 t.join();

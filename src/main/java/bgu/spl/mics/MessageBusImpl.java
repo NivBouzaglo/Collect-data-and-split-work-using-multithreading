@@ -66,7 +66,7 @@ public class MessageBusImpl implements MessageBus {
             for (MicroService m : broadcasts.get(b.getClass())) {
                 synchronized (m) {
                     if (m != null && registered(m))
-                        if (b.getClass().equals(TerminateBroadcast.class) && !(m instanceof StudentService)) {
+                        if (PublishConferenceBroadcast.class.equals(b.getClass()) || b.getClass().equals(TerminateBroadcast.class) && !(m instanceof StudentService)) {
                             microservicesBroadcast.get(m).addFirst(b);
                         } else
                             microservicesBroadcast.get(m).add(b);
@@ -109,6 +109,7 @@ public class MessageBusImpl implements MessageBus {
                 count++;
                 if (count == microServices.size())
                     count = 0;
+                microServices.notifyAll();
                 return m;
             }
         }

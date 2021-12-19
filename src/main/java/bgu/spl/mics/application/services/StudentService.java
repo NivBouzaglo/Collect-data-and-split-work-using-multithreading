@@ -61,11 +61,6 @@ public class StudentService extends MicroService {
             PublishResultsEvent p = new PublishResultsEvent(model);
             future = sendEvent(p);
         }
-        inProgress = false;
-        modelCounter++;
-        if (modelCounter < student.getModels().size())
-            progress(student.getModels().get(modelCounter));
-
     }
 
     public void setTerminate() {
@@ -99,5 +94,9 @@ public class StudentService extends MicroService {
     public void completeTest(Event event, Model f) {
         MessageBusImpl.getInstance().complete(event, f);
         this.publish(f);
+        inProgress=false;
+        modelCounter++;
+        if (modelCounter < student.getModels().size())
+            progress(student.getModels().get(modelCounter));
     }
 }

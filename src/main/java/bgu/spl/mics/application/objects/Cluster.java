@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class Cluster {
-    private List<CPU> cpu;
+    private Queue<CPU> cpu;
     private List<GPU> gpu;
     private ConcurrentHashMap<GPU, Queue<DataBatch>> processedData;
     private static Cluster INSTANCE = null;
@@ -47,18 +47,17 @@ public class Cluster {
     }
 
     public void sendToCPU(DataBatch batch) {
-        if(index>=cpu.size()-1)
-            index=0;
-        else
-            index++;
-        cpu.get(index).receiveData(batch);
+        CPU c = cpu.poll();
+        if (c != null)
+           c.receiveData(batch);
+        cpu.add(c);
     }
 
     public List<GPU> getGpu() {
         return gpu;
     }
 
-    public List<CPU> getCpu() {
+    public Queue<CPU> getCpu() {
         return cpu;
     }
 

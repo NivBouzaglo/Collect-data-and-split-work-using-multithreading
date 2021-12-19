@@ -44,9 +44,11 @@ public class GPUService extends MicroService {
                 sendBroadcast(new finishBroadcast( gpu.getModel() , event));
                 gpu.setModel(null);
                 gpu.setEvent(null);
+                gpu.setBatches();
             }
         });
         subscribeEvent(TrainModelEvent.class, t -> {
+            System.out.println("start training "+ t.getModel());
             this.event = t;
             t.setService(this);
             gpu.setModel(t.getModel());

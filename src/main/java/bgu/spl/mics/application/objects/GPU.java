@@ -59,6 +59,10 @@ public class GPU {
         return null;
     }
 
+    public void setBatches() {
+        batches = null;
+    }
+
     public void setBusy() {
         busy = !busy;
     }
@@ -127,8 +131,7 @@ public class GPU {
      */
     public void sendToCluster() {
         if (!batches.isEmpty())
-            System.out.println("send to cpu");
-        cluster.sendToCPU(batches.poll());
+           cluster.sendToCPU(batches.poll());
     }
 
     /**
@@ -142,7 +145,7 @@ public class GPU {
             DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpuIndex(cluster.findGPU(this));
             batches.add(dataBatch);
-            if (i < capacity / 2)
+            if (i < capacity )
                 sendToCluster();
         }
 
@@ -167,7 +170,6 @@ public class GPU {
     }
 
     public void subTrain(int ticks) {
-        System.out.println("gpu training");
         free = true;
         processedData++;
         processed.poll();
@@ -187,7 +189,7 @@ public class GPU {
             currentTime = time;
             startTraining();
         }
-
+        cluster.getStatistics().setUnit_used_gpu(ticks);
         cluster.getStatistics().setNumber_of_DB(1);
     }
 

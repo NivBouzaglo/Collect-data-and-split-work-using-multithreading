@@ -9,7 +9,7 @@ import java.util.Queue;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class CPU {
-    private int cores;
+    private final int cores;
     private Queue<DataBatch> data;
     private Cluster cluster;
     private boolean processed;
@@ -20,7 +20,7 @@ public class CPU {
     public CPU(int i_cores) {
         cores = i_cores;
         cluster = Cluster.getInstance();
-        data = new LinkedList<DataBatch>();
+        data = new LinkedList<>();
         processed = false;
     }
 
@@ -58,11 +58,11 @@ public class CPU {
     public void sendData(DataBatch unit ) {
         processed = true;
         if (unit !=null ) {
+            cluster.getStatistics().setUnit_used_cpu(1);
             if (time-currentTime>= unit.getTicks()*(32/cores)){
                 cluster.addProcessedData(unit);
                 data.poll();
                 processed = false;
-                cluster.getStatistics().setUnit_used_cpu(unit.getTicks()*(32/cores));
             }
         }
     }
@@ -85,15 +85,6 @@ public class CPU {
              sendData(data.peek());
          }
     }
-
-    private void check() {
-
-    }
-
-    public boolean isProcessing() {
-        return processed;
-    }
-
     public long getTicks() {
         return time;
     }
