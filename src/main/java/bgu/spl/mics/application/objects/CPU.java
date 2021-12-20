@@ -12,7 +12,6 @@ public class CPU {
     private final int cores;
     private LinkedBlockingDeque<DataBatch> data;
     private Cluster cluster;
-    private int time = 0;
     private int ticks = 0;
 
 
@@ -42,11 +41,6 @@ public class CPU {
     public void receiveData(DataBatch unit) {
         data.add(unit);
     }
-//    public void receiveData(){
-//        if(!cluster.getUnprocessedData().isEmpty()){
-//            synchronized (cluster.getUnprocessedData().peek()){
-//         data.add(cluster.getUnprocessedData().poll());
-//    }}}
 
     /**
      * @pre process was called.
@@ -55,7 +49,7 @@ public class CPU {
      */
     public void sendData(DataBatch unit) {
         cluster.getStatistics().setNumber_of_DB();
-        ticks=0;
+        ticks = 0;
         cluster.addProcessedData(unit);
     }
 
@@ -66,22 +60,23 @@ public class CPU {
      * @post data is processed.
      */
     /**
-     * @return
-     * @pre
-     * @inv
-     * @post
+     *
+     * @pre data != null
+     * @inv cpu != null
+     * @post tick = tick-1 || tick = 0
      */
     public void addTime() {
         if (!data.isEmpty()) {
+            cluster.getStatistics().setUnit_used_cpu();
             if (ticks < data.peek().getTicks() * (32 / cores))
                 ticks++;
             else
                 sendData(data.poll());
-            cluster.getStatistics().setUnit_used_cpu();
         }
     }
 
-    public long getTicks() {
-        return time;
+
+    public int getTicks() {
+        return ticks;
     }
 }

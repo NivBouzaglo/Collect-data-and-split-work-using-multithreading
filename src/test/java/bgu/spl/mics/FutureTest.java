@@ -27,7 +27,7 @@ public class FutureTest<T> {
     public void testResolve() {
         test.resolve("Good");
         assertTrue(test.isDone());
-        assertEquals("good", test.get());
+        assertEquals("Good", test.get());
     }
 
     @Test
@@ -42,8 +42,8 @@ public class FutureTest<T> {
         } catch (Exception ex){}
         t2.start();
         try {
-            t2.join();
             t1.join();
+            t2.join();
         }catch (InterruptedException e){}
         assertEquals("good" ,test.get(timeout, TimeUnit.SECONDS));
     }

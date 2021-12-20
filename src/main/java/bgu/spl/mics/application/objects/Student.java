@@ -72,11 +72,6 @@ public class Student {
         return this.models;
     }
 
-    public void createModel(Data data, String m_name) {
-        Model train = new Model(this, data, m_name);
-        models.add(train);
-    }
-
     public void addPublication(){
         publications++;
     }

@@ -21,7 +21,7 @@ public class GPUTest {
     public void setUp() {
         e = new ExampleEvent("Test");
         m = new Model(new Student("niv","computer science","PhD"), new Data("Text", 2000),"YOLO10");
-        c = new Cluster();
+        c = Cluster.getInstance();
         test = new GPU("RTX080");
     }
 
@@ -31,6 +31,7 @@ public class GPUTest {
     }
     @Test
     public void testGetModel() {
+        test.setModel(m);
         assertEquals(m, test.getModel());
     }
     @Test
@@ -39,13 +40,12 @@ public class GPUTest {
     }
     @Test
     public void testGetBatches() {
-        Queue<DataBatch> copy = new LinkedList<DataBatch>();
+        Queue<DataBatch> copy = test.getBatches();
         assertEquals(copy, test.getDataBatchList());
     }
     @Test
     public void testAddType(){
-        test.setType("RTX2080");
-        assertEquals("RTX2080",test.getType());
+        assertEquals("RTX080",test.getType());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class GPUTest {
     @Test
     public void testDivide(){
         test.divide();
-        assertEquals(m.getData().getSize(),test.getDataBatchList().size());
+        assertEquals(m.getData().getSize()/1000,test.getDataBatchList().size());
     }
     @Test
     public void testSubTrain(){

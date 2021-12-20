@@ -30,7 +30,7 @@ public class Future<T> {
      * <p>
      *
      * @return return the result of type T if it is available, if not wait until it is available.
-     * @pre None
+     * @pre
      * @inv if(! isDone) wait.
      * @post this.get()==result.
      */
@@ -38,13 +38,12 @@ public class Future<T> {
     public T get() {
         //TODO: implement this.
         while (!isDone)
-            synchronized (this){
-            try {
-                synchronized (this) {
+            synchronized (this) {
+                try {
                     wait();
+                } catch (InterruptedException ex) {
                 }
-            } catch (InterruptedException ex) {
-            }}
+            }
         return result;
     }
 
@@ -90,15 +89,10 @@ public class Future<T> {
         //TODO: implement this.
         if (isDone)
             return result;
-        synchronized (this) {
-            try {
-                wait(timeout);
-                if (isDone)
-                    return result;
-            } catch (InterruptedException ignored) {
-            }
+        try {
+            unit.sleep(timeout);
+        } catch (InterruptedException ignored) {
         }
-        return null;
+        return result;
     }
-
 }

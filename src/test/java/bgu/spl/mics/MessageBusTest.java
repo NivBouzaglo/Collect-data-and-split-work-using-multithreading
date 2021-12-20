@@ -1,6 +1,9 @@
 package bgu.spl.mics;
 
+import bgu.spl.mics.application.messages.TickBroadcast;
+import bgu.spl.mics.application.objects.CPU;
 import bgu.spl.mics.application.objects.Student;
+import bgu.spl.mics.application.services.CPUService;
 import bgu.spl.mics.application.services.StudentService;
 import bgu.spl.mics.example.messages.ExampleBroadcast;
 import bgu.spl.mics.example.messages.ExampleEvent;
@@ -15,21 +18,18 @@ import static org.junit.Assert.*;
 public class MessageBusTest {
     MessageBusImpl b;
     Student s;
+    CPU c;
 
     @Before
     public void setUp() {
         b = b.getInstance();
-        s = new Student("niv", "computer Science" , "PhD");
+        s = new Student("niv", "computer Science", "PhD");
+        c = new CPU(32);
     }
 
     @Test
     public void subscribeEventTest() {
         MicroService ms = new StudentService(s);
-        //test: if subscribeEvent when the microService unregistered
-        b.subscribeEvent(ExampleEvent.class, ms);
-        assertFalse(b.updateEvent(ExampleEvent.class, ms));
-        //test: subscribe the event after register
-        b.register(ms);
         b.subscribeEvent(ExampleEvent.class, ms);
         assertTrue(b.updateEvent(ExampleEvent.class, ms));
     }
@@ -37,13 +37,9 @@ public class MessageBusTest {
     @Test
     public void subscribeBroadcastTest() {
         MicroService ms = new StudentService(s);
-        //test: if subscribeBroadcast when the microService unregistered
-        b.subscribeBroadcast(ExampleBroadcast.class, ms);
-        assertFalse(b.updateBroadcast(ExampleBroadcast.class, ms));
-        //test: subscribe the Broadcast after register
-        b.register(ms);
         b.subscribeBroadcast(ExampleBroadcast.class, ms);
         assertTrue(b.updateBroadcast(ExampleBroadcast.class, ms));
+        //
     }
 
     @Test
@@ -81,7 +77,7 @@ public class MessageBusTest {
     }
 
     @Test
-    public void registerTest(){
+    public void registerTest() {
         MicroService m = new StudentService(s);
         assertFalse(b.registered(m));//test 1
         b.register(m);
@@ -89,7 +85,7 @@ public class MessageBusTest {
     }
 
     @Test
-    public void unRegisterTest(){
+    public void unRegisterTest() {
         MicroService m = new StudentService(s);
         b.register(m);
         b.subscribeEvent(ExampleEvent.class, m);
@@ -102,23 +98,14 @@ public class MessageBusTest {
     @Test
     public void awaitMessageTest() {
         //test 1:
-        MicroService m = new StudentService(s);
-        try {
-            Message B = b.awaitMessage(m);
-        } catch (IllegalStateException | InterruptedException e) {
-            assertThrows(IllegalStateException.class, (ThrowingRunnable) e);
-        }
-        //test 2
+        MicroService m = new CPUService("cpu 1", c);
         b.register(m);
         b.subscribeEvent(ExampleEvent.class, m);
-        Event b2 = new ExampleEvent("subscribe");
-        b.sendEvent(b2);
+        b.sendBroadcast(new TickBroadcast());
         try {
-            assertEquals(b2,b.awaitMessage(m));
-        } catch (InterruptedException e) {
-            System.out.println("different message");
-        }
-
+            Message p = b.awaitMessage(m);
+            assertEquals( p.getClass(), TickBroadcast.class );
+        } catch (InterruptedException e) {}
     }
 
 }

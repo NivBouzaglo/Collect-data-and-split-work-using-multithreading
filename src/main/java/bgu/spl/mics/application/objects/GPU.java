@@ -145,7 +145,7 @@ public class GPU {
             DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
             dataBatch.setGpu(this);
             batches.add(dataBatch);
-            if (i < capacity )
+            if (i < capacity/2)
                 sendToCluster();
         }
 
@@ -171,11 +171,6 @@ public class GPU {
         else if (!batches.isEmpty()) {
             sendToCluster();
         }
-    }
-
-    public void deliver() {
-        for (int i = 0; i < capacity & !batches.isEmpty(); i++)
-            sendToCluster();
     }
 
     /**
@@ -206,13 +201,13 @@ public class GPU {
 
     public Model testGPU(Model model) {
         Double rand = Math.random();
-        if (model.getStudent().getStatus()== Student.Degree.PhD){
+        if (model.getStudent().getStatus().equals(Student.Degree.PhD)){
             if (rand>=0.8)
                 model.setResult(Model.result.Good);
             else
                 model.setResult(Model.result.Bad);
         }
-        if (model.getStudent().getStatus() == Student.Degree.MSc){
+        if (model.getStudent().getStatus().equals(Student.Degree.MSc)){
             if (rand>=0.6)
                 model.setResult(Model.result.Good);
             else

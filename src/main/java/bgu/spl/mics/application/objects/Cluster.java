@@ -16,24 +16,28 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class Cluster {
     //private LinkedBlockingDeque<CPU> cpu;
-    private LinkedList<CPU> cpu;
+    private LinkedBlockingDeque<CPU> cpu;
     private List<GPU> gpu;
     private LinkedBlockingDeque<DataBatch> unprocessedData;
     private ConcurrentHashMap<GPU, Queue<DataBatch>> processedData;
     private final statistics statistics;
-    private static class SingletonHolder{
+
+    private static class SingletonHolder {
         private static Cluster instance = new Cluster();
     }
 
 
-    public static Cluster getInstance(){return Cluster.SingletonHolder.instance;}
+    public static Cluster getInstance() {
+        return Cluster.SingletonHolder.instance;
+    }
+
     /**
      * Retrieves the single instance of this class.
      */
 
     public Cluster() {
         //cpu = new LinkedBlockingDeque<>();
-        cpu = new LinkedList<>();
+        cpu = new LinkedBlockingDeque<>();
         gpu = new LinkedList<>();
         statistics = new statistics();
         processedData = new ConcurrentHashMap<>();
@@ -45,7 +49,8 @@ public class Cluster {
             processedData.put(g, new LinkedList<>());
         }
     }
-    public LinkedBlockingDeque<DataBatch> getUnprocessedData(){
+
+    public LinkedBlockingDeque<DataBatch> getUnprocessedData() {
         return unprocessedData;
     }
 
@@ -54,15 +59,10 @@ public class Cluster {
         synchronized (cpu) {
             c = cpu.poll();
             cpu.add(c);
+            cpu.notifyAll();
         }
-            c.receiveData(batch);
+        c.receiveData(batch);
     }
-//
-//public void sendToCPU(DataBatch batch){
-//        int rand = (int)(Math.random()*cpu.size()-1);
-//        cpu.get(rand).receiveData(batch);
-//
-//}
 
     public List<GPU> getGpu() {
         return gpu;
@@ -73,18 +73,10 @@ public class Cluster {
     }
 
     public void addProcessedData(DataBatch batch) {
-        GPU g =batch.getGpu();
+        GPU g = batch.getGpu();
         g.getProcessed().add(batch);
     }
 
-//    public void askForBatch(GPU g) {
-//        if (g.getProcessed().size() < g.getCapacity() && !processedData.get(g).isEmpty()) {
-//            System.out.println("asking for data ");
-//            DataBatch d = processedData.get(g).poll();
-//            if (d != null & g.getProcessed() != null)
-//                g.getProcessed().add(d);
-//        }
-//    }
 
     public statistics getStatistics() {
         return statistics;
