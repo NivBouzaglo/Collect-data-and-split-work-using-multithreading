@@ -9,7 +9,7 @@ public class DataBatch {
     private Data data;
     private int start_index;
     private boolean proccesed;
-    private int gpuIndex;
+    private GPU gpu;
     private int ticks;
     private int tickCounter=0;
 
@@ -40,12 +40,12 @@ public class DataBatch {
         return ticks;
     }
 
-    public int getGpuIndex() {
-        return gpuIndex;
-    }
 
-    public void setGpuIndex(int gpuIndex) {
-        this.gpuIndex = gpuIndex;
+    public void setGpu(GPU gpu) {
+        this.gpu = gpu;
+    }
+    public GPU getGpu(){
+        return this.gpu;
     }
 
     public Data getData() { return data; }

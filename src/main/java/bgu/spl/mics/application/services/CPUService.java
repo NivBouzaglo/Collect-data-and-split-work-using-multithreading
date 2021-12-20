@@ -14,7 +14,7 @@ import bgu.spl.mics.application.objects.CPU;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class CPUService extends MicroService {
-    private CPU cpu;
+    private final CPU cpu;
     public CPUService(String name,CPU cpu) {
         super(name);
         this.cpu = cpu;

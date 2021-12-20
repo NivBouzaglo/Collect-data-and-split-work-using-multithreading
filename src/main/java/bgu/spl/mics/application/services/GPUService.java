@@ -1,6 +1,6 @@
 package bgu.spl.mics.application.services;
-
 import bgu.spl.mics.Event;
+import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.GPU;
@@ -18,10 +18,8 @@ import bgu.spl.mics.application.objects.Model;
 public class GPUService extends MicroService {
     private GPU gpu;
     private Event<Model> event;
-
     public GPUService(String name, GPU gpu) {
         super(name);
-        //this.gpu = new GPU(gpu.getType());
         this.gpu = gpu;
         this.gpu.setGPU(this);
     }
@@ -32,23 +30,21 @@ public class GPUService extends MicroService {
 
     @Override
     protected void initialize() {
-        // TODO Implement this
         subscribeBroadcast(TickBroadcast.class, m -> {
             gpu.addTime();
-            if (gpu.getModel() != null && gpu.getModel().getStatus().compareTo("Trained") == 0){
-                sendBroadcast(new finishBroadcast( gpu.getModel() , event));
+            if (gpu.getModel() != null && gpu.getModel().getStatus().compareTo(Model.status.Trained) == 0){
+                MessageBusImpl.getInstance().complete(event, gpu.getModel());
                 gpu.setModel(null);
-                gpu.setEvent(null);
             }
         });
         subscribeEvent(TrainModelEvent.class, t -> {
-            System.out.println("start training "+ t.getModel());
             this.event = t;
-            t.setService(this);
             gpu.setModel(t.getModel());
-            gpu.setEvent(t);
+            this.gpu.getModel().setStatus(Model.status.Training);
             gpu.divide();
-
+        });
+        subscribeEvent(TestModelEvent.class, t->{
+            complete(t,this.gpu.testGPU(t.getModel()));
         });
         subscribeBroadcast(TerminateBroadcast.class, m1 -> {
             terminate();

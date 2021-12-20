@@ -2,15 +2,13 @@ package bgu.spl.mics;
 
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
 import bgu.spl.mics.application.messages.TerminateBroadcast;
-import bgu.spl.mics.application.messages.TestModelEvent;
+import bgu.spl.mics.application.messages.finishBroadcast;
 import bgu.spl.mics.application.services.GPUService;
 import bgu.spl.mics.application.services.StudentService;
 
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
+
 
 /**
  * The {@link MessageBusImpl class is the implementation of the MessageBus interface.
@@ -19,44 +17,40 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class MessageBusImpl implements MessageBus {
 
-    private ConcurrentHashMap<MicroService, Deque<Event>> microservicesEvent;
-    private ConcurrentHashMap<MicroService, Deque<Broadcast>> microservicesBroadcast;
-    private ConcurrentHashMap<Class<? extends Event<?>>, List<MicroService>> events = null;
-    private ConcurrentHashMap<Class<? extends Broadcast>, Deque<MicroService>> broadcasts = null;
-    private static MessageBusImpl INSTANCE = null;
-    int count = 0;
-
+    private ConcurrentHashMap<MicroService, LinkedBlockingDeque<Event>> microservicesEvent;
+    private ConcurrentHashMap<MicroService, LinkedBlockingDeque<Broadcast>> microservicesBroadcast;
+    private ConcurrentHashMap<Class<? extends Event<?>>, LinkedBlockingDeque<MicroService>> events;
+    private ConcurrentHashMap<Class<? extends Broadcast>, LinkedBlockingDeque<MicroService>> broadcasts;
+    private ConcurrentHashMap<Event,Future> futureMap;
+    private static class SingletonHolder{
+        private static MessageBusImpl instance = new MessageBusImpl();
+    }
 
     public MessageBusImpl() {
+        futureMap = new ConcurrentHashMap<>();
         microservicesEvent = new ConcurrentHashMap<>();
         microservicesBroadcast = new ConcurrentHashMap<>();
         events = new ConcurrentHashMap<>();
         broadcasts = new ConcurrentHashMap<>();
     }
 
-    public static MessageBusImpl getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new MessageBusImpl();
-        }
-        return INSTANCE;
-    }
+   public static MessageBusImpl getInstance(){return SingletonHolder.instance;}
 
     public <T> void subscribeEvent(Class<? extends Event<T>> type, MicroService m) {
-        if (!events.containsKey(type))
-            events.put(type, new ArrayList<>());
+        events.putIfAbsent(type,new LinkedBlockingDeque<>());
         events.get(type).add(m);
     }
 
     @Override
     public void subscribeBroadcast(Class<? extends Broadcast> type, MicroService m) {
-        if (!broadcasts.containsKey(type))
-            broadcasts.put(type, new LinkedBlockingDeque<MicroService>());
+        broadcasts.putIfAbsent(type,new LinkedBlockingDeque<>());
         broadcasts.get(type).add(m);
     }
 
     @Override
     public <T> void complete(Event<T> e, T result) {
-        e.getFuture().resolve(result);
+        futureMap.get(e).resolve(result);
+        MessageBusImpl.getInstance().sendBroadcast(new finishBroadcast());
     }
 
     @Override
@@ -77,42 +71,26 @@ public class MessageBusImpl implements MessageBus {
                 }
             }
     }
-
-
-    @Override
     public <T> Future<T> sendEvent(Event<T> e) {
-        if (!events.containsKey(e.getClass()))
-            return null;
-        MicroService getTheEvent = roundRobin(events.get(e.getClass()));
-        while (getTheEvent==null){
-
+        while (events.get(e.getClass())==null){
+            // waiting for someone to subscribe, don't want to lose event.
         }
-        if (getTheEvent != null) {
-            synchronized (getTheEvent) {
-                microservicesEvent.get(getTheEvent).addFirst(e);
-                Future<T> future = new Future<>();
-                getTheEvent.notifyAll();
-                //  System.out.println("Notify "+ getTheEvent.getName());
-                return future;
-            }
-        }
-        return null;
+        roundRobin(events.get(e.getClass()),e);
+        Future future = new Future();
+        futureMap.put(e,future);
+        return future;
     }
 
 
 
-    private MicroService roundRobin(List<MicroService> microServices) {
+    private void roundRobin(LinkedBlockingDeque<MicroService> microServices,Event event) {
+        synchronized (event.getClass()) {
             if (!microServices.isEmpty()) {
-                MicroService m = microServices.get(count);
-                count++;
-                if (count == microServices.size())
-                    count = 0;
-                synchronized (microServices) {
-                    microServices.notifyAll();
-                }
-                return m;
+                MicroService micro = microServices.poll();
+                microServices.add(micro);
+                MessageBusImpl.getInstance().microservicesEvent.get(micro).add(event);
             }
-        return null;
+        }
     }
 
     @Override
@@ -152,7 +130,6 @@ public class MessageBusImpl implements MessageBus {
                     return microservicesBroadcast.get(m).poll();}
                 else
                     synchronized (m) {
-                    System.out.println("Wait "+ m.getName());
                         m.wait();
                     }
             }

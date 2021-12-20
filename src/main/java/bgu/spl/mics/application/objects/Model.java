@@ -30,18 +30,8 @@ public class Model {
         this.r=result.None;
     }
 
-    public String getStatus() {
-        switch (s){
-            case Tested:
-                return "Tested";
-            case PreTrained:
-                return "PreTrained";
-            case Training:
-                return "Training";
-            case Trained:
-                return "Trained";
-        }
-        return null;
+    public status getStatus() {
+        return this.s;
     }
 
     public Data getData() {
@@ -88,15 +78,8 @@ public class Model {
         return null;
     }
 
-    public void setResult(String rt) {
-        switch (rt) {
-            case "Bad":
-                this.r = result.Bad;
-                break;
-            case "Good":
-                this.r = result.Good;
-                break;
-        }
+    public void setResult(result rt) {
+        this.r = rt;
     }
 
     public boolean good(){

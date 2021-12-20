@@ -8,12 +8,12 @@ import java.util.List;
 
 public class PublishConferenceBroadcast implements Broadcast {
 
-    private List<Model> modelsName;
+    private List<Model> models;
 
     public PublishConferenceBroadcast(List<Model>models) {
-        this.modelsName = models;
+        this.models = models;
     }
-    public List<Model> getModelsName() {
-        return this.modelsName;
+    public List<Model> getModels() {
+        return this.models;
     }
 }

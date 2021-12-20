@@ -13,7 +13,6 @@ public class ExampleEvent implements Event<String>{
         this.service = service;
     }
 
-    @Override
     public MicroService getService() {
         return service;
     }
@@ -27,7 +26,6 @@ public class ExampleEvent implements Event<String>{
     }
     public void action(){}
 
-    @Override
     public Future getFuture() {
         return null;
     }

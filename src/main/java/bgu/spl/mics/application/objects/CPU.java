@@ -2,6 +2,7 @@ package bgu.spl.mics.application.objects;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * Passive object representing a single CPU.
@@ -10,19 +11,16 @@ import java.util.Queue;
  */
 public class CPU {
     private final int cores;
-    private Queue<DataBatch> data;
+    private LinkedBlockingDeque<DataBatch> data;
     private Cluster cluster;
-    private boolean processed;
     private int time = 0;
-    private int currentTime = 0;
     private int ticks = 0;
 
 
     public CPU(int i_cores) {
         cores = i_cores;
         cluster = Cluster.getInstance();
-        data = new LinkedList<>();
-        processed = false;
+        data = new LinkedBlockingDeque<>();
     }
 
     public int getCores() {
@@ -52,10 +50,9 @@ public class CPU {
      * @post data.size()=0.
      */
     public void sendData(DataBatch unit) {
+        cluster.getStatistics().setNumber_of_DB();
         ticks=0;
-        if (unit != null) {
-            cluster.addProcessedData(unit);
-        }
+         cluster.addProcessedData(unit);
     }
 
 

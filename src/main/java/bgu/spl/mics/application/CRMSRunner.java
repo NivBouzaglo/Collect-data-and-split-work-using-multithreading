@@ -70,7 +70,6 @@ public class CRMSRunner {
             t.start();
         }
         threads.addLast(time);
-        timeService.setThreads(threads);
         time.start();
         for (Thread t : threads) {
             try {
@@ -150,7 +149,7 @@ public class CRMSRunner {
             file.write('\n');
             file.write(" TrainedModels:");
             for (Model model : student.getModels()) {
-                if (model.getStatus().compareTo("Tested") == 0) {
+                if (model.getStatus().compareTo(Model.status.Tested) == 0) {
                     file.write('\n');
                     file.write("            name: " + model.getName());
                     file.write('\n');

@@ -14,6 +14,24 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class GPU {
+    public Model testGPU(Model model) {
+        Double rand = Math.random();
+        if (model.getStudent().getStatus()== Student.Degree.PhD){
+            if (rand>=0.8)
+                model.setResult(Model.result.Good);
+            else
+                model.setResult(Model.result.Bad);
+        }
+        if (model.getStudent().getStatus() == Student.Degree.MSc){
+            if (rand>=0.6)
+                model.setResult(Model.result.Good);
+            else
+                model.setResult(Model.result.Bad);
+        }
+        model.setStatus(Model.status.Tested);
+        return model;
+    }
+
     /**
      * Enum representing the type of the GPU.
      */
@@ -27,9 +45,7 @@ public class GPU {
     private BlockingDeque<DataBatch> processed;
     private int processedData;
     private int capacity = 0, time = 1, currentTime = 0;
-    private Event event;
     private GPUService GPU;
-    private boolean free;
     private int ticks;
     private boolean busy = false;
 
@@ -38,7 +54,6 @@ public class GPU {
         cluster = Cluster.getInstance();
         batches = new LinkedList<DataBatch>();
         processed = new LinkedBlockingDeque();
-        free = true;
         processedData = 0;
     }
 
@@ -47,7 +62,6 @@ public class GPU {
         this.setType(type);
         this.model = null;
         cluster = Cluster.getInstance();
-        this.event = null;
         batches = new LinkedList<DataBatch>();
         processed = new LinkedBlockingDeque();
     }
@@ -76,9 +90,6 @@ public class GPU {
         this.model = model;
     }
 
-    public void setEvent(Event e) {
-        this.event = e;
-    }
 
     public Model getModel() {
         return model;
@@ -96,9 +107,6 @@ public class GPU {
         return capacity;
     }
 
-    public Event getEvent() {
-        return event;
-    }
 
     public GPUService getGPU() {
         return GPU;
@@ -145,17 +153,15 @@ public class GPU {
      * @post All the data is stores in one of the data batch.
      */
     public void divide() {
-        System.out.println("Start train model event " + model.getName() + " " + this.getName());
         for (int i = 1; i <= model.getData().getSize() / 1000; i++) {
             DataBatch dataBatch = new DataBatch(model.getData(), i * 1000);
-            dataBatch.setGpuIndex(cluster.findGPU(this));
+            dataBatch.setGpu(this);
             batches.add(dataBatch);
             if (i < capacity )
                 sendToCluster();
         }
 
     }
-
     public String getName() {
         return GPU.getName();
     }
@@ -166,21 +172,17 @@ public class GPU {
      * * @post model.status = "Trained".
      */
 
-    public void subTrain(int ticks) {
-        free = true;
+    public void subTrain() {
         processedData++;
         processed.poll();
-
         if (processedData * 1000 >= model.getData().getSize()) {
             processedData = 0;
             model.endTraining();
-            model.getStudent().getService().completeTrain(event, model);
+            cluster.getStatistics().addNames(model.getName());
         }
-        if (!batches.isEmpty()) {
+        else if (!batches.isEmpty()) {
             sendToCluster();
         }
-        cluster.askForBatch(this);
-        cluster.getStatistics().setNumber_of_DB();
     }
 
     public void deliver() {
@@ -196,14 +198,12 @@ public class GPU {
 
 
     public void addTime() {
-        //time++;
         if (!processed.isEmpty()) {
-            model.setStatus(Model.status.Training);
-            if (processed.peek().getTickCounter() < ticks) {
-                processed.peek().setTickCounter();
-                cluster.getStatistics().setUnit_used_gpu();
-            } else {
-                subTrain(ticks);
+            DataBatch currBatch = processed.peek();
+            currBatch.setTickCounter();
+            cluster.getStatistics().setUnit_used_gpu();
+            if (currBatch.getTickCounter()>=ticks){
+                subTrain();
             }
         }
     }

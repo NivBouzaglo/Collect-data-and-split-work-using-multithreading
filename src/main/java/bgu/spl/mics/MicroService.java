@@ -29,7 +29,6 @@ public abstract class MicroService implements Runnable {
     private final String name;
     private MessageBusImpl mb = MessageBusImpl.getInstance();
     private ConcurrentHashMap<Class<? extends Message>, Callback> callbacks;
-    private int ticks = 0;
 
 
     /**
@@ -64,7 +63,6 @@ public abstract class MicroService implements Runnable {
      *                 queue.
      */
     protected final <T, E extends Event<T>> void subscribeEvent(Class<E> type, Callback<E> callback) {
-        //TODO: implement this.
         callbacks.put(type, callback);
         mb.subscribeEvent(type, this);
     }
@@ -91,7 +89,6 @@ public abstract class MicroService implements Runnable {
      *                 queue.
      */
     protected final <B extends Broadcast> void subscribeBroadcast(Class<B> type, Callback<B> callback) {
-        //TODO: implement this.
         callbacks.put(type, callback);
         mb.subscribeBroadcast(type, this);
     }
@@ -110,7 +107,6 @@ public abstract class MicroService implements Runnable {
      * null in case no micro-service has subscribed to {@code e.getClass()}.
      */
     protected final <T> Future<T> sendEvent(Event<T> e) {
-        //TODO: implement this
         return mb.sendEvent(e);
     }
 
@@ -122,7 +118,6 @@ public abstract class MicroService implements Runnable {
      * @param b The broadcast message to send
      */
     protected final void sendBroadcast(Broadcast b) {
-        //TODO: implement this.
         mb.sendBroadcast(b);
     }
 
@@ -138,7 +133,6 @@ public abstract class MicroService implements Runnable {
      *               {@code e}.
      */
     protected final <T> void complete(Event<T> e, T result) {
-        //TODO: implement this.
         mb.complete(e, result);
     }
 
@@ -152,12 +146,8 @@ public abstract class MicroService implements Runnable {
      * message.
      */
     protected final void terminate() {
+        System.out.println(this + " Terminated");
         this.terminated = true;
-        System.out.println(this.name + " terminated");
-    }
-
-    protected final boolean isTerminated() {
-        return this.terminated;
     }
 
     /**
@@ -171,30 +161,19 @@ public abstract class MicroService implements Runnable {
     /**
      * The entry point of the micro-service. TODO: you must complete this code
      * otherwise you will end up in an infinite loop.
-     */ //in the mb we need to back to mc.run
-    @Override
+     */
     public final void run() {
         mb.register(this);
         initialize();
         while (!terminated) {
             Message m = null;
             try {
-                m = mb.awaitMessage(this);
+               m = mb.awaitMessage(this);
             } catch (InterruptedException e) {
             }
-            if (m != null) {
-                if(m.getClass().equals(TrainModelEvent.class))
-                    System.out.println("getting tarin "+ this.getName());
                 Callback c = callbacks.get(m.getClass());
                 c.call(m);
             }
-        }
-        if (!this.getClass().equals(ConferenceService.class))
         mb.unregister(this);
-    }
-
-
-    protected void register() {
-        mb.register(this);
-    }
+        }
 }

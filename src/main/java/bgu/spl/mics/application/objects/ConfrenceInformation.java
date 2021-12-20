@@ -14,13 +14,12 @@ public class ConfrenceInformation {
     private int date;
     private LinkedList<Model> models ;
     private int time = 0;
-    private ConferenceService conf;
     private boolean finish =false;
 
     public ConfrenceInformation(String name , int date){
         this.name = name;
         this.date = date;
-        this.models=new LinkedList<Model>();
+        this.models=new LinkedList();
     }
     public void addToModels(Model model){
         model.setPublish();
@@ -41,10 +40,6 @@ public class ConfrenceInformation {
         if (time == date)
             finish = true;
     }
-   public void setService(ConferenceService c){
-        this.conf=c;
-   }
-
     public boolean isFinish() {
         return finish;
     }
