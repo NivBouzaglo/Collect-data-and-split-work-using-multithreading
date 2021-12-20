@@ -53,9 +53,12 @@ public class StudentService extends MicroService {
                     System.out.println(model.getName() + "Testing");
                     future = this.sendEvent(new TestModelEvent(model));
                 }
-                else if (model.getStatus() == Model.status.Tested && model.getResult() == Model.result.Good) {
+                else if (model.getStatus() == Model.status.Tested && model.getResult() == Model.result.Good &&this.student.getModels().size()-1>modelCounter ) {
                     System.out.println(model.getName() + "Publish");
                     future = this.sendEvent(new PublishResultsEvent(model));
+                    modelCounter++;
+                    model = this.student.getModels().get(modelCounter);
+                    future = this.sendEvent(new TrainModelEvent(model));
                 }
                 else if (model.getResult()== Model.result.Bad && this.student.getModels().size()-1>modelCounter){
                     modelCounter++;

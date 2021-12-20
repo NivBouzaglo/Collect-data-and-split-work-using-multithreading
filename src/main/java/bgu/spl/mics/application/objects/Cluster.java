@@ -58,9 +58,8 @@ public class Cluster {
         CPU c = null;
         synchronized (cpu) {
             c = cpu.poll();
-            cpu.add(c);
-            cpu.notifyAll();
         }
+        cpu.add(c);
         c.receiveData(batch);
     }
 
