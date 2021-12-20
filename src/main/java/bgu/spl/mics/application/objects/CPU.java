@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.objects;
 
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -43,6 +42,11 @@ public class CPU {
     public void receiveData(DataBatch unit) {
         data.add(unit);
     }
+//    public void receiveData(){
+//        if(!cluster.getUnprocessedData().isEmpty()){
+//            synchronized (cluster.getUnprocessedData().peek()){
+//         data.add(cluster.getUnprocessedData().poll());
+//    }}}
 
     /**
      * @pre process was called.
@@ -52,7 +56,7 @@ public class CPU {
     public void sendData(DataBatch unit) {
         cluster.getStatistics().setNumber_of_DB();
         ticks=0;
-         cluster.addProcessedData(unit);
+        cluster.addProcessedData(unit);
     }
 
 
@@ -69,13 +73,13 @@ public class CPU {
      */
     public void addTime() {
         if (!data.isEmpty()) {
-            cluster.getStatistics().setUnit_used_cpu();
             if (ticks < data.peek().getTicks() * (32 / cores))
                 ticks++;
             else
                 sendData(data.poll());
-            }
+            cluster.getStatistics().setUnit_used_cpu();
         }
+    }
 
     public long getTicks() {
         return time;

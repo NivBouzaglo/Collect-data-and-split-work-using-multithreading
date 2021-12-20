@@ -1,17 +1,16 @@
 package bgu.spl.mics;
 
-import static org.junit.Assert.*;
-import java.time.Instant;
-import bgu.spl.mics.application.objects.Cluster;
 import bgu.spl.mics.application.objects.CPU;
+import bgu.spl.mics.application.objects.Cluster;
 import bgu.spl.mics.application.objects.Data;
 import bgu.spl.mics.application.objects.DataBatch;
 import org.junit.Before;
-import org.junit.After;
 import org.junit.Test;
 
 import java.util.Collection;
 import java.util.LinkedList;
+
+import static org.junit.Assert.assertEquals;
 
 public class CPUTest {
     private static CPU test;
@@ -20,13 +19,13 @@ public class CPUTest {
 
     @Before
     public void setUp() throws Exception {
-        test = new CPU(2);
+        test = new CPU(32);
         c = new Cluster();
         unit = new DataBatch(new Data("Tabular",10),1);
     }
     @Test
-    public void testGetcores(){
-        assertEquals(2,test.getCores());
+    public void testGetCores(){
+        assertEquals(16,test.getCores());
     }
     @Test
     public void testGetCluster(){
@@ -46,10 +45,6 @@ public class CPUTest {
         test.receiveData(unit);
         col.add(unit);
         assertEquals(col,test.getData());
-        //?
-        CPU cpu2= new CPU(0);
-        test.receiveData(unit);
-
 
     }
     @Test
@@ -79,15 +74,12 @@ public class CPUTest {
         after = test.getTicks();
         assertEquals((32/test.getCores())*4,after - before);
     }
-
     @Test
-    public void testSetTicks(){
-        //max num of ticks we need right now
-        int max = 32*4;
-        long before = test.getTicks();
-        for (int i=0;i<max;i++){
-            assertEquals(before+1,test.getTicks());
-            before =test.getTicks();
-        }
+    public void testAddTime(){
+        test.receiveData(unit);
+        test.addTime();
+        assertEquals(0,test.getData().size());
+
     }
+
 }

@@ -29,7 +29,7 @@ public class DataBatch {
     }
 
     public void setTickCounter() {
-        this.tickCounter ++;
+        this.tickCounter++;
     }
 
     public int getTickCounter() {

@@ -1,8 +1,6 @@
 package bgu.spl.mics.application.objects;
 
 
-import bgu.spl.mics.MessageBusImpl;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -17,8 +15,10 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class Cluster {
-    private LinkedBlockingDeque<CPU> cpu;
+    //private LinkedBlockingDeque<CPU> cpu;
+    private LinkedList<CPU> cpu;
     private List<GPU> gpu;
+    private LinkedBlockingDeque<DataBatch> unprocessedData;
     private ConcurrentHashMap<GPU, Queue<DataBatch>> processedData;
     private final statistics statistics;
     private static class SingletonHolder{
@@ -32,16 +32,21 @@ public class Cluster {
      */
 
     public Cluster() {
-        cpu = new LinkedBlockingDeque<>();
+        //cpu = new LinkedBlockingDeque<>();
+        cpu = new LinkedList<>();
         gpu = new LinkedList<>();
         statistics = new statistics();
         processedData = new ConcurrentHashMap<>();
+        unprocessedData = new LinkedBlockingDeque<>();
     }
 
     public void setProcessedData() {
         for (GPU g : gpu) {
             processedData.put(g, new LinkedList<>());
         }
+    }
+    public LinkedBlockingDeque<DataBatch> getUnprocessedData(){
+        return unprocessedData;
     }
 
     public void sendToCPU(DataBatch batch) {
@@ -52,6 +57,12 @@ public class Cluster {
         }
             c.receiveData(batch);
     }
+//
+//public void sendToCPU(DataBatch batch){
+//        int rand = (int)(Math.random()*cpu.size()-1);
+//        cpu.get(rand).receiveData(batch);
+//
+//}
 
     public List<GPU> getGpu() {
         return gpu;

@@ -14,24 +14,6 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class GPU {
-    public Model testGPU(Model model) {
-        Double rand = Math.random();
-        if (model.getStudent().getStatus()== Student.Degree.PhD){
-            if (rand>=0.8)
-                model.setResult(Model.result.Good);
-            else
-                model.setResult(Model.result.Bad);
-        }
-        if (model.getStudent().getStatus() == Student.Degree.MSc){
-            if (rand>=0.6)
-                model.setResult(Model.result.Good);
-            else
-                model.setResult(Model.result.Bad);
-        }
-        model.setStatus(Model.status.Tested);
-        return model;
-    }
-
     /**
      * Enum representing the type of the GPU.
      */
@@ -41,6 +23,7 @@ public class GPU {
     private Type type;
     private Model model;
     private Cluster cluster;
+    //private Qeque<DataBatch> batches;
     private Queue<DataBatch> batches;
     private BlockingDeque<DataBatch> processed;
     private int processedData;
@@ -53,6 +36,7 @@ public class GPU {
         this.setType(t);
         cluster = Cluster.getInstance();
         batches = new LinkedList<DataBatch>();
+        //batches = new LinkedBlockingQeque();
         processed = new LinkedBlockingDeque();
         processedData = 0;
     }
@@ -62,7 +46,7 @@ public class GPU {
         this.setType(type);
         this.model = null;
         cluster = Cluster.getInstance();
-        batches = new LinkedList<DataBatch>();
+        //atches = new LinkedList<DataBatch>();
         processed = new LinkedBlockingDeque();
     }
 
@@ -89,6 +73,10 @@ public class GPU {
     public void setModel(Model model) {
         this.model = model;
     }
+    public Queue<DataBatch> getBatches(){
+        return batches;
+    }
+
 
 
     public Model getModel() {
@@ -214,6 +202,24 @@ public class GPU {
 
     public void setGPU(GPUService s) {
         this.GPU = s;
+    }
+
+    public Model testGPU(Model model) {
+        Double rand = Math.random();
+        if (model.getStudent().getStatus()== Student.Degree.PhD){
+            if (rand>=0.8)
+                model.setResult(Model.result.Good);
+            else
+                model.setResult(Model.result.Bad);
+        }
+        if (model.getStudent().getStatus() == Student.Degree.MSc){
+            if (rand>=0.6)
+                model.setResult(Model.result.Good);
+            else
+                model.setResult(Model.result.Bad);
+        }
+        model.setStatus(Model.status.Tested);
+        return model;
     }
 
 }

@@ -1,18 +1,15 @@
-/*package bgu.spl.mics;
+package bgu.spl.mics;
 
-import static org.junit.Assert.*;
 import bgu.spl.mics.application.objects.*;
 import bgu.spl.mics.example.messages.ExampleEvent;
 import org.junit.Before;
-import org.junit.After;
 import org.junit.Test;
-import org.junit.platform.engine.TestDescriptor;
 
-import java.lang.reflect.Type;
-import java.sql.Time;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
 public class GPUTest {
     private GPU test;
@@ -23,7 +20,7 @@ public class GPUTest {
     @Before
     public void setUp() {
         e = new ExampleEvent("Test");
-        m = new Model(new Student("niv","computer science","PhD"), new Data("image", 2000),"YOLO10");
+        m = new Model(new Student("niv","computer science","PhD"), new Data("Text", 2000),"YOLO10");
         c = new Cluster();
         test = new GPU("RTX080");
     }
@@ -37,10 +34,6 @@ public class GPUTest {
         assertEquals(m, test.getModel());
     }
     @Test
-    public void testGetEvent() {
-        assertEquals(e, test.getEvent());
-    }
-    @Test
     public void testGetCluster() {
         assertEquals(c, test.getCluster());
     }
@@ -50,11 +43,17 @@ public class GPUTest {
         assertEquals(copy, test.getDataBatchList());
     }
     @Test
+    public void testAddType(){
+        test.setType("RTX2080");
+        assertEquals("RTX2080",test.getType());
+    }
+
+    @Test
     public void testSendToCluster(){
         DataBatch d = new DataBatch(m.getData(),0);
+        test.getBatches().add(d);
         int before= test.getDataBatchList().size();
         test.sendToCluster();
-        testSendToCluster();
         assertEquals(before-1,test.getDataBatchList().size() );
     }
     @Test
@@ -63,44 +62,25 @@ public class GPUTest {
         assertEquals(m.getData().getSize(),test.getDataBatchList().size());
     }
     @Test
-    public void testTrain(){
-        GPU t3090 = new GPU("RTX2080");
-        long  before = test.getTicks();
-        t3090.train();
-        long after = test.getTicks();
-        assertEquals(1,after-before);
-        GPU t2080 = new GPU("RTX2080");
-        before = test.getTicks();
-        t2080.train(m.getData());
-        after = test.getTicks();
-        assertEquals(2,after-before);
-        GPU t1080= new GPU("RTX2080" );
-        before = test.getTicks();
-        t1080.train();
-        after = test.getTicks();
-        assertEquals(4,after-before);
-
+    public void testSubTrain(){
+        test.getBatches().add(new DataBatch(test.getModel().getData(),0));
+        test.subTrain();
+        assertEquals(0,test.getBatches().size());
+        test.subTrain();
+        assertEquals(Model.status.Trained,test.getModel().getStatus());
     }
     @Test
-    public void testReceiveFromCluster(){
-        DataBatch unit=new DataBatch(new Data("Text",2000),0);
-        test.receiveFromCluster(unit);
-        assertEquals(unit,test.getDataBatchList().peek());
+    public void testAddTime(){
+        test.getProcessed().add(new DataBatch(test.getModel().getData(),0) );
+        test.addTime();
+        assertEquals(test.getModel().getStatus(), Model.status.Training);
+        test.addTime();
+        assertEquals(test.getModel().getStatus(), Model.status.Tested);
     }
     @Test
-    public void testSetType(){
-        test.setType("RTX3090");
-        assertEquals("RTX3090",test.getType());
-    }
-    @Test
-    public void testSetTicks(){
-        //max num of ticks we need right now
-        int max = 4;
-        long before = test.getTicks();
-        for (int i=0;i<max;i++){
-            assertEquals(before+1,test.getTicks());
-            before =test.getTicks();
-        }
+    public void testTest(){
+        test.testGPU(test.getModel());
+        assertNotSame(Model.result.None,test.getModel().getResult());
     }
 
-}*/
+}
