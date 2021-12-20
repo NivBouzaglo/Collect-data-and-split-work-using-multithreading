@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.PublishConferenceBroadcast;
 import bgu.spl.mics.application.messages.PublishResultsEvent;
@@ -18,7 +17,7 @@ import bgu.spl.mics.application.objects.ConfrenceInformation;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class ConferenceService extends MicroService {
-    ConfrenceInformation conf;
+    private final ConfrenceInformation conf;
     public ConferenceService(ConfrenceInformation c) {
         super(c.getName());
         this.conf = c;

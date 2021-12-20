@@ -1,6 +1,5 @@
 package bgu.spl.mics.application.objects;
 
-import bgu.spl.mics.Event;
 import bgu.spl.mics.application.services.GPUService;
 
 import java.util.LinkedList;
@@ -22,32 +21,20 @@ public class GPU {
 
     private Type type;
     private Model model;
-    private Cluster cluster;
-    //private Qeque<DataBatch> batches;
+    private final Cluster cluster;
     private Queue<DataBatch> batches;
     private BlockingDeque<DataBatch> processed;
     private int processedData;
-    private int capacity = 0, time = 1, currentTime = 0;
+    private int capacity = 0;
     private GPUService GPU;
     private int ticks;
-    private boolean busy = false;
 
     public GPU(String t) {
         this.setType(t);
         cluster = Cluster.getInstance();
-        batches = new LinkedList<DataBatch>();
-        //batches = new LinkedBlockingQeque();
-        processed = new LinkedBlockingDeque();
+        batches = new LinkedList<>();
+        processed = new LinkedBlockingDeque<>();
         processedData = 0;
-    }
-
-    //Swe need to fix it.
-    public GPU(String type, Event event) {
-        this.setType(type);
-        this.model = null;
-        cluster = Cluster.getInstance();
-        //atches = new LinkedList<DataBatch>();
-        processed = new LinkedBlockingDeque();
     }
 
     public String getType() {
@@ -55,19 +42,6 @@ public class GPU {
         else if (type == Type.RTX2080) return "RTX2080";
         else if (type == Type.GTX1080) return "GTX1080";
         return null;
-    }
-    public void setProcessed(){
-        while ((!processed.isEmpty()))
-            processed.poll();
-    }
-
-    public void setBatches() {
-        while ((!batches.isEmpty()))
-            batches.poll();
-    }
-
-    public void setBusy() {
-        busy = !busy;
     }
 
     public void setModel(Model model) {
@@ -91,11 +65,6 @@ public class GPU {
         return processed;
     }
 
-    public int getCapacity() {
-        return capacity;
-    }
-
-
     public GPUService getGPU() {
         return GPU;
     }
@@ -103,11 +72,6 @@ public class GPU {
     public Queue<DataBatch> getDataBatchList() {
         return batches;
     }
-
-    public boolean isBusy() {
-        return busy;
-    }
-    //added by bar - this feild is not recognized in the test class.
 
     public void setType(String t) {
         if (t.compareTo("RTX3090") == 0) {
@@ -191,16 +155,12 @@ public class GPU {
         }
     }
 
-    public int getTicks() {
-        return time;
-    }
-
     public void setGPU(GPUService s) {
         this.GPU = s;
     }
 
     public Model testGPU(Model model) {
-        Double rand = Math.random();
+        double rand = Math.random();
         if (model.getStudent().getStatus().equals(Student.Degree.PhD)){
             if (rand>=0.8)
                 model.setResult(Model.result.Good);

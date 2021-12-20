@@ -56,17 +56,15 @@ public class MessageBusImpl implements MessageBus {
     @Override
     public void sendBroadcast(Broadcast b) {
         if (!broadcasts.containsKey(b.getClass())) {
-            // throw new IllegalArgumentException("don't have microservice that subscribe this broadcast");
             System.out.println("don't have microservice that subscribe this broadcast");
         } else if (microservicesBroadcast != null && broadcasts != null)
             for (MicroService m : broadcasts.get(b.getClass())) {
                 synchronized (m) {
                     if (m != null && registered(m))
-                        if (PublishConferenceBroadcast.class.equals(b.getClass()) || b.getClass().equals(TerminateBroadcast.class) && !(m instanceof StudentService)) {
+                        if (PublishConferenceBroadcast.class.equals(b.getClass()) || b.getClass().equals(TerminateBroadcast.class)) {
                             microservicesBroadcast.get(m).addFirst(b);
                         } else
                             microservicesBroadcast.get(m).add(b);
-                //   System.out.println("Notify "+ m.getName());
                     m.notifyAll();
                 }
             }

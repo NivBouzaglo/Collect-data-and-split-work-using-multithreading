@@ -19,21 +19,16 @@ public class Student {
     private Degree status;
     private int publications = 0;
     private int papersRead = 0;
-    //added by bar
     private LinkedList<Model> models;
-    private StudentService service;
+
 
     public Student(String name, String department, String degree ) {
         this.name = name;
         this.department = department;
-        this.models=new LinkedList<Model>();
-        //this.service = new StudentService(this);
+        this.models=new LinkedList<>();
         status = degree(degree);
     }
 
-    public void setService(StudentService service) {
-        this.service = service;
-    }
 
     public  void setModels(LinkedList<Model> s_models){
         this.models=s_models;
@@ -48,9 +43,6 @@ public class Student {
             return Degree.MSc;
         else
             return Degree.PhD;
-    }
-    public StudentService getService() {
-        return service;
     }
 
     public Degree getStatus() {

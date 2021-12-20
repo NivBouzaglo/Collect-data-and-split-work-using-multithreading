@@ -52,13 +52,6 @@ public class CPU {
         ticks = 0;
         cluster.addProcessedData(unit);
     }
-
-
-    /**
-     * @pre data!=null & cores>0
-     * @inv
-     * @post data is processed.
-     */
     /**
      *
      * @pre data != null

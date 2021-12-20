@@ -5,8 +5,6 @@ import bgu.spl.mics.application.services.*;
 import com.google.gson.*;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 
 /**
@@ -15,32 +13,22 @@ import java.util.LinkedList;
  * In the end, you should output a text file.
  */
 public class CRMSRunner {
-    //I added throws IOSException ,Hopes its fine
     public static void main(String[] args) throws IOException {
         FileWriter output = new FileWriter("output.txt");
-        /*try {
-            if (!output.createNewFile())
-                System.out.println("File is already exists");
-        } catch (IOException e) {
-            System.out.println("Error while creating output file.");
-        }*/
         Cluster cluster = Cluster.getInstance();
-        LinkedList<Student> students = new LinkedList<Student>();
-        LinkedList<ConfrenceInformation> conferences = new LinkedList<ConfrenceInformation>();
-        LinkedList<GPU> gpus = new LinkedList<GPU>();
-        LinkedList<CPU> cpus = new LinkedList<CPU>();
+        LinkedList<Student> students = new LinkedList<>();
+        LinkedList<ConfrenceInformation> conferences = new LinkedList<>();
+        LinkedList<GPU> gpus = new LinkedList<>();
+        LinkedList<CPU> cpus = new LinkedList<>();
         TimeService timeService = new TimeService();
         readInputFile(args[0], timeService, cluster, students, gpus, cpus, conferences);
-        start(timeService, students, conferences, cluster, output);
-        System.out.println("end");
-        System.out.println("Finish processing");
+        start(timeService, students, conferences);
         writeOutputFile(output, students, conferences, cluster);
     }
 
-    public static void start(TimeService timeService, LinkedList<Student> students, LinkedList<ConfrenceInformation> conference, Cluster cluster, FileWriter output) throws IOException {
+    public static void start(TimeService timeService, LinkedList<Student> students, LinkedList<ConfrenceInformation> conference) {
         LinkedList<Thread> threads = new LinkedList<>();
         int i = 0;
-        // for (GPU gpu : gpus) {
         for (GPU gpu : Cluster.getInstance().getGpu()) {
             GPUService service = new GPUService("GPUId" + i, gpu);
             i++;
@@ -74,10 +62,8 @@ public class CRMSRunner {
         for (Thread t : threads) {
             try {
                 t.join();
-            } catch (InterruptedException e) {
-            }
+            } catch (InterruptedException e) {}
         }
-        System.out.println("Finish all ");
     }
 
 
@@ -85,12 +71,6 @@ public class CRMSRunner {
     public static void readInputFile(String input, TimeService timeService, Cluster
             cluster, LinkedList<Student> students, LinkedList<GPU> gpus1, LinkedList<CPU> cpus1, LinkedList<ConfrenceInformation> confrenceInformations) throws
             FileNotFoundException {
-        Reader reader = null;
-        Gson g = new Gson();
-        try {
-            reader = Files.newBufferedReader(Paths.get(input));
-        } catch (IOException ignored) {
-        }
         JsonElement tree = JsonParser.parseReader(new FileReader(input));
         JsonObject obj = tree.getAsJsonObject();
         JsonArray arr = obj.get("Students").getAsJsonArray();
@@ -100,7 +80,7 @@ public class CRMSRunner {
             students.add(new Student(object.get("name").getAsString(),
                     object.get("department").getAsString(), object.get("status").getAsString()));
             JsonArray models = object.get("models").getAsJsonArray();
-            LinkedList<Model> e_models = new LinkedList<Model>();
+            LinkedList<Model> e_models = new LinkedList<>();
             for (JsonElement m : models) {
                 JsonObject model_object = m.getAsJsonObject();
                 Data data = new Data(model_object.get("type").getAsString(), model_object.get("size").getAsInt());
@@ -132,7 +112,6 @@ public class CRMSRunner {
 
     public static void writeOutputFile(FileWriter file, LinkedList<Student> students, LinkedList<ConfrenceInformation> conferences, Cluster cluster) throws
             IOException {
-        System.out.println("Start writing ");
         //Students
         file.write("Students: ");
         for (Student student : students) {
@@ -147,7 +126,7 @@ public class CRMSRunner {
             file.write('\n');
             file.write(" papersRead: " + student.getPapersRead());
             file.write('\n');
-            file.write(" TrainedModels:");
+            file.write("   TrainedModels:");
             for (Model model : student.getModels()) {
                 if (model.getStatus().compareTo(Model.status.Tested) == 0) {
                     file.write('\n');
@@ -182,9 +161,9 @@ public class CRMSRunner {
                 file.write('\n');
                 file.write("     Data: ");
                 file.write('\n');
-                file.write("     type: " + m.getData().getType());
+                file.write("         type: " + m.getData().getType());
                 file.write('\n');
-                file.write("     size: " + m.getData().getSize());
+                file.write("         size: " + m.getData().getSize());
                 file.write('\n');
                 file.write("     status: " + m.getStatus());
                 file.write('\n');

@@ -22,7 +22,6 @@ public class ConfrenceInformation {
         this.models=new LinkedList();
     }
     public void addToModels(Model model){
-        model.setPublish();
         models.add(model);
     }
     public LinkedList<Model> getModels(){

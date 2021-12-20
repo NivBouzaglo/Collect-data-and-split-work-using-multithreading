@@ -1,8 +1,6 @@
 package bgu.spl.mics.application.services;
 
-import bgu.spl.mics.Event;
 import bgu.spl.mics.Future;
-import bgu.spl.mics.MessageBusImpl;
 import bgu.spl.mics.MicroService;
 import bgu.spl.mics.application.messages.*;
 import bgu.spl.mics.application.objects.Model;
@@ -20,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * You MAY change constructor signatures and even add new public constructors.
  */
 public class StudentService extends MicroService {
-    private Student student;
+    private final Student student;
     private int modelCounter = 0;
     private Future future =new Future();
 
@@ -28,7 +26,6 @@ public class StudentService extends MicroService {
     public StudentService(Student student) {
         super(student.getName());
         this.student = student;
-        student.setService(this);
         // TODO Implement this
     }
 
@@ -50,11 +47,9 @@ public class StudentService extends MicroService {
             if (this.getFuture().get(1,TimeUnit.MILLISECONDS)!=null){
                 Model model = (Model) this.getFuture().get(1,TimeUnit.MILLISECONDS);
                 if (model.getStatus() == Model.status.Trained) {
-                    System.out.println(model.getName() + "Testing");
                     future = this.sendEvent(new TestModelEvent(model));
                 }
                 else if (model.getStatus() == Model.status.Tested && model.getResult() == Model.result.Good &&this.student.getModels().size()-1>modelCounter ) {
-                    System.out.println(model.getName() + "Publish");
                     future = this.sendEvent(new PublishResultsEvent(model));
                     modelCounter++;
                     model = this.student.getModels().get(modelCounter);
@@ -63,13 +58,11 @@ public class StudentService extends MicroService {
                 else if (model.getResult()== Model.result.Bad && this.student.getModels().size()-1>modelCounter){
                     modelCounter++;
                     model = this.student.getModels().get(modelCounter);
-                    System.out.println("New trainmodelEvent" + model.getName());
                     future = this.sendEvent(new TrainModelEvent(model));
                 }
             }
         });
         if (!this.student.getModels().isEmpty()){
-            System.out.println("start training" + student.getModels().get(0).getName());
             future = this.sendEvent(new TrainModelEvent(this.student.getModels().get(0)));
         }
     }

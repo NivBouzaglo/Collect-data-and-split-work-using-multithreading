@@ -15,10 +15,8 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class Cluster {
-    //private LinkedBlockingDeque<CPU> cpu;
     private LinkedBlockingDeque<CPU> cpu;
     private List<GPU> gpu;
-    private LinkedBlockingDeque<DataBatch> unprocessedData;
     private ConcurrentHashMap<GPU, Queue<DataBatch>> processedData;
     private final statistics statistics;
 
@@ -36,12 +34,10 @@ public class Cluster {
      */
 
     public Cluster() {
-        //cpu = new LinkedBlockingDeque<>();
         cpu = new LinkedBlockingDeque<>();
         gpu = new LinkedList<>();
         statistics = new statistics();
         processedData = new ConcurrentHashMap<>();
-        unprocessedData = new LinkedBlockingDeque<>();
     }
 
     public void setProcessedData() {
@@ -50,12 +46,8 @@ public class Cluster {
         }
     }
 
-    public LinkedBlockingDeque<DataBatch> getUnprocessedData() {
-        return unprocessedData;
-    }
-
     public void sendToCPU(DataBatch batch) {
-        CPU c = null;
+        CPU c;
         synchronized (cpu) {
             c = cpu.poll();
         }

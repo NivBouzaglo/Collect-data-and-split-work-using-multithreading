@@ -6,11 +6,11 @@ package bgu.spl.mics.application.objects;
  * Add fields and methods to this class as you see fit (including public methods and constructors).
  */
 public class Model {
-    private String name;
-    private Data data;
-    private Student student;
+    private final String name;
+    private final Data data;
+    private final Student student;
     private status s;
-    private boolean publish;
+
     private result r;
 
     public enum status {
@@ -18,7 +18,7 @@ public class Model {
     }
 
     public enum result {
-        Good, Bad , None
+        Good, Bad, None
     }
 
     public Model(Student student, Data data, String name) {
@@ -26,8 +26,7 @@ public class Model {
         this.data = data;
         this.student = student;
         this.s = Model.status.PreTrained;
-        this.publish = false;
-        this.r=result.None;
+        this.r = result.None;
     }
 
     public status getStatus() {
@@ -54,20 +53,12 @@ public class Model {
         s = status.Trained;
     }
 
-    public void Tested() {
-        s = status.Tested;
-    }
-
-    public void setPublish() {
-        publish = true;
-    }
-
-    public result getResult(){
+    public result getResult() {
         return r;
     }
 
     public String getR() {
-        switch (r){
+        switch (r) {
             case Bad:
                 return "Bad";
             case Good:
@@ -82,13 +73,4 @@ public class Model {
         this.r = rt;
     }
 
-    public boolean good(){
-        if (r == result.Good)
-            return true;
-        return false;
-    }
-
-    public boolean isPublish () {
-            return publish;
-        }
-    }
+}
