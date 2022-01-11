@@ -1,7 +1,7 @@
 # Multithreading
 
 The idea of the project is to receive a list of student that have a list of models and to training as much as possible data in the models on the time you gave him.
-I receive a Json file that include the student, the models i have to train,cpus ,gpus and the time that the program will run.
+I receive a Json file that include the student, the models i have to train,cpus ,gpus and the time the program will run.
 The target of this program is to see the level of the synchronize between the threads , more DataBatch that get trained mean more activity from the gpu and cpu that we get.
 
 To run the projects:
