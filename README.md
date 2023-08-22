@@ -1,4 +1,4 @@
-# Multithreading
+# Collect-data-and-split-work-using-multithreading
 
 The idea of the project is to receive a list of student that have a list of models and to training as much as possible data in the models on the time you gave him.
 I receive a Json file that include the student, the models i have to train,cpus ,gpus and the time the program will run.
